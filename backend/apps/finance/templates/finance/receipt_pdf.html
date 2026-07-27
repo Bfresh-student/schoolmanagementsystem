@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; color: #1a1a1a; font-size: 13px; }
+  .header { display: flex; justify-content: space-between; border-bottom: 2px solid #222; padding-bottom: 12px; }
+  .title { font-size: 20px; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+  td, th { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
+  .total { font-size: 16px; font-weight: bold; text-align: right; margin-top: 16px; }
+  .footer { margin-top: 40px; font-size: 11px; color: #666; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">Reçu de paiement</div>
+    <div>N° {{ receipt.receipt_number }}<br>{{ receipt.generated_at|date:"d/m/Y H:i" }}</div>
+  </div>
+
+  <table>
+    <tr><th>Étudiant</th><td>{{ invoice.student }}</td></tr>
+    <tr><th>Facture</th><td>{{ invoice.invoice_number }}</td></tr>
+    <tr><th>Moyen de paiement</th><td>{{ payment.payment_method.name }}</td></tr>
+    <tr><th>Référence</th><td>{{ payment.gateway_reference|default:"—" }}</td></tr>
+    <tr><th>Date de paiement</th><td>{{ payment.paid_at|date:"d/m/Y H:i" }}</td></tr>
+  </table>
+
+  <div class="total">Montant payé : {{ payment.amount }} {{ payment.currency }}</div>
+
+  <div class="footer">Document généré automatiquement — Système de Gestion Scolaire.</div>
+</body>
+</html>

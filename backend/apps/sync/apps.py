@@ -1,5 +1,7 @@
 from django.apps import AppConfig
 
-class syncConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.sync'
+
+class SyncConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.sync"
+    verbose_name = "Synchronisation Offline-First"

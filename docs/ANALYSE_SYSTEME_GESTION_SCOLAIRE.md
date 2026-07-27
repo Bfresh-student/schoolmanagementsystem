@@ -75,7 +75,7 @@
 
 ```
 ┌─────────────────────────────────────────────────┐
-│   FRONTEND (React/Vue + WatermelonDB)           │
+│   FRONTEND (Vanilla+ WatermelonDB)           │
 │  ┌─────────────────────────────────────────┐   │
 │  │ Service Workers (offline support)       │   │
 │  │ Redux/Zustand (state)                   │   │

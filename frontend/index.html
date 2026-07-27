@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion Scolaire</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    .container { max-width: 400px; margin: 50px auto; }
+    form { display: flex; flex-direction: column; gap: 10px; }
+    input, button { padding: 10px; font-size: 16px; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <h1>Gestion Scolaire</h1>
-    <p id="status">Connexion au backend...</p>
-  </div>
-  <script src="/js/main.js"></script>
+  <div id="app"></div>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
