@@ -16,8 +16,17 @@ HR_STAFF_ROLES = {"admin", "hr"}
 
 
 def _role_name(user):
+    """Return the role name for a user.
+    Handles both a string stored in the `role` CharField and a potential
+    related Role object with a `name` attribute.
+    """
     role = getattr(user, "role", None)
+    # If role is stored as a string (the usual case), return it lower‑cased
+    if isinstance(role, str):
+        return role.lower()
+    # Fallback for a Role model instance with a `name` field
     return getattr(role, "name", None)
+
 
 
 class IsHRStaff(BasePermission):

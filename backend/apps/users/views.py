@@ -54,7 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserListSerializer
     
     def get_permissions(self):
-        if self.action in ['create', 'register', 'login']:
+        if self.action in ['create', 'register', 'login', 'refresh']:
             return [AllowAny()]
         return super().get_permissions()
     
@@ -97,8 +97,11 @@ class UserViewSet(viewsets.ModelViewSet):
         user.status = 'ACTIVE'
         user.save()
         
+        refresh = RefreshToken.for_user(user)
         return Response({
             'message': 'Utilisateur créé avec succès',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'user': UserDetailSerializer(user).data
         }, status=status.HTTP_201_CREATED)
     
@@ -157,6 +160,20 @@ class UserViewSet(viewsets.ModelViewSet):
             'refresh': str(refresh),
             'user': UserDetailSerializer(user).data
         }, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def refresh(self, request):
+        """Endpoint pour rafraîchir le token d'accès JWT"""
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'error': 'Token refresh requis'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            refresh = RefreshToken(refresh_token)
+            return Response({
+                'access': str(refresh.access_token)
+            }, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({'error': 'Token invalide ou expiré'}, status=status.HTTP_401_UNAUTHORIZED)
     
     @action(detail=False, methods=['post'])
     def logout(self, request):
