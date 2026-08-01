@@ -10,7 +10,6 @@ urlpatterns = [
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/auth/', include('apps.users.urls')),
     path('api/v1/dashboard/', include('apps.dashboard.urls')),
-    path('api/v1/auth/', include('apps.users.urls')),
     
     path('api/v1/students/', include('apps.students.urls')),
     path('api/v1/teachers/', include('apps.teachers.urls')),
@@ -30,4 +29,3 @@ urlpatterns = [
     # path('api/v1/reports/', include('apps.reports.urls')),
     # path('api/v1/settings/', include('apps.settings.urls')),
 ]
-
