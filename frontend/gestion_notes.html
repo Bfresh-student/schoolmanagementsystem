@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <title>Registre des Notes & Bulletins · CEJEC ERP</title>
+    <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css">
+    <link rel="stylesheet" href="css/AI_Styles.css">
+    <link rel="stylesheet" href="css/styles_note.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- LOGO -->
+            <div class="header-left">
+                <!-- Menu Toggle Button -->
+                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+                    </svg>
+                </button>
+
+                <a href="Dashbord-Admin.html" class="logo-link">
+                    <i class="fas fa-chart-line logo-img"></i>
+                </a>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="header-center">
+                <div class="input-group">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
+                    <button type="submit" class="btn-search">Recherche</button>
+                </div>
+            </div>
+            
+            <!-- USER + NOTIFICATIONS -->
+            <div class="header-right">
+
+                <!-- USER MENU -->
+                <div class="user-section">
+                    <div class="user-trigger" onclick="toggleUserMenu()">
+                        <div class="avatar">B</div>
+                        <span class="user-name">Bruno Jean</span>
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </div>
+
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-info">
+                            <strong>CEJEC</strong>
+                            <span>brunojean90@gmail.com</span>
+                        </div>
+
+                        <!-- PARAMÈTRE -->
+                        <a href="Parametre_Admin.html" class="menu-item">
+                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+                        </a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="Se connecter - Admin.html" class="menu-item logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> 
+                            <span>Se déconnecter</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- NOTIFICATIONS -->
+                <div class="header-actions">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge44">5</span>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- BRAND -->
+            <div class="brand">
+                <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo">
+                </div>
+                <div>
+                <h1>CEJEC</h1>
+                <div class="muted">Admin Panel</div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav>
+
+                <!-- DASHBOARD -->
+                <p>Vue d'ensemble</p>                
+                <a href="Dashbord-Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Tableau de bord
+                </div>
+                </a>
+                
+                <!-- MANAGEMENT -->
+                <p>Opérations</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-school fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Académique
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
+                        <a class="dropdown22-item active" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
+                        <a class="dropdown22-item" href="gestion_medias.html">
+                            <span class="fa-stack" style="width: 1.5em;">
+                                    <!-- ICON PRINCIPAL -->
+                                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                                    <!-- PETIT GEAR (TOP RIGHT) -->
+                                    <i class="fa-solid fa-newspaper fa-stack-1x"
+                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                            </span>  
+                        Médias & Communication
+                    </a>
+                    </div>
+                </div>
+                
+                <!-- INCUBATEUR PROJETS & CALDRIER -->
+                <a href="incubateur_calendrier.html">
+                <div class="nav-item">
+                <span class="fa-stack" style="width: 1.5em;">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                </span>                    
+                Incubateur Projets & Calendrier
+                </div>
+                </a>
+             
+                <!-- OPERATIONS -->
+                <p>Système</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Opérations
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                      
+                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
+                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
+                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
+                    </div>
+                </div>   
+
+                <!-- PARAMÈT -->
+                <a href="Parametre_Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                Paramètre
+                </div>
+                </a>
+
+            </nav>
+                
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+
+                <div class="user-profile2">
+                    <div class="avatar-wrapper2">
+                        <div class="avatar2">BJ</div>
+                        <span class="status-indicator2"></span>
+                    </div>
+                    
+                    <div class="user-info2">
+                        <div class="user-name2">Bruno Jean</div>
+                        <div class="user-role2">Super Admin</div>
+                    </div>
+                    <a href="Se connecter - Admin.html">
+                        <button class="logout-btn2" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </a>
+                </div>
+                
+            </div>
+
+        </aside>
+
+        <!-- OVERLAY -->
+        <div class="overlay"></div>
+        
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <div class="breadcrumb">
+                <i class="fas fa-home"></i> Accueil
+                <span class="separator">›</span>
+                <span class="current">Registre des Notes & Bulletins</span>
+            </div>
+
+            <header class="header22">
+                <div class="header-left22">
+                    <h1><span class="icon-circle"><i class="fas fa-graduation-cap"></i></span> Notes & Bulletins</h1>
+                    <div class="badge-row">
+                        <span class="badge badge-blue"><i class="fas fa-building"></i> CEJEC</span>
+                        <span class="badge badge-green"><i class="fas fa-calendar-alt"></i> <span id="currentYear">2025-2026</span></span>
+                        <span class="badge badge-purple"><i class="fas fa-users"></i> <span id="currentClass">ENTREPRENEURIAT</span></span>
+                    </div>
+                </div>
+                <div class="header-right22">
+                    <button class="btn btn-outline btn-sm" onclick="openYearModal()"><i class="fas fa-calendar-plus"></i> Année</button>
+                    <button class="btn btn-outline btn-sm" onclick="openClassModal()"><i class="fas fa-layer-group"></i> Classe</button>
+                    <button class="btn btn-outline btn-sm" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Élève</button>
+                    <button class="btn btn-add-note" onclick="openAddNoteModal()"><i class="fas fa-plus-circle"></i> Ajouter Note</button>
+                    <button class="btn btn-primary btn-sm" onclick="generateAllBulletins()"><i class="fas fa-file-alt"></i> Bulletins</button>
+                </div>
+            </header>
+
+            <section class="stats-row">
+                <div class="stat-card stat-blue">
+                    <div class="stat-info"><span class="stat-label">Élèves</span><span class="stat-value" id="statStudents">0</span></div>
+                    <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+                </div>
+                <div class="stat-card stat-green">
+                    <div class="stat-info"><span class="stat-label">Moy. Classe</span><span class="stat-value" id="statAvg">0</span></div>
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-info"><span class="stat-label">Réussite</span><span class="stat-value" id="statSuccess">0%</span></div>
+                    <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-info"><span class="stat-label">Major</span><span class="stat-value" id="statBest" style="font-size:0.9rem">-</span></div>
+                    <div class="stat-icon"><i class="fas fa-medal"></i></div>
+                </div>
+                <div class="stat-card stat-red">
+                    <div class="stat-info"><span class="stat-label">Échec</span><span class="stat-value" id="statLow">0</span></div>
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                </div>
+            </section>
+
+            <div class="filter-bar">
+                <div class="filter-group"><i class="fas fa-calendar-alt"></i><select id="filterYear" onchange="applyFilters()"></select></div>
+                <div class="filter-group"><i class="fas fa-users"></i><select id="filterClass" onchange="applyFilters()"></select></div>
+                <div class="filter-group"><i class="fas fa-search"></i><input type="text" id="filterSearch" placeholder="Rechercher..." oninput="applyFilters()"></div>
+                <div class="filter-group"><i class="fas fa-filter"></i><select id="filterMention" onchange="applyFilters()"><option value="tous">Mentions</option><option value="excellent">Excellent</option><option value="tresbien">Très Bien</option><option value="bien">Bien</option><option value="assezbien">Assez Bien</option><option value="passable">Passable</option><option value="insuffisant">Insuffisant</option></select></div>
+                <button class="btn btn-outline btn-sm" onclick="exportToCSV()"><i class="fas fa-download"></i> CSV</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-table"></i> Tableau · <span id="classNameDisplay">ENTREPRENEURIAT</span></h2>
+                    <span class="badge badge-blue" style="font-size:0.7rem"><span id="notesCount">0</span> notes</span>
+                </div>
+                <div class="table-wrapper" id="tableWrapper">
+                    <table>
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-box">
+                    <h3><i class="fas fa-chart-bar"></i> Moyennes par Matière</h3>
+                    <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h3><i class="fas fa-chart-pie"></i> Distribution Mentions</h3>
+                    <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL ÉLÈVE -->
+        <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+        <div class="student-detail-panel" id="studentPanel">
+            <div class="panel-header">
+                <div class="panel-avatar" id="panelAvatar">MD</div>
+                <div class="panel-student-info">
+                    <h3 id="panelName">Marie Dupont</h3>
+                    <p id="panelMatricule">Matricule: CEJ-001</p>
+                </div>
+                <button class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="panel-body" id="panelBody"></div>
+            <div class="panel-footer">
+                <div class="panel-actions">
+                    <button class="btn btn-outline btn-sm" onclick="panelView()"><i class="fas fa-eye"></i> Voir</button>
+                    <button class="btn btn-outline btn-sm" onclick="panelEditNotes()"><i class="fas fa-edit"></i> Modifier</button>
+                    <button class="btn btn-primary btn-sm" onclick="panelBulletin()"><i class="fas fa-file-alt"></i> Bulletin</button>
+                    <button class="btn btn-outline btn-sm" onclick="panelStats()"><i class="fas fa-chart-bar"></i> Stats</button>
+                    <button class="btn btn-outline btn-sm" onclick="panelPrint()"><i class="fas fa-print"></i> Imprimer</button>
+                    <button class="btn btn-success btn-sm" onclick="panelSendWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn btn-outline btn-sm" onclick="panelSendEmail()"><i class="fas fa-envelope"></i> Email</button>
+                    <button class="btn btn-danger btn-sm" onclick="panelArchive()"><i class="fas fa-archive"></i> Archiver</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL AJOUTER NOTE -->
+        <div class="modal-overlay" id="addNoteModal">
+            <div class="modal" style="max-width:560px">
+                <div class="modal-header">
+                    <h3><i class="fas fa-plus-circle"></i> Ajouter une Note</h3>
+                    <button class="modal-close" onclick="closeAddNoteModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>👤 Élève</label>
+                            <select id="addNoteStudent"></select>
+                        </div>
+                        <div class="form-group full">
+                            <label>📚 Matière</label>
+                            <select id="addNoteMatiere"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>📝 Note (/20)</label>
+                            <input type="number" id="addNoteValue" min="0" max="20" step="0.5" value="15" inputmode="decimal">
+                        </div>
+                        <div class="form-group">
+                            <label>⚖️ Coefficient</label>
+                            <input type="number" id="addNoteCoef" min="1" max="10" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>📋 Type d'évaluation</label>
+                            <select id="addNoteType">
+                                <option>Quiz</option>
+                                <option>Devoir</option>
+                                <option>Projet</option>
+                                <option selected>Examen</option>
+                                <option>Présentation</option>
+                                <option>Oral</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Date</label>
+                            <input type="date" id="addNoteDate">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeAddNoteModal()">Annuler</button>
+                    <button class="btn btn-primary" onclick="saveNewNote()"><i class="fas fa-save"></i> Enregistrer la Note</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL MODIFIER NOTES -->
+        <div class="modal-overlay" id="editNotesModal">
+            <div class="modal" style="max-width:650px">
+                <div class="modal-header"><h3><i class="fas fa-edit"></i> Modifier Notes · <span id="editStudentName"></span></h3><button class="modal-close" onclick="closeEditNotesModal()"><i class="fas fa-times"></i></button></div>
+                <div class="modal-body" id="editNotesBody"></div>
+                <div class="modal-footer"><button class="btn btn-outline" onclick="closeEditNotesModal()">Annuler</button><button class="btn btn-primary" onclick="saveEditedNotes()"><i class="fas fa-save"></i> Enregistrer</button></div>
+            </div>
+        </div>
+
+        <!-- MODAL ANNÉE -->
+        <div class="modal-overlay" id="yearModal">
+            <div class="modal" style="max-width:450px">
+                <div class="modal-header"><h3><i class="fas fa-calendar-plus"></i> Années Académiques</h3><button class="modal-close" onclick="closeYearModal()"><i class="fas fa-times"></i></button></div>
+                <div class="modal-body">
+                    <div class="form-group full"><label>Nouvelle Année</label><input type="text" id="newYearInput" placeholder="Ex: 2026-2027"></div>
+                    <div style="margin-top:12px"><strong style="font-size:0.8rem">Existantes :</strong></div>
+                    <div id="existingYears" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-outline" onclick="closeYearModal()">Fermer</button><button class="btn btn-primary" onclick="addYear()"><i class="fas fa-plus"></i> Ajouter</button></div>
+            </div>
+        </div>
+
+        <!-- MODAL CLASSE -->
+        <div class="modal-overlay" id="classModal">
+            <div class="modal" style="max-width:450px">
+                <div class="modal-header"><h3><i class="fas fa-layer-group"></i> Classes</h3><button class="modal-close" onclick="closeClassModal()"><i class="fas fa-times"></i></button></div>
+                <div class="modal-body">
+                    <div class="form-group full"><label>Nouvelle Classe</label><input type="text" id="newClassInput" placeholder="Ex: COMPTABILITÉ"></div>
+                    <div style="margin-top:12px"><strong style="font-size:0.8rem">Existantes :</strong></div>
+                    <div id="existingClasses" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-outline" onclick="closeClassModal()">Fermer</button><button class="btn btn-primary" onclick="addClass()"><i class="fas fa-plus"></i> Ajouter</button></div>
+            </div>
+        </div>
+
+        <!-- MODAL ÉLÈVE -->
+        <div class="modal-overlay" id="studentModal">
+            <div class="modal" style="max-width:450px">
+                <div class="modal-header"><h3><i class="fas fa-user-plus"></i> Ajouter Élève</h3><button class="modal-close" onclick="closeStudentModal()"><i class="fas fa-times"></i></button></div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group full"><label>Nom complet</label><input type="text" id="newStudentName" placeholder="Ex: Jean Dupont"></div>
+                        <div class="form-group"><label>Matricule</label><input type="text" id="newStudentMat" placeholder="CEJ-0XX"></div>
+                        <div class="form-group"><label>Téléphone</label><input type="text" id="newStudentTel" placeholder="+509 XX XX XXXX"></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-outline" onclick="closeStudentModal()">Annuler</button><button class="btn btn-primary" onclick="addStudent()"><i class="fas fa-user-plus"></i> Ajouter</button></div>
+            </div>
+        </div>
+
+        <!-- MODAL CONFIRMATION -->
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal" style="max-width:400px">
+                <div class="modal-header"><h3 id="confirmTitle">Confirmation</h3><button class="modal-close" onclick="closeConfirmModal()"><i class="fas fa-times"></i></button></div>
+                <div class="modal-body"><p id="confirmMessage" style="font-size:0.9rem">Êtes-vous sûr ?</p></div>
+                <div class="modal-footer"><button class="btn btn-outline" onclick="closeConfirmModal()">Non</button><button class="btn btn-danger" id="confirmYes">Oui</button></div>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+        <!-- AI Systeme -->
+        <div id="orion-concierge-sistem"></div>        
+    </div>
+
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_note.js"></script>
+<script src="js/user-profile.js"></script>
+</body>
+</html>

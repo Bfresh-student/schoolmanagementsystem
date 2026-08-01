@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Incubateur Projets & Calendrier · CEJEC ERP</title>
+    <meta name="description" content="Incubateur de projets et calendrier CEJEC">
+    <meta name="theme-color" content="#0A4D8C">
+    <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css">
+    <link rel="stylesheet" href="css/AI_Styles.css">
+    <link rel="stylesheet" href="css/styles_incuba_calen.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- LOGO -->
+            <div class="header-left">
+                <!-- Menu Toggle Button -->
+                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+                    </svg>
+                </button>
+
+                <a href="Dashbord-Admin.html" class="logo-link">
+                    <i class="fas fa-chart-line logo-img"></i>
+                </a>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="header-center">
+                <div class="input-group">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
+                    <button type="submit" class="btn-search">Recherche</button>
+                </div>
+            </div>
+            
+            <!-- USER + NOTIFICATIONS -->
+            <div class="header-right">
+
+                <!-- USER MENU -->
+                <div class="user-section">
+                    <div class="user-trigger" onclick="toggleUserMenu()">
+                        <div class="avatar">B</div>
+                        <span class="user-name">Bruno Jean</span>
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </div>
+
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-info">
+                            <strong>CEJEC</strong>
+                            <span>brunojean90@gmail.com</span>
+                        </div>
+
+                        <!-- PARAMÈTRE -->
+                        <a href="Parametre_Admin.html" class="menu-item">
+                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+                        </a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="Se connecter - Admin.html" class="menu-item logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> 
+                            <span>Se déconnecter</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- NOTIFICATIONS -->
+                <div class="header-actions">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge44">5</span>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- BRAND -->
+            <div class="brand">
+                <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo">
+                </div>
+                <div>
+                <h1>CEJEC</h1>
+                <div class="muted">Admin Panel</div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav>
+
+                <!-- DASHBOARD -->
+                <p>Vue d'ensemble</p>                
+                <a href="Dashbord-Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Tableau de bord
+                </div>
+                </a>
+                
+                <!-- MANAGEMENT -->
+                <p>Opérations</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-school fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Académique
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
+                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
+                        <a class="dropdown22-item" href="gestion_medias.html">
+                            <span class="fa-stack" style="width: 1.5em;">
+                                    <!-- ICON PRINCIPAL -->
+                                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                                    <!-- PETIT GEAR (TOP RIGHT) -->
+                                    <i class="fa-solid fa-newspaper fa-stack-1x"
+                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                            </span>  
+                        Médias & Communication
+                    </a>
+                    </div>
+                </div>
+                
+                <!-- INCUBATEUR PROJETS & CALDRIER -->
+                <a href="incubateur_calendrier.html">
+                <div class="nav-item active">
+                <span class="fa-stack" style="width: 1.5em;">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                </span>                    
+                Incubateur Projets & Calendrier
+                </div>
+                </a>
+             
+                <!-- OPERATIONS -->
+                <p>Système</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Opérations
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
+                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
+                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
+                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
+                    </div>
+                </div>   
+  
+                <!-- PARAMÈT -->
+                <a href="Parametre_Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                Paramètre
+                </div>
+                </a>
+
+            </nav>
+                
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+
+                <div class="user-profile2">
+                    <div class="avatar-wrapper2">
+                        <div class="avatar2">BJ</div>
+                        <span class="status-indicator2"></span>
+                    </div>
+                    
+                    <div class="user-info2">
+                        <div class="user-name2">Bruno Jean</div>
+                        <div class="user-role2">Super Admin</div>
+                    </div>
+                    <a href="Se connecter - Admin.html">
+                        <button class="logout-btn2" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </a>
+                </div>
+                
+            </div>
+
+        </aside>
+
+        <!-- OVERLAY -->
+        <div class="overlay"></div>
+
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <div class="breadcrumb"><i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <span class="current" id="breadcrumbCurrent">Projets</span></div>
+
+            <header class="header-page">
+                <div>
+                    <h1><span class="icon-circle"><i class="fas fa-rocket"></i></span> Incubateur Projets & Calendrier</h1>
+                    <span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span>
+                    <p>Suivi des projets entrepreneuriaux, mentorat, incubation et calendrier des événements</p>
+                </div>
+            </header>
+
+            <nav class="nav-tabs" id="navTabs">
+                <button class="active" data-page="projets"><i class="fas fa-rocket"></i> Projets</button>
+                <button data-page="stages"><i class="fas fa-briefcase"></i> Stages</button>
+                <button data-page="mentorat"><i class="fas fa-user-tie"></i> Mentorat</button>
+                <button data-page="incubation"><i class="fas fa-building"></i> Incubation</button>
+                <button data-page="businessplan"><i class="fas fa-file-contract"></i> Business Plans</button>
+                <button data-page="calendrier"><i class="fas fa-calendar-alt"></i> Calendrier</button>
+            </nav>
+
+            <div id="mainContent"></div>
+        </div>
+
+        <!-- ============ MODALS ============ -->
+        <!-- MODAL PROJET -->
+        <div class="modal-overlay" id="projectModal"><div class="modal"><div class="modal-header"><h3><i class="fas fa-rocket"></i> <span id="projModalTitle">Nouveau Projet</span></h3><button class="modal-close" onclick="closeModal('projectModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body"><div class="form-grid">
+            <div class="form-group full"><label>Nom du projet *</label><input type="text" id="projNom" placeholder="Nom du projet"></div>
+            <div class="form-group"><label>Porteur du projet</label><input type="text" id="projPorteur" placeholder="Nom de l'étudiant"></div>
+            <div class="form-group"><label>Promotion</label><select id="projPromo"><option>Promotion 2026</option><option>Promotion 2025</option></select></div>
+            <div class="form-group"><label>Catégorie</label><select id="projCat"><option>Agriculture</option><option>Commerce</option><option>Technologie</option><option>Services</option><option>Éducation</option><option>Santé</option><option>Artisanat</option><option>Autre</option></select></div>
+            <div class="form-group"><label>Budget estimatif (HTG)</label><input type="number" id="projBudget" placeholder="0" value="50000"></div>
+            <div class="form-group"><label>Date de début</label><input type="date" id="projDebut"></div>
+            <div class="form-group"><label>Date lancement</label><input type="date" id="projLancement"></div>
+            <div class="form-group"><label>Statut</label><select id="projStatut"><option>Idée</option><option>Étude</option><option>Incubation</option><option>Recherche financement</option><option>Lancement</option><option>Terminé</option></select></div>
+            <div class="form-group full"><label>Description</label><textarea id="projDesc" rows="3" placeholder="Description du projet..."></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('projectModal')">Annuler</button><button class="btn btn-primary" onclick="saveProject()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+
+        <!-- MODAL STAGE -->
+        <div class="modal-overlay" id="stageModal"><div class="modal"><div class="modal-header"><h3><i class="fas fa-briefcase"></i> Nouveau Stage</h3><button class="modal-close" onclick="closeModal('stageModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body"><div class="form-grid">
+            <div class="form-group full"><label>Étudiant *</label><input type="text" id="stageEtudiant" placeholder="Nom de l'étudiant"></div>
+            <div class="form-group"><label>Promotion</label><select id="stagePromo"><option>Promotion 2026</option><option>Promotion 2025</option></select></div>
+            <div class="form-group"><label>Entreprise *</label><input type="text" id="stageEntreprise" placeholder="Nom de l'entreprise"></div>
+            <div class="form-group"><label>Secteur</label><select id="stageSecteur"><option>Technologie</option><option>Finance</option><option>Agriculture</option><option>Éducation</option><option>Santé</option><option>Commerce</option><option>Services</option></select></div>
+            <div class="form-group"><label>Poste</label><input type="text" id="stagePoste" placeholder="Intitulé du poste"></div>
+            <div class="form-group"><label>Superviseur</label><input type="text" id="stageSuperviseur" placeholder="Nom du superviseur"></div>
+            <div class="form-group"><label>Date début</label><input type="date" id="stageDateDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="stageDateFin"></div>
+            <div class="form-group"><label>Statut</label><select id="stageStatut"><option>En attente</option><option>En cours</option><option>Terminé</option></select></div>
+            <div class="form-group"><label>Évaluation</label><select id="stageEval"><option>—</option><option>A+</option><option>A</option><option>B+</option><option>B</option><option>C</option></select></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('stageModal')">Annuler</button><button class="btn btn-primary" onclick="saveStage()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+
+        <!-- MODAL MENTOR -->
+        <div class="modal-overlay" id="mentorModal"><div class="modal"><div class="modal-header"><h3><i class="fas fa-user-tie"></i> Nouveau Mentor</h3><button class="modal-close" onclick="closeModal('mentorModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body"><div class="form-grid">
+            <div class="form-group full"><label>Nom complet *</label><input type="text" id="mentorNom" placeholder="Nom du mentor"></div>
+            <div class="form-group"><label>Profession</label><input type="text" id="mentorProfession" placeholder="Ex: Entrepreneur"></div>
+            <div class="form-group"><label>Entreprise</label><input type="text" id="mentorEntreprise" placeholder="Nom de l'entreprise"></div>
+            <div class="form-group"><label>Téléphone</label><input type="text" id="mentorTel" placeholder="+509 XX XX XXXX"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="mentorEmail" placeholder="email@exemple.com"></div>
+            <div class="form-group"><label>Spécialité</label><select id="mentorSpecialite"><option>Entrepreneuriat</option><option>Marketing</option><option>Finance</option><option>Leadership</option><option>Technologie</option><option>Droit</option><option>GRH</option></select></div>
+            <div class="form-group"><label>Disponibilité</label><select id="mentorDispo"><option>Oui</option><option>Partiel</option><option>Non</option></select></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('mentorModal')">Annuler</button><button class="btn btn-primary" onclick="saveMentor()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+
+        <!-- MODAL BUSINESS PLAN -->
+        <div class="modal-overlay" id="bpModal"><div class="modal"><div class="modal-header"><h3><i class="fas fa-file-contract"></i> Nouveau Business Plan</h3><button class="modal-close" onclick="closeModal('bpModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body"><div class="form-grid">
+            <div class="form-group full"><label>Titre *</label><input type="text" id="bpTitre" placeholder="Titre du business plan"></div>
+            <div class="form-group"><label>Porteur</label><input type="text" id="bpPorteur" placeholder="Nom de l'étudiant"></div>
+            <div class="form-group"><label>Statut</label><select id="bpStatut"><option>Brouillon</option><option>En analyse</option><option>Validé</option><option>Rejeté</option></select></div>
+            <div class="form-group"><label>Date</label><input type="date" id="bpDate"></div>
+            <div class="form-group"><label>Montant (HTG)</label><input type="number" id="bpMontant" placeholder="0" value="100000"></div>
+            <div class="form-group full"><label>Résumé</label><textarea id="bpResume" rows="3" placeholder="Résumé du business plan..."></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('bpModal')">Annuler</button><button class="btn btn-primary" onclick="saveBP()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+
+        <!-- MODAL ÉVÉNEMENT -->
+        <div class="modal-overlay" id="eventModal"><div class="modal" style="max-width:600px"><div class="modal-header"><h3><i class="fas fa-calendar-plus"></i> <span id="evtModalTitle">Ajouter Événement</span></h3><button class="modal-close" onclick="closeModal('eventModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body"><div class="form-grid">
+            <div class="form-group full"><label>Titre *</label><input type="text" id="evtTitre" placeholder="Titre de l'événement"></div>
+            <div class="form-group"><label>Catégorie</label><select id="evtCat"><option>Cours</option><option>Réunion</option><option>Mentorat</option><option>Hackathon</option><option>Conférence</option><option>Visite terrain</option><option>Soutenance</option><option>Autre</option></select></div>
+            <div class="form-group"><label>Priorité</label><select id="evtPriorite"><option>Faible</option><option selected>Normale</option><option>Importante</option><option>Urgente</option></select></div>
+            <div class="form-group"><label>Date début</label><input type="date" id="evtDateDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="evtDateFin"></div>
+            <div class="form-group"><label>Heure début</label><input type="time" id="evtHeureDebut" value="09:00"></div>
+            <div class="form-group"><label>Heure fin</label><input type="time" id="evtHeureFin" value="11:00"></div>
+            <div class="form-group"><label>Lieu</label><input type="text" id="evtLieu" placeholder="Salle ou lieu"></div>
+            <div class="form-group"><label>Responsable</label><input type="text" id="evtResp" placeholder="Nom du responsable"></div>
+            <div class="form-group"><label>Couleur</label><select id="evtCouleur"><option value="blue">Bleu</option><option value="red">Rouge</option><option value="green">Vert</option><option value="orange">Orange</option><option value="purple">Violet</option></select></div>
+            <div class="form-group"><label>Statut</label><select id="evtStatut"><option>Programmé</option><option>Confirmé</option><option>Terminé</option><option>Annulé</option></select></div>
+            <div class="form-group full" style="background:var(--blue-lighter);border-radius:var(--radius-sm);padding:12px;margin-top:8px">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;font-weight:600;color:var(--ink)">
+                    <input type="checkbox" id="evtAlarme" style="width:18px;height:18px;cursor:pointer;accent-color:var(--red)" onchange="toggleAlarmConfig()">
+                    <i class="fas fa-bell" style="color:var(--red)"></i> Activer une alarme pour cet événement
+                </label>
+                <div id="alarmConfigSection" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Sonner avant (minutes)</label>
+                            <select id="alarmAvance">
+                                <option value="0">À l'heure exacte</option>
+                                <option value="5">5 minutes avant</option>
+                                <option value="15" selected>15 minutes avant</option>
+                                <option value="30">30 minutes avant</option>
+                                <option value="60">1 heure avant</option>
+                                <option value="120">2 heures avant</option>
+                                <option value="1440">1 jour avant</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Type de sonnerie</label>
+                            <select id="alarmSon">
+                                <option value="classic">🔔 Classique</option>
+                                <option value="digital">📱 Digital</option>
+                                <option value="urgent">🚨 Urgent</option>
+                                <option value="gentle">🎵 Doux</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée sonnerie (secondes)</label>
+                            <select id="alarmDuree">
+                                <option value="5">5 secondes</option>
+                                <option value="10" selected>10 secondes</option>
+                                <option value="15">15 secondes</option>
+                                <option value="30">30 secondes</option>
+                                <option value="60">60 secondes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Répéter</label>
+                            <select id="alarmRepetition">
+                                <option value="1">1 fois</option>
+                                <option value="2">2 fois</option>
+                                <option value="3" selected>3 fois</option>
+                                <option value="5">5 fois</option>
+                                <option value="0">En continu</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Intervalle répétition (min)</label>
+                            <select id="alarmIntervalle">
+                                <option value="1">1 minute</option>
+                                <option value="5" selected>5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Volume</label>
+                            <input type="range" id="alarmVolume" min="1" max="10" value="7" style="width:100%">
+                            <span style="font-size:.6rem;color:var(--muted);text-align:center">Volume: <span id="volumeValue">7</span>/10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('eventModal')">Annuler</button><button class="btn btn-primary" onclick="saveEvent()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+
+        <!-- MODAL DÉTAIL ÉVÉNEMENT -->
+        <div class="modal-overlay" id="eventDetailModal"><div class="modal" style="max-width:550px"><div class="modal-header"><h3><i class="fas fa-eye"></i> Détails de l'Événement</h3><button class="modal-close" onclick="closeModal('eventDetailModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body" id="eventDetailBody"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('eventDetailModal')">Fermer</button>
+            <button class="btn btn-outline" id="eventDetailEditBtn" onclick="editEventFromDetail()"><i class="fas fa-edit"></i> Modifier</button>
+            <button class="btn btn-danger" id="eventDetailAlarmBtn" onclick="toggleAlarmFromDetail()"><i class="fas fa-bell"></i> <span id="alarmBtnText">Activer Alarme</span></button>
+        </div></div></div>
+
+        <!-- MODAL DÉTAIL GÉNÉRAL -->
+        <div class="modal-overlay" id="detailModal"><div class="modal" style="max-width:600px"><div class="modal-header"><h3><i class="fas fa-eye"></i> Détails</h3><button class="modal-close" onclick="closeModal('detailModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body" id="detailBody"></div>
+        <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('detailModal')">Fermer</button></div></div></div>
+
+        <!-- ALARME MODAL -->
+        <div class="alarm-modal-overlay" id="alarmPopup">
+            <div class="alarm-modal">
+                <div class="alarm-icon" id="alarmPopupIcon">🔔</div>
+                <div class="alarm-title" id="alarmPopupTitle">Rappel Événement</div>
+                <div class="alarm-info" id="alarmPopupInfo"></div>
+                <div id="alarmPopupCountdown" style="font-size:1.5rem;font-weight:800;color:var(--red);margin:10px 0"></div>
+                <button class="alarm-stop-btn" onclick="stopAlarm()">
+                    <i class="fas fa-stop"></i> ARRÊTER
+                </button>
+                <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="snoozeAlarm()">
+                    <i class="fas fa-clock"></i> Rappel dans 5 min
+                </button>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+        <!-- AI Systeme -->
+        <div id="orion-concierge-sistem"></div>        
+    </div>
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_incuba_calen.js"></script>
+<script src="js/user-profile.js"></script>
+</body>
+</html>

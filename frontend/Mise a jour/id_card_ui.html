@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>CEJEC · Système de Badges Complet | Élèves, Professeurs & Direction</title>
+  <!-- Polices Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Alex+Brush&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Librairies pour QR code et Barcode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js">
+  </script>
+  <style>
+    :root {
+      --white: #ffffff;
+      --blue: #0A4D8C;
+      --blue-dark: #073864;
+      --blue-light: #e8f1fa;
+      --red: #D62828;
+      --red-dark: #a81d1d;
+      --ink: #1a1f2b;
+      --muted: #5b6675;
+      --bg-soft: #f7f9fc;
+      --border: #e5ebf2;
+      --shadow-sm: 0 2px 8px rgba(10, 77, 140, 0.06);
+      --shadow-md: 0 8px 24px rgba(10, 77, 140, 0.1);
+      --shadow-lg: 0 20px 48px rgba(10, 77, 140, 0.16);
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 22px;
+      --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: var(--bg-soft);
+      line-height: 1.5;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .main-container {
+      max-width: 1500px;
+      width: 100%;
+    }
+
+    .header-title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header-title h1 {
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 2.3rem;
+      text-transform: uppercase;
+    }
+
+    .header-title p {
+      color: var(--muted);
+    }
+
+    /* Grille principale */
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .badges-area {
+      flex: 2;
+      min-width: 700px;
+    }
+
+    .controls-area {
+      flex: 1;
+      min-width: 380px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 25px;
+      box-shadow: var(--shadow-md);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .category-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--blue-dark);
+      border-left: 6px solid var(--red);
+      padding-left: 15px;
+      margin: 30px 0 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cards-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+
+    /* Carte ID */
+    .id-card {
+      width: 330px;
+      height: 520px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .id-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card-top-bg {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      height: 130px;
+      background: var(--blue);
+      border-bottom-left-radius: 50% 40px;
+      border-bottom-right-radius: 50% 40px;
+      z-index: 1;
+    }
+
+    .card-top-accent {
+      position: absolute;
+      top: -25px;
+      left: -25px;
+      width: 130px;
+      height: 130px;
+      background: var(--red);
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .card-bottom-bg {
+      position: absolute;
+      bottom: -25px;
+      left: -20px;
+      right: -20px;
+      height: 130px;
+      background: var(--blue);
+      border-top-left-radius: 50% 50px;
+      border-top-right-radius: 50% 50px;
+      z-index: 1;
+    }
+
+    .card-bottom-accent {
+      position: absolute;
+      bottom: -35px;
+      right: -25px;
+      width: 160px;
+      height: 140px;
+      background: var(--red);
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 5;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    .front-logo-container {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      z-index: 10;
+      width: 50px;
+      height: 50px;
+      background: white;
+      border-radius: 50%;
+      padding: 3px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--blue-light);
+    }
+
+    .front-logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .photo-frame {
+      width: 115px;
+      height: 135px;
+      border: 2px solid var(--blue);
+      border-radius: var(--radius);
+      margin-top: 45px;
+      background: white;
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: calc(var(--radius) - 4px);
+    }
+
+    .member-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .member-role {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .info-table {
+      width: 100%;
+      margin-bottom: auto;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 3px;
+      font-size: 0.73rem;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--ink);
+      width: 65px;
+    }
+
+    .info-label::after {
+      content: ":";
+      margin-left: 2px;
+    }
+
+    .info-value {
+      color: var(--muted);
+      font-weight: 500;
+      flex: 1;
+      text-align: left;
+    }
+
+    .barcode-container {
+      width: 100%;
+      background: white;
+      padding: 5px;
+      border-radius: var(--radius-sm);
+      margin: 6px 0 18px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+
+    .barcode-svg {
+      max-width: 100%;
+      height: 32px;
+    }
+
+    /* Verso */
+    .back-logo-section {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .back-logo-wrap {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: var(--radius);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+    }
+
+    .back-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .logo-subtext {
+      font-size: 0.6rem;
+      color: var(--red);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .signature-container {
+      margin: 6px 0 8px;
+      border-bottom: 1px dashed var(--border);
+      width: 65%;
+      padding-bottom: 3px;
+      text-align: center;
+    }
+
+    .signature-img {
+      font-family: 'Alex Brush', cursive;
+      font-size: 1.7rem;
+      color: var(--blue-dark);
+    }
+
+    .terms-text {
+      font-size: 0.55rem;
+      color: var(--muted);
+      margin: 4px 5px 12px;
+      text-align: left;
+    }
+
+    .terms-text ul {
+      list-style: none;
+    }
+
+    .terms-text li {
+      padding-left: 10px;
+      position: relative;
+      margin-bottom: 2px;
+    }
+
+    .terms-text li::before {
+      content: "•";
+      color: var(--red);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .qr-container {
+      background: white;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Boutons */
+    .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--blue-dark);
+    }
+
+    .btn-red {
+      background: var(--red);
+    }
+
+    .btn-red:hover {
+      background: var(--red-dark);
+    }
+
+    .btn-outline {
+      background: white;
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--blue-light);
+    }
+
+    /* Formulaire */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Poppins', sans-serif;
+      background: #fafbfc;
+      font-size: 0.85rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(10, 77, 140, 0.1);
+    }
+
+    /* Upload photo */
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fafbfc;
+      margin-bottom: 10px;
+    }
+
+    .photo-upload-area:hover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .photo-upload-area i {
+      font-size: 2rem;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .photo-upload-area p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .photo-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 10px auto;
+      display: block;
+      border: 2px solid var(--blue);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    hr {
+      margin: 20px 0;
+      border-color: var(--border);
+    }
+
+    .badge-count {
+      background: var(--blue-light);
+      color: var(--blue);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    @media print {
+      .controls-area,
+      .header-title,
+      .btn {
+        display: none;
+      }
+      .id-card {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header-title">
+      <h1>CEJEC · Système de Badges Intelligents</h1>
+      <p>Gestion dynamique des cartes Élèves, Professeurs & Direction</p>
+    </div>
+
+    <div class="dashboard">
+      <!-- ZONE BADGES -->
+      <div class="badges-area" id="badgesContainer">
+        <!-- Les badges seront générés dynamiquement ici -->
+      </div>
+
+      <!-- PANNEAU DE CONTRÔLE -->
+      <div class="controls-area" id="controlPanel">
+        <h3 style="color:var(--blue); margin-bottom:15px;">
+          <i class="fas fa-sliders-h"></i> Configuration Badge
+        </h3>
+
+        <div class="form-group">
+          <label>Type de carte</label>
+          <select id="cardTypeSelect">
+            <option value="eleve">👨‍🎓 Élève / Étudiant</option>
+            <option value="professeur">👨‍🏫 Professeur / Encadrant</option>
+            <option value="direction">🏢 Membre de la Direction</option>
+          </select>
+        </div>
+
+        <!-- Formulaire dynamique -->
+        <div id="dynamicFormFields"></div>
+
+        <!-- Zone upload photo -->
+        <div class="form-group">
+          <label>Photo du membre</label>
+          <div class="photo-upload-area" id="photoUploadArea">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Cliquez pour télécharger une photo</p>
+            <p style="font-size:0.7rem; color:var(--muted);">ou glissez-déposez ici</p>
+            <img id="photoPreview" class="photo-preview" src="#" alt="Aperçu" style="display:none;">
+          </div>
+          <input type="file" id="fileInput" accept="image/*">
+          <button class="btn btn-outline" id="removePhotoBtn" style="width:100%; margin-top:5px; display:none;">
+            <i class="fas fa-times"></i> Retirer la photo
+          </button>
+        </div>
+
+        <div class="flex-row">
+          <button class="btn" id="addOrUpdateBtn">
+            <i class="fas fa-plus-circle"></i> Ajouter / Mettre à jour
+          </button>
+          <button class="btn btn-outline" id="clearFormBtn">
+            <i class="fas fa-eraser"></i> Vider formulaire
+          </button>
+        </div>
+
+        <hr>
+
+        <!-- Suppression -->
+        <div>
+          <p style="font-weight:600; margin-bottom:8px;">
+            <i class="fas fa-trash-alt" style="color:var(--red);"></i> Supprimer une carte
+          </p>
+          <div class="flex-row">
+            <select id="deleteSelect" style="flex:1; padding:8px;">
+              <option value="">-- Choisir un badge --</option>
+            </select>
+            <button class="btn btn-red" id="deleteBtn">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" style="margin-top:15px; width:100%;" onclick="window.print()">
+          <i class="fas fa-print"></i> Imprimer toutes les cartes
+        </button>
+
+        <button class="btn btn-red" style="margin-top:8px; width:100%;" id="resetAllBtn">
+          <i class="fas fa-undo"></i> Réinitialiser tout (démo)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // --- ÉTAT GLOBAL ---
+      let badges = {
+        eleves: [],
+        professeurs: [],
+        direction: []
+      };
+
+      // Photo uploadée en base64
+      let uploadedPhotoData = null;
+
+      // Données par défaut
+      const defaultEleve = {
+        id: 'e1',
+        nom: 'Mireille Joseph',
+        role: 'Étudiante Entrepreneur',
+        niveau: 'Licence 2',
+        filiere: 'Gestion',
+        email: 'm.joseph@cejec.edu',
+        code: 'E-2026',
+        photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+      };
+
+      const defaultProf = {
+        id: 'p1',
+        nom: 'Dr. Marc Antoine',
+        role: 'Encadrant Académique',
+        departement: 'Innovation',
+        email: 'm.antoine@cejec.org',
+        bureau: 'B-204',
+        code: 'P-0815',
+        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'
+      };
+
+      const defaultDirection = {
+        id: 'd1',
+        nom: 'Jean-Claude Duval',
+        role: 'Président',
+        departement: 'Direction Générale',
+        email: 'president@cejec.org',
+        bureau: 'A-101',
+        code: 'D-0001',
+        photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80'
+      };
+
+      // Initialisation
+      if (!localStorage.getItem('cejecBadgesV2')) {
+        badges.eleves.push(defaultEleve);
+        badges.professeurs.push(defaultProf);
+        badges.direction.push(defaultDirection);
+        saveToStorage();
+      } else {
+        badges = JSON.parse(localStorage.getItem('cejecBadgesV2'));
+      }
+
+      // --- STOCKAGE ---
+      function saveToStorage() {
+        localStorage.setItem('cejecBadgesV2', JSON.stringify(badges));
+      }
+
+      // --- GÉNÉRATION CODE-BARRE & QR ---
+      function generateBarcode(containerId, text) {
+        const svg = document.getElementById(containerId);
+        if (svg) {
+          try {
+            JsBarcode(svg, text, {
+              format: "CODE128",
+              lineColor: "#1a1f2b",
+              width: 1.5,
+              height: 32,
+              displayValue: false,
+              margin: 0,
+              background: "white"
+            });
+          } catch (e) {
+            svg.innerHTML = '<rect width="100%" height="30" fill="#eee"/>';
+          }
+        }
+      }
+
+      function generateQRCode(containerId, text) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.innerHTML = '';
+          try {
+            new QRCode(container, {
+              text: text,
+              width: 55,
+              height: 55,
+              colorDark: "#0A4D8C",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          } catch (e) {
+            container.innerHTML =
+              '<div style="width:55px;height:55px;background:#f0f0f0;border-radius:4px;"></div>';
+          }
+        }
+      }
+
+      // --- RENDU DES BADGES ---
+      function renderAllBadges() {
+        const container = document.getElementById('badgesContainer');
+        if (!container) return;
+        let html = '';
+
+        // Section Direction (en premier car plus important)
+        if (badges.direction.length > 0) {
+          html +=
+            '<h2 class="category-title"><i class="fas fa-building"></i> Direction <span class="badge-count">' +
+            badges.direction.length + '</span></h2><div class="cards-row">';
+          badges.direction.forEach((d, index) => {
+            html += buildCard(d, index, 'direction');
+          });
+          html += '</div>';
+        }
+
+        // Section Professeurs
+        if (badges.professeurs.length > 0) {
+          html +=
+            '<h2 class="category-title"><i class="fas fa-chalkboard-teacher"></i> Professeurs / Encadrants <span class="badge-count">' +
+            badges.professeurs.length + '</span></h2><div class="cards-row">';
+          badges.professeurs.forEach((p, index) => {
+            html += buildCard(p, index, 'professeur');
+          });
+          html += '</div>';
+        }
+
+        // Section Élèves
+        if (badges.eleves.length > 0) {
+          html +=
+            '<h2 class="category-title"><i class="fas fa-user-graduate"></i> Élèves / Étudiants <span class="badge-count">' +
+            badges.eleves.length + '</span></h2><div class="cards-row">';
+          badges.eleves.forEach((e, index) => {
+            html += buildCard(e, index, 'eleve');
+          });
+          html += '</div>';
+        }
+
+        if (badges.eleves.length === 0 && badges.professeurs.length === 0 && badges.direction.length === 0) {
+          html =
+            '<p style="text-align:center; color:var(--muted); padding:40px;">Aucun badge pour le moment. Ajoutez-en via le panneau de droite.</p>';
+        }
+
+        container.innerHTML = html;
+
+        // Générer codes dynamiques après insertion DOM
+        badges.direction.forEach((d, i) => {
+          generateBarcode('barcode-direction-' + i, d.code);
+          generateQRCode('qr-direction-' + i, 'CEJEC|' + d.nom + '|' + d.code + '|DIRECTION');
+        });
+        badges.professeurs.forEach((p, i) => {
+          generateBarcode('barcode-prof-' + i, p.code);
+          generateQRCode('qr-prof-' + i, 'CEJEC|' + p.nom + '|' + p.code + '|PROF');
+        });
+        badges.eleves.forEach((e, i) => {
+          generateBarcode('barcode-eleve-' + i, e.code);
+          generateQRCode('qr-eleve-' + i, 'CEJEC|' + e.nom + '|' + e.code + '|ELEVE');
+        });
+
+        updateDeleteSelect();
+      }
+
+      function buildCard(person, index, type) {
+        let infoRows = '';
+        let categorie = '';
+
+        if (type === 'eleve') {
+          infoRows = `
+            <div class="info-row"><span class="info-label">Niveau</span><span class="info-value">${person.niveau || ''}</span></div>
+            <div class="info-row"><span class="info-label">Filière</span><span class="info-value">${person.filiere || ''}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">${person.email}</span></div>
+            <div class="info-row"><span class="info-label">Code</span><span class="info-value">${person.code}</span></div>
+          `;
+          categorie = 'ELEVE';
+        } else if (type === 'professeur') {
+          infoRows = `
+            <div class="info-row"><span class="info-label">Dépt</span><span class="info-value">${person.departement || ''}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">${person.email}</span></div>
+            <div class="info-row"><span class="info-label">Bur.</span><span class="info-value">${person.bureau || ''}</span></div>
+            <div class="info-row"><span class="info-label">Code</span><span class="info-value">${person.code}</span></div>
+          `;
+          categorie = 'PROFESSEUR';
+        } else if (type === 'direction') {
+          infoRows = `
+            <div class="info-row"><span class="info-label">Dépt</span><span class="info-value">${person.departement || ''}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">${person.email}</span></div>
+            <div class="info-row"><span class="info-label">Bur.</span><span class="info-value">${person.bureau || ''}</span></div>
+            <div class="info-row"><span class="info-label">Code</span><span class="info-value">${person.code}</span></div>
+          `;
+          categorie = 'DIRECTION';
+        }
+
+        const signatureText = person.nom.split(' ').length > 1 ?
+          person.nom.split(' ')[0][0] + '. ' + person.nom.split(' ').pop() :
+          person.nom;
+
+        return `
+          <!-- RECTO -->
+          <div class="id-card">
+            <div class="card-top-accent"></div><div class="card-top-bg"></div>
+            <div class="front-logo-container">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230A4D8C'/%3E%3Ctext x='50' y='65' font-size='42' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E" alt="logo">
+            </div>
+            <div class="card-content">
+              <div class="photo-frame">
+                <img src="${person.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="photo">
+              </div>
+              <h2 class="member-name">${person.nom}</h2>
+              <div class="member-role">${person.role}</div>
+              <div class="info-table">${infoRows}</div>
+              <div class="barcode-container">
+                <svg id="barcode-${type}-${index}" class="barcode-svg"></svg>
+              </div>
+            </div>
+            <div class="card-bottom-bg"></div><div class="card-bottom-accent"></div>
+          </div>
+          <!-- VERSO -->
+          <div class="id-card">
+            <div class="card-top-accent"></div><div class="card-top-bg"></div>
+            <div class="card-content">
+              <div class="back-logo-section">
+                <div class="back-logo-wrap">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23D62828'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='white'%3ECE%3C/text%3E%3C/svg%3E" alt="logo">
+                </div>
+                <div class="logo-text">CEJEC</div>
+                <div class="logo-subtext">Club Entrepreneurs du Centre</div>
+              </div>
+              <div style="text-align:center; margin-top:5px;">
+                <h2 class="member-name" style="font-size:1rem;">${person.nom}</h2>
+                <div class="member-role">${person.role}</div>
+              </div>
+              <div class="signature-container">
+                <span class="signature-img">${signatureText}</span>
+              </div>
+              <div class="info-table">
+                <div class="info-row"><span class="info-label">Catégorie</span><span class="info-value">${categorie}</span></div>
+                <div class="info-row"><span class="info-label">Valide</span><span class="info-value">Jusqu'au 12.2028</span></div>
+              </div>
+              <div class="terms-text">
+                <ul>
+                  <li>Carte strictement personnelle CEJEC.</li>
+                  <li>Perte : signaler immédiatement au secrétariat.</li>
+                </ul>
+              </div>
+              <div class="qr-container" id="qr-${type}-${index}"></div>
+            </div>
+            <div class="card-bottom-bg"></div><div class="card-bottom-accent"></div>
+          </div>
+        `;
+      }
+
+      // --- FORMULAIRE DYNAMIQUE ---
+      const typeSelect = document.getElementById('cardTypeSelect');
+      const formContainer = document.getElementById('dynamicFormFields');
+
+      function renderFormFields() {
+        const type = typeSelect.value;
+        let html = '';
+
+        if (type === 'eleve') {
+          html = `
+            <div class="form-group"><label>Nom complet *</label><input id="f_nom" placeholder="Ex: Mireille Joseph"></div>
+            <div class="form-group"><label>Rôle</label><input id="f_role" placeholder="Étudiante Entrepreneur"></div>
+            <div class="form-group"><label>Niveau</label><input id="f_niveau" placeholder="Licence 2"></div>
+            <div class="form-group"><label>Filière</label><input id="f_filiere" placeholder="Gestion"></div>
+            <div class="form-group"><label>Email</label><input id="f_email" placeholder="email@cejec.edu" type="email"></div>
+            <div class="form-group"><label>Code unique *</label><input id="f_code" placeholder="E-2026"></div>
+          `;
+        } else if (type === 'professeur') {
+          html = `
+            <div class="form-group"><label>Nom complet *</label><input id="f_nom" placeholder="Dr. Marc Antoine"></div>
+            <div class="form-group"><label>Rôle</label><input id="f_role" placeholder="Encadrant Académique"></div>
+            <div class="form-group"><label>Département</label><input id="f_departement" placeholder="Innovation"></div>
+            <div class="form-group"><label>Email</label><input id="f_email" placeholder="email@cejec.org" type="email"></div>
+            <div class="form-group"><label>Bureau</label><input id="f_bureau" placeholder="B-204"></div>
+            <div class="form-group"><label>Code unique *</label><input id="f_code" placeholder="P-0815"></div>
+          `;
+        } else if (type === 'direction') {
+          html = `
+            <div class="form-group"><label>Nom complet *</label><input id="f_nom" placeholder="Jean-Claude Duval"></div>
+            <div class="form-group"><label>Rôle / Titre</label><input id="f_role" placeholder="Président"></div>
+            <div class="form-group"><label>Département</label><input id="f_departement" placeholder="Direction Générale"></div>
+            <div class="form-group"><label>Email</label><input id="f_email" placeholder="president@cejec.org" type="email"></div>
+            <div class="form-group"><label>Bureau</label><input id="f_bureau" placeholder="A-101"></div>
+            <div class="form-group"><label>Code unique *</label><input id="f_code" placeholder="D-0001"></div>
+          `;
+        }
+
+        formContainer.innerHTML = html;
+      }
+
+      typeSelect.addEventListener('change', () => {
+        renderFormFields();
+        resetPhotoUpload();
+      });
+      renderFormFields();
+
+      // --- GESTION UPLOAD PHOTO ---
+      const photoUploadArea = document.getElementById('photoUploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const photoPreview = document.getElementById('photoPreview');
+      const removePhotoBtn = document.getElementById('removePhotoBtn');
+
+      photoUploadArea.addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      // Drag & drop
+      photoUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        photoUploadArea.style.borderColor = 'var(--red)';
+      });
+
+      photoUploadArea.addEventListener('dragleave', () => {
+        photoUploadArea.style.borderColor = 'var(--border)';
+      });
+
+      photoUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        photoUploadArea.style.borderColor = 'var(--border)';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          handleFile(file);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleFile(file);
+        }
+      });
+
+      function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          uploadedPhotoData = event.target.result;
+          photoPreview.src = uploadedPhotoData;
+          photoPreview.style.display = 'block';
+          removePhotoBtn.style.display = 'block';
+          // Cacher le texte d'instruction
+          photoUploadArea.querySelector('i').style.display = 'none';
+          photoUploadArea.querySelectorAll('p').forEach(p => p.style.display = 'none');
+        };
+        reader.readAsDataURL(file);
+      }
+
+      removePhotoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPhotoUpload();
+      });
+
+      function resetPhotoUpload() {
+        uploadedPhotoData = null;
+        photoPreview.src = '#';
+        photoPreview.style.display = 'none';
+        removePhotoBtn.style.display = 'none';
+        fileInput.value = '';
+        photoUploadArea.querySelector('i').style.display = 'block';
+        photoUploadArea.querySelectorAll('p').forEach(p => p.style.display = 'block');
+      }
+
+      // --- AJOUT / MISE À JOUR ---
+      document.getElementById('addOrUpdateBtn').addEventListener('click', () => {
+        const type = typeSelect.value;
+        const nom = document.getElementById('f_nom')?.value.trim();
+        const code = document.getElementById('f_code')?.value.trim();
+
+        if (!nom) {
+          alert('❌ Veuillez entrer un nom complet.');
+          return;
+        }
+        if (!code) {
+          alert('❌ Veuillez entrer un code unique.');
+          return;
+        }
+
+        const baseData = {
+          nom: nom,
+          role: document.getElementById('f_role')?.value || 'Membre',
+          email: document.getElementById('f_email')?.value || 'contact@cejec.org',
+          code: code,
+          photo: uploadedPhotoData ||
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+        };
+
+        if (type === 'eleve') {
+          const newEntry = {
+            ...baseData,
+            id: 'e' + Date.now(),
+            niveau: document.getElementById('f_niveau')?.value || '',
+            filiere: document.getElementById('f_filiere')?.value || ''
+          };
+          badges.eleves.push(newEntry);
+        } else if (type === 'professeur') {
+          const newEntry = {
+            ...baseData,
+            id: 'p' + Date.now(),
+            departement: document.getElementById('f_departement')?.value || '',
+            bureau: document.getElementById('f_bureau')?.value || ''
+          };
+          badges.professeurs.push(newEntry);
+        } else if (type === 'direction') {
+          const newEntry = {
+            ...baseData,
+            id: 'd' + Date.now(),
+            departement: document.getElementById('f_departement')?.value || 'Direction',
+            bureau: document.getElementById('f_bureau')?.value || ''
+          };
+          badges.direction.push(newEntry);
+        }
+
+        saveToStorage();
+        renderAllBadges();
+        clearForm();
+        resetPhotoUpload();
+        alert('✅ Badge ajouté avec succès !');
+      });
+
+      function clearForm() {
+        document.querySelectorAll('#dynamicFormFields input').forEach(inp => inp.value = '');
+        resetPhotoUpload();
+      }
+
+      document.getElementById('clearFormBtn').addEventListener('click', () => {
+        clearForm();
+      });
+
+      // --- SUPPRESSION ---
+      function updateDeleteSelect() {
+        const select = document.getElementById('deleteSelect');
+        select.innerHTML = '<option value="">-- Choisir un badge --</option>';
+
+        badges.direction.forEach(d => {
+          select.innerHTML +=
+            `<option value="${d.id}|direction">🏢 ${d.nom} (${d.code}) - Direction</option>`;
+        });
+        badges.professeurs.forEach(p => {
+          select.innerHTML +=
+            `<option value="${p.id}|professeur">👨‍🏫 ${p.nom} (${p.code}) - Professeur</option>`;
+        });
+        badges.eleves.forEach(e => {
+          select.innerHTML +=
+          `<option value="${e.id}|eleve">👨‍🎓 ${e.nom} (${e.code}) - Élève</option>`;
+        });
+      }
+
+      document.getElementById('deleteBtn').addEventListener('click', () => {
+        const val = document.getElementById('deleteSelect').value;
+        if (!val) {
+          alert('⚠️ Veuillez sélectionner un badge à supprimer.');
+          return;
+        }
+        if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce badge définitivement ?')) return;
+
+        const [id, type] = val.split('|');
+        if (type === 'eleve') {
+          badges.eleves = badges.eleves.filter(e => e.id !== id);
+        } else if (type === 'professeur') {
+          badges.professeurs = badges.professeurs.filter(p => p.id !== id);
+        } else if (type === 'direction') {
+          badges.direction = badges.direction.filter(d => d.id !== id);
+        }
+        saveToStorage();
+        renderAllBadges();
+      });
+
+      // --- RÉINITIALISATION ---
+      document.getElementById('resetAllBtn').addEventListener('click', () => {
+        if (!confirm(
+            '⚠️ Ceci va supprimer TOUS les badges et restaurer les exemples. Continuer ?')) return;
+        badges = {
+          eleves: [defaultEleve],
+          professeurs: [defaultProf],
+          direction: [defaultDirection]
+        };
+        saveToStorage();
+        renderAllBadges();
+        clearForm();
+        resetPhotoUpload();
+      });
+
+      // --- DÉMARRAGE ---
+      renderAllBadges();
+    })();
+  </script>
+</body>
+</html>

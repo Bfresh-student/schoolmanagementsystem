@@ -1,0 +1,24 @@
+{
+  "name": "CEJEC ERP - Système de Gestion Scolaire",
+  "short_name": "CEJEC ERP",
+  "description": "Plateforme de Gestion Scolaire et Académique du CEJEC",
+  "start_url": "./Se%20connecter%20-%20Admin.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#052440",
+  "theme_color": "#0A4D8C",
+  "icons": [
+    {
+      "src": "assets/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

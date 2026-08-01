@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - CEJEC ERP</title>
+    <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css">
+    <link rel="stylesheet" href="css/AI_Styles.css">
+    <link rel="stylesheet" href="css/styles_parametre.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- LOGO -->
+            <div class="header-left">
+                <!-- Menu Toggle Button -->
+                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+                    </svg>
+                </button>
+
+                <a href="Dashbord-Admin.html" class="logo-link">
+                    <i class="fas fa-chart-line logo-img"></i>
+                </a>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="header-center">
+                <div class="input-group">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
+                    <button type="submit" class="btn-search">Recherche</button>
+                </div>
+            </div>
+            
+            <!-- USER + NOTIFICATIONS -->
+            <div class="header-right">
+
+                <!-- USER MENU -->
+                <div class="user-section">
+                    <div class="user-trigger" onclick="toggleUserMenu()">
+                        <div class="avatar">B</div>
+                        <span class="user-name">Bruno Jean</span>
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </div>
+
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-info">
+                            <strong>CEJEC</strong>
+                            <span>brunojean90@gmail.com</span>
+                        </div>
+
+                        <!-- PARAMÈTRE -->
+                        <a href="Parametre_Admin.html" class="menu-item">
+                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+                        </a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="Se connecter - Admin.html" class="menu-item logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> 
+                            <span>Se déconnecter</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- NOTIFICATIONS -->
+                <div class="header-actions">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge44">5</span>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- BRAND -->
+            <div class="brand">
+                <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo">
+                </div>
+                <div>
+                <h1>CEJEC</h1>
+                <div class="muted">Admin Panel</div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav>
+
+                <!-- DASHBOARD -->
+                <p>Vue d'ensemble</p>                
+                <a href="Dashbord-Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Tableau de bord
+                </div>
+                </a>
+                
+                <!-- MANAGEMENT -->
+                <p>Opérations</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-school fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Académique
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
+                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
+                        <a class="dropdown22-item" href="gestion_medias.html">
+                            <span class="fa-stack" style="width: 1.5em;">
+                                    <!-- ICON PRINCIPAL -->
+                                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                                    <!-- PETIT GEAR (TOP RIGHT) -->
+                                    <i class="fa-solid fa-newspaper fa-stack-1x"
+                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                            </span>  
+                        Médias & Communication
+                    </a>
+                    </div>
+                </div>
+                
+                <!-- INCUBATEUR PROJETS & CALDRIER -->
+                <a href="incubateur_calendrier.html">
+                <div class="nav-item">
+                <span class="fa-stack" style="width: 1.5em;">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                </span>                    
+                Incubateur Projets & Calendrier
+                </div>
+                </a>
+             
+                <!-- OPERATIONS -->
+                <p>Système</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Opérations
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
+                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
+                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
+                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
+                    </div>
+                </div>   
+  
+                <!-- PARAMÈT -->
+                <a href="Parametre_Admin.html">
+                <div class="nav-item active">
+                <i class="fa-solid fa-gear"></i>
+                Paramètre
+                </div>
+                </a>
+
+            </nav>
+                
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+
+                <div class="user-profile2">
+                    <div class="avatar-wrapper2">
+                        <div class="avatar2">BJ</div>
+                        <span class="status-indicator2"></span>
+                    </div>
+                    
+                    <div class="user-info2">
+                        <div class="user-name2">Bruno Jean</div>
+                        <div class="user-role2">Super Admin</div>
+                    </div>
+                    <a href="Se connecter - Admin.html">
+                        <button class="logout-btn2" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </a>
+                </div>
+                
+            </div>
+
+        </aside>
+
+        <!-- OVERLAY -->
+        <div class="overlay"></div>
+
+        <!-- MAIN CONTENT -->
+        <div class="container" id="main-content">
+            <!-- ========== BREADCRUMB ========== -->
+            <div class="breadcrumb">
+                <i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <strong>Paramètres</strong>
+            </div>
+
+            <!-- ========== HEADER ========== -->
+            <header class="main-header">
+                <h1><i class="fa-solid fa-gear"></i> Paramètres CEJEC</h1>
+                <p>Configuration générale du Centre d'Études des Jeunes en Entrepreneuriat et Commerce</p>
+            </header>
+
+            <!-- ========== RECHERCHE ========== -->
+            <div class="search-wrapper">
+                <input type="text" id="searchSettings" placeholder="Rechercher un paramètre..." aria-label="Rechercher un paramètre">
+                <i class="fas fa-search" aria-hidden="true"></i>
+            </div>
+
+            <!-- ========== NAVIGATION ========== -->
+            <nav class="nav-tabs" role="tablist" aria-label="Sections paramètres">
+                <button class="nav-tab active" data-section="general" role="tab" aria-selected="true"><i class="fas fa-building"></i> Général</button>
+                <button class="nav-tab" data-section="profile" role="tab" aria-selected="false"><i class="fas fa-user"></i> Profile</button>
+                <button class="nav-tab" data-section="academique" role="tab" aria-selected="false"><i class="fas fa-graduation-cap"></i> Académique</button>
+                <button class="nav-tab" data-section="finance" role="tab" aria-selected="false"><i class="fas fa-coins"></i> Financier</button>
+                <button class="nav-tab" data-section="utilisateurs" role="tab" aria-selected="false"><i class="fas fa-users-cog"></i> Utilisateurs</button>
+                <button class="nav-tab" data-section="notifications" role="tab" aria-selected="false"><i class="fas fa-bell"></i> Notifications</button>
+                <button class="nav-tab" data-section="securite" role="tab" aria-selected="false"><i class="fas fa-shield-halved"></i> Sécurité</button>
+                <button class="nav-tab" data-section="journalaudit" role="tab" aria-selected="false">
+                    <span class="fa-stack" style="width: 1.5em;">
+                        <i class="fa-solid fa-history fa-stack-1x"></i>
+                        <i class="fa-solid fa-shield-halved fa-stack-1x"
+                        style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                    </span>  
+                    Journal d'Audit
+                </button>
+                <button class="nav-tab" data-section="sauvegarde" role="tab" aria-selected="false"><i class="fas fa-database"></i> Sauvegarde</button>
+            </nav>
+
+            <!-- ========== CONTENU DYNAMIQUE ========== -->
+            <div id="settingsContent" aria-live="polite"></div>
+
+            <!-- ========== FOOTER ========== -->
+            <footer class="footer-bar">
+                <div class="footer-text">
+                    <h2><i class="fas fa-cloud-upload-alt" style="color: var(--blue);"></i> Sauvegarde des paramètres</h2>
+                    <p>Dernière sauvegarde: <span id="last-save-time">Aujourd'hui à 10:45</span></p>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-light" id="btn-export">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                    <button type="button" class="btn-light" id="btn-import">
+                        <i class="fas fa-upload"></i> Importer
+                    </button>
+                    <button type="button" class="btn-gold-submit" id="btn-save-all">
+                        <i class="fas fa-save"></i> Sauvegarder maintenant
+                    </button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- ========== MODAL 2FA ========== -->
+        <div class="modal-overlay" id="modal-2fa-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="2fa-modal-title">
+            <div class="modal" style="max-width: 520px;">
+                <div id="2fa-step-1" class="twofa-step active">
+                    <div class="twofa-setup-container">
+                        <div class="twofa-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></div>
+                        <h3 id="2fa-modal-title">Configurer l'authentification à deux facteurs</h3>
+                        <p>Scannez le code QR avec votre application d'authentification</p>
+                        <div class="twofa-qr-container">
+                            <div class="twofa-qr-code" id="qr-code-container" aria-label="QR Code pour authentification 2FA"></div>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Ou entrez cette clé manuellement :</p>
+                        <div class="twofa-manual-key" id="manual-key">JBSWY3DPEHPK3PXP</div>
+                        <button class="copy-btn" onclick="copyManualKey()" aria-label="Copier la clé manuelle"><i class="fas fa-copy" aria-hidden="true"></i> Copier la clé</button>
+                        <div style="margin-top: 24px;">
+                            <p style="font-size: 0.9rem; font-weight: 500; margin-bottom: 12px;">Entrez le code à 6 chiffres :</p>
+                            <div class="twofa-code-input" id="twofa-code-inputs">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 1">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 2">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 3">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 4">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 5">
+                                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" aria-label="Chiffre 6">
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--danger-color); margin-top: 8px; display: none;" id="code-error" role="alert">
+                                <i class="fas fa-exclamation-circle" aria-hidden="true"></i> Code incorrect. Veuillez réessayer.
+                            </p>
+                        </div>
+                        <div class="modal-actions" style="margin-top: 24px;">
+                            <button class="btn-secondary" onclick="close2FAModal()"><i class="fas fa-times" aria-hidden="true"></i> Annuler</button>
+                            <button class="btn-gold-submit" onclick="verify2FACode()"><i class="fas fa-check" aria-hidden="true"></i> Vérifier et activer</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="2fa-step-2" class="twofa-step">
+                    <div class="twofa-setup-container">
+                        <div class="twofa-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        </div>
+                        <h3>2FA Activé avec succès ! 🎉</h3>
+                        <p style="margin-bottom: 16px; color: #065f46;">Conservez ces codes de secours dans un endroit sûr.</p>
+                        <div class="twofa-backup-codes" id="backup-codes-container">
+                            <div class="backup-code">ABCD-EFGH-IJKL</div>
+                            <div class="backup-code">MNOP-QRST-UVWX</div>
+                            <div class="backup-code">YZAB-CDEF-GHIJ</div>
+                            <div class="backup-code">KLMN-OPQR-STUV</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin: 16px 0; flex-wrap: wrap;">
+                            <button class="copy-btn" onclick="copyBackupCodes()" aria-label="Copier les codes de secours"><i class="fas fa-copy" aria-hidden="true"></i> Copier</button>
+                            <button class="copy-btn" onclick="downloadBackupCodes()" aria-label="Télécharger les codes de secours"><i class="fas fa-download" aria-hidden="true"></i> Télécharger</button>
+                        </div>
+                        <div class="modal-actions" style="margin-top: 24px; justify-content: center;">
+                            <button class="btn-gold-submit" onclick="close2FAModal()"><i class="fas fa-check" aria-hidden="true"></i> J'ai sauvegardé mes codes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- AI Systeme -->
+        <div id="orion-concierge-sistem"></div>        
+    </div>
+
+    <script src="js/Script_Ad.js"></script> 
+    <script src="js/AI_Script.js"></script>   
+    <script src="js/script_parametre.js"></script>
+<script src="js/user-profile.js"></script>
+</body>
+</html>

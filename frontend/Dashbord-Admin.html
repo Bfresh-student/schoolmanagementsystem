@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="ht">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Pro - CEJEC</title>
+    <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css" />
+    <link rel="stylesheet" href="css/AI_Styles.css" />
+    <link rel="stylesheet" href="css/styles_dash.css" />
+  </head>
+  <body>
+    <div class="dashboard">
+      <!-- Header -->
+      <header class="header">
+        <!-- LOGO -->
+        <div class="header-left">
+          <!-- Menu Toggle Button -->
+          <button
+            id="menu-toggle"
+            class="menu-toggle"
+            aria-label="Ouvrir le menu"
+            aria-expanded="false">
+            <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+              <rect width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+            </svg>
+          </button>
+
+          <a href="Dashbord-Admin.html" class="logo-link">
+            <i class="fas fa-chart-line logo-img"></i>
+          </a>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="header-center">
+          <div class="input-group">
+            <span class="search-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Rechercher étudiants, formations, enseignants ou informations..."
+              aria-label="Rechercher dans le tableau de bord" />
+            <button type="submit" class="btn-search">Recherche</button>
+          </div>
+        </div>
+
+        <!-- USER + NOTIFICATIONS -->
+        <div class="header-right">
+          <!-- USER MENU -->
+          <div class="user-section">
+            <div class="user-trigger" onclick="toggleUserMenu()">
+              <div class="avatar">B</div>
+              <span class="user-name">Bruno Jean</span>
+              <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
+
+            <div class="user-menu" id="userMenu">
+              <div class="user-info">
+                <strong>CEJEC</strong>
+                <span>brunojean90@gmail.com</span>
+              </div>
+
+              <!-- PARAMÈTRE -->
+              <a href="Parametre_Admin.html" class="menu-item">
+                <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+              </a>
+
+              <div class="menu-divider"></div>
+
+              <a href="Se connecter - Admin.html" class="menu-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Se déconnecter</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="header-actions">
+            <div class="notification-bell">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge44">5</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- BRAND -->
+        <div class="brand">
+          <div class="logo">
+            <img src="assets/favicon.png" alt="CEJEC Logo" />
+          </div>
+          <div>
+            <h1>CEJEC</h1>
+            <div class="muted">Admin Panel</div>
+          </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav>
+          <!-- DASHBOARD -->
+          <p>Vue d'ensemble</p>
+          <a href="Dashbord-Admin.html">
+            <div class="nav-item active">
+              <i class="fa-solid fa-chart-line"></i>
+              Tableau de bord
+            </div>
+          </a>
+
+          <!-- MANAGEMENT -->
+          <p>Opérations</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggle">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-school fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Académique
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenu">
+              <a class="dropdown22-item" href="gestion_classes.html"
+                ><i class="fa-solid fa-chalkboard"></i> Classes</a
+              >
+              <a class="dropdown22-item" href="gestion_notes.html"
+                ><i class="fa-solid fa-sticky-note"></i> Notes</a
+              >
+              <a class="dropdown22-item" href="gestion_medias.html">
+                <span class="fa-stack" style="width: 1.5em">
+                  <!-- ICON PRINCIPAL -->
+                  <i class="fa-solid fa-image fa-stack-1x"></i>
+                  <!-- PETIT GEAR (TOP RIGHT) -->
+                  <i
+                    class="fa-solid fa-newspaper fa-stack-1x"
+                    style="
+                      font-size: 0.55em;
+                      transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                Médias & Communication
+              </a>
+            </div>
+          </div>
+
+          <!-- INCUBATEUR PROJETS & CALDRIER -->
+          <a href="incubateur_calendrier.html">
+            <div class="nav-item">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-calendar-days fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Incubateur Projets & Calendrier
+            </div>
+          </a>
+
+          <!-- OPERATIONS -->
+          <p>Système</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggle">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Opérations
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenu">
+              <a class="dropdown22-item" href="gestion_inscriptions.html"
+                ><i class="fa-solid fa-user-plus"></i> Inscriptions</a
+              >
+              <a class="dropdown22-item" href="gestion_utilisateurs.html"
+                ><i class="fa-solid fa-users"></i> Eleves & Professeurs</a
+              >
+              <a class="dropdown22-item" href="Rapports_Admin.html"
+                ><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a
+              >
+              <a class="dropdown22-item" href="rh.html"
+                ><i class="fa-solid fa-user-tie"></i> RH</a
+              >
+            </div>
+          </div>
+
+          <!-- PARAMÈT -->
+          <a href="Parametre_Admin.html">
+            <div class="nav-item">
+              <i class="fa-solid fa-gear"></i>
+              Paramètre
+            </div>
+          </a>
+        </nav>
+
+        <!-- FOOTER TOOLS -->
+        <div class="sidebar-footer">
+          <div class="user-profile2">
+            <div class="avatar-wrapper2">
+              <div class="avatar2">BJ</div>
+              <span class="status-indicator2"></span>
+            </div>
+
+            <div class="user-info2">
+              <div class="user-name2">Bruno Jean</div>
+              <div class="user-role2">Super Admin</div>
+            </div>
+            <a href="Se connecter - Admin.html">
+              <button class="logout-btn2" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </button>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- OVERLAY -->
+      <div class="overlay"></div>
+
+      <!-- =============================== -->
+      <!-- MODAL DES ÉVÉNEMENTS -->
+      <!-- =============================== -->
+      <div
+        class="modal-overlay"
+        id="eventModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h3 id="modalTitle">
+              <i class="fa-solid fa-calendar-day"></i>
+              <span id="modalDateTitle">Événements du jour</span>
+            </h3>
+            <button
+              class="modal-close-btn"
+              id="closeModalBtn"
+              aria-label="Fermer la fenêtre">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body" id="modalBody">
+            <!-- Contenu dynamique -->
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn-modal btn-modal-secondary"
+              id="closeModalFooterBtn">
+              <i class="fa-solid fa-xmark"></i> Fermer
+            </button>
+            <button class="btn-modal btn-modal-primary" id="addEventBtn">
+              <i class="fa-solid fa-plus"></i> Nouvel événement
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =============================== -->
+      <!-- CONTENU PRINCIPAL -->
+      <!-- =============================== -->
+      <main class="app-container">
+        <header class="main-header">
+          <div class="header-title">
+            <h1>Tableau de Bord Stratégique</h1>
+            <p>
+              Analyse des performances de l'établissement et de l'incubateur
+              d'entreprises
+            </p>
+          </div>
+
+          <div class="quick-actions">
+            <a href="Rapports_Admin.html#" class="btn-report"
+              ><i class="fa-solid fa-file-pdf text-red"></i> Rapport
+              Académique</a
+            >
+            <a href="gestion_utilisateurs.html#" class="btn-report"
+              ><i class="fa-solid fa-user-check text-blue"></i> Présences</a
+            >
+            <a href="gestion_utilisateurs.html#" class="btn-report"
+              ><i class="fa-solid fa-users"></i> Étudiants</a
+            >
+            <a
+              href="incubateur_calendrier.html#"
+              class="btn-report btn-primary-action"
+              ><i class="fa-solid fa-plus"></i> Nouveau Projet</a
+            >
+          </div>
+        </header>
+
+        <!-- Cartes KPI -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Étudiants Inscrits</span>
+              <div class="kpi-icon">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">482</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +12%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-1"
+                aria-label="Graphique des étudiants inscrits"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Promotions Actives</span>
+              <div class="kpi-icon">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">6</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-minus"></i> Stable</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-2"
+                aria-label="Graphique des promotions actives"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Professeurs</span>
+              <div class="kpi-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">34</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +4%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-3"
+                aria-label="Graphique des professeurs"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Cours Disponibles</span>
+              <div class="kpi-icon"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">52</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +8%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-4"
+                aria-label="Graphique des cours disponibles"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Revenus du mois</span>
+              <div class="kpi-icon">
+                <i class="fa-solid fa-sack-dollar"></i>
+              </div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">14 250 $</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +21%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas id="spark-5" aria-label="Graphique des revenus"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Taux de Réussite</span>
+              <div class="kpi-icon"><i class="fa-solid fa-star"></i></div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">94,2%</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +1,5%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-6"
+                aria-label="Graphique du taux de réussite"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Diplômes Délivrés</span>
+              <div class="kpi-icon">
+                <i class="fa-solid fa-certificate"></i>
+              </div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">120</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-check"></i> 100%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-7"
+                aria-label="Graphique des diplômes délivrés"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Projets Incubés</span>
+              <div class="kpi-icon"><i class="fa-solid fa-lightbulb"></i></div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">18</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +35%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-8"
+                aria-label="Graphique des projets incubés"></canvas>
+            </div>
+          </div>
+
+          <div class="kpi-card red-variant">
+            <div class="kpi-top">
+              <span class="kpi-title">Publications & Actualités</span>
+              <div class="kpi-icon"><i class="fa-solid fa-newspaper"></i></div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">42</span>
+              <span class="kpi-badge badge-down"
+                ><i class="fa-solid fa-arrow-down"></i> -2%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-9"
+                aria-label="Graphique des publications"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section analytique principale -->
+        <section class="analytics-section">
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-chart-line"></i> Évolution des
+                Inscriptions & Taux de Réussite
+              </h3>
+            </div>
+            <div class="chart-container chart-container-lg">
+              <canvas
+                id="mixedChart"
+                aria-label="Graphique mixte des inscriptions et du taux de réussite"></canvas>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-chart-pie"></i> Répartition par Promotion
+              </h3>
+            </div>
+            <div
+              class="chart-container chart-container-lg"
+              style="display: flex; justify-content: center">
+              <canvas
+                id="donutChart"
+                aria-label="Graphique en anneau de la répartition par promotion"
+                style="max-width: 330px; max-height: 330px"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section secondaire : Présences et Activités CÔTE À CÔTE -->
+        <section class="analytics-section">
+          <!-- Les deux panels sont maintenant dans une seule grille à 2 colonnes -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-calendar-check"></i> Présences Globales du
+                Jour
+              </h3>
+            </div>
+            <div class="chart-container chart-container-md">
+              <canvas
+                id="attendanceChart"
+                aria-label="Graphique des présences globales du jour"></canvas>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <i class="fa-solid fa-clock-rotate-left"></i> Journal
+                d'activités récentes
+              </h3>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item green-item">
+                <div class="activity-indicator"></div>
+                <div class="activity-details">
+                  <p>
+                    Nouvel étudiant inscrit :
+                    <strong>Jean-Baptiste Pierre</strong> (Promo Entrepreneur
+                    2026)
+                  </p>
+                  <span>Il y a 8 min · Système d'Admission</span>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-indicator"></div>
+                <div class="activity-details">
+                  <p>
+                    Paiement reçu : <strong>500 USD</strong> frais de scolarité
+                    pour Sarah François
+                  </p>
+                  <span>Il y a 32 min · Passerelle Stripe</span>
+                </div>
+              </div>
+              <div class="activity-item green-item">
+                <div class="activity-indicator"></div>
+                <div class="activity-details">
+                  <p>
+                    Diplôme d'excellence généré pour
+                    <strong>Marc-Arthur Vital</strong>
+                  </p>
+                  <span>Il y a 2 heures · BackOffice</span>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-indicator"></div>
+                <div class="activity-details">
+                  <p>
+                    Nouveau projet créé dans l'incubateur :
+                    <strong>EkoLakay Tech</strong>
+                  </p>
+                  <span>Il y a 5 heures · Module Entrepreneuriat</span>
+                </div>
+              </div>
+              <div class="activity-item red-item">
+                <div class="activity-indicator"></div>
+                <div class="activity-details">
+                  <p>
+                    Nouvelle actualité publiée :
+                    <em>"Lancement officiel de la Médiathèque Numérique"</em>
+                  </p>
+                  <span>Hier à 17:42 · CMS interne</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section Calendrier - Planification des Événements EN BAS -->
+        <section class="calendar-section">
+          <div class="panel calendar-container">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <a
+                  href="incubateur_calendrier.html"
+                  title="Voir le calendrier complet de l'incubateur">
+                  <i class="fa-regular fa-calendar"></i> Planification des
+                  Événements
+                  <i class="fa-solid fa-external-link-alt"></i>
+                </a>
+              </h3>
+            </div>
+            <div id="fullCalendar"></div>
+          </div>
+        </section>
+      </main>
+      <!-- AI Systeme -->
+      <div id="orion-concierge-sistem"></div>
+    </div>
+    <script type="module">
+      // PWA Online/Offline Sync Status listener
+      function updateSyncStatus() {
+        const badge = document.getElementById("pwaSyncBadge");
+        const text = document.getElementById("syncStatusText");
+        if (!badge || !text) return;
+        if (navigator.onLine) {
+          badge.style.background = "rgba(16,185,129,0.15)";
+          badge.style.color = "#10b981";
+          badge.style.borderColor = "rgba(16,185,129,0.3)";
+          text.textContent = "En ligne (PWA)";
+        } else {
+          badge.style.background = "rgba(214,40,40,0.15)";
+          badge.style.color = "#d62828";
+          badge.style.borderColor = "rgba(214,40,40,0.3)";
+          text.textContent = "Hors-ligne (Local Storage)";
+        }
+      }
+
+      window.addEventListener("online", updateSyncStatus);
+      window.addEventListener("offline", updateSyncStatus);
+      document.addEventListener("DOMContentLoaded", updateSyncStatus);
+    </script>
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_dash.js"></script>
+    <script src="js/user-profile.js"></script>
+  </body>
+</html>

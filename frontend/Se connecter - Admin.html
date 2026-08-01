@@ -1,0 +1,1007 @@
+﻿<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>Authentification · CEJEC ERP</title>
+    <link rel="manifest" href="manifest.json" />
+    <script src="sw-register.js" defer></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+      /* ============================================
+           CEJEC — Centre d'Études des Jeunes Entrepreneurs du Centre
+           Palette: White (#FFFFFF), Blue (#0A4D8C), Red (#D62828)
+           ============================================ */
+
+      :root {
+        --white: #ffffff;
+        --blue: #0a4d8c;
+        --blue-dark: #073864;
+        --blue-darker: #052440;
+        --blue-light: #e8f1fa;
+        --blue-lighter: #f4f8fd;
+        --blue-soft: #d0e2f5;
+        --red: #d62828;
+        --red-dark: #a81d1d;
+        --red-light: #fef2f2;
+        --red-soft: #fde8e8;
+        --ink: #1a1f2b;
+        --muted: #5b6675;
+        --muted-light: #8b95a5;
+        --bg-soft: #f7f9fc;
+        --border: #e5ebf2;
+        --border-light: #f0f4f8;
+        --input-bg: #f8fafc;
+        --input-border: #dce2e8;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --info: #3b82f6;
+        --info-light: #dbeafe;
+        --google-blue: #4285f4;
+        --google-red: #ea4335;
+        --google-yellow: #fbbc05;
+        --google-green: #34a853;
+        --shadow-xs: 0 1px 2px rgba(10, 77, 140, 0.04);
+        --shadow-sm: 0 2px 8px rgba(10, 77, 140, 0.06);
+        --shadow-md: 0 8px 24px rgba(10, 77, 140, 0.1);
+        --shadow-lg: 0 20px 48px rgba(10, 77, 140, 0.16);
+        --radius-xs: 6px;
+        --radius-sm: 10px;
+        --radius: 16px;
+        --radius-lg: 24px;
+        --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition: 0.25s var(--ease);
+        --font-primary: "Inter", system-ui, -apple-system, sans-serif;
+        --font-display: "Playfair Display", Georgia, serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Poppins",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font-primary);
+        color: var(--ink);
+        /* Background 98% blanc + 2% ble très pale */
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #ffffff 50%,
+          #f8fafd 70%,
+          #f2f7fc 100%
+        );
+        background-attachment: fixed;
+        background-size: cover;
+        background-repeat: no-repeat;
+        line-height: 1.6;
+        min-height: 100vh;
+        min-height: 100dvh;
+        width: 100%;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* ========== AUTH CONTAINER ========== */
+      .auth-container {
+        width: 100%;
+        max-width: 500px;
+        z-index: 1;
+      }
+
+      /* ========== AUTH BOX ========== */
+      .auth-box {
+        background: var(--white);
+        width: 100%;
+        padding: 40px 36px;
+        border-radius: var(--radius-lg);
+        box-shadow:
+          0 8px 40px rgba(10, 77, 140, 0.12),
+          0 2px 8px rgba(10, 77, 140, 0.06);
+        animation: fadeUp 0.5s var(--ease);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(10, 77, 140, 0.06);
+      }
+      .auth-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--blue),
+          var(--red),
+          var(--blue)
+        );
+        background-size: 200% 100%;
+        animation: borderShine 4s linear infinite;
+      }
+      @keyframes borderShine {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 200% 50%;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ========== LOGO ========== */
+      .auth-logo {
+        width: 68px;
+        height: 68px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        position: relative;
+        overflow: hidden;
+      }
+      .logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .auth-logo.recup-logo {
+        background: linear-gradient(135deg, var(--red), var(--red-dark));
+        box-shadow: 0 8px 16px rgba(214, 40, 40, 0.2);
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 30px;
+      }
+      .auth-logo.recup-logo .logo-img {
+        display: none;
+      }
+
+      /* ========== TITLES ========== */
+      .auth-box h2 {
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 800;
+        font-family: var(--font-display);
+        color: var(--blue-dark);
+        margin-bottom: 4px;
+        line-height: 1.3;
+      }
+      .auth-subtitle {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+        font-weight: 400;
+        line-height: 1.5;
+      }
+
+      /* ========== TOGGLE ========== */
+      .auth-toggle {
+        display: flex;
+        background: var(--bg-soft);
+        padding: 5px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+      }
+      .toggle-btn {
+        flex: 1;
+        border: none;
+        background: none;
+        padding: 10px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: var(--muted);
+        cursor: pointer;
+        border-radius: var(--radius-xs);
+        transition: all var(--transition);
+        font-family: var(--font-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .toggle-btn.active {
+        background: var(--white);
+        color: var(--blue);
+        box-shadow: var(--shadow-sm);
+        font-weight: 700;
+      }
+      .toggle-btn:hover:not(.active) {
+        color: var(--blue-dark);
+        background: var(--blue-lighter);
+      }
+
+      /* ========== DIVIDER ========== */
+      .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: var(--muted-light);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 18px 0;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .divider::before {
+        margin-right: 12px;
+      }
+      .divider::after {
+        margin-left: 12px;
+      }
+
+      /* ========== GOOGLE BUTTON ========== */
+      .btn-google {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--white);
+        color: var(--ink);
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition);
+        font-family: var(--font-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-google:hover {
+        border-color: var(--google-blue);
+        background: #f8faff;
+        box-shadow: 0 4px 16px rgba(66, 133, 244, 0.15);
+        transform: translateY(-1px);
+      }
+      .btn-google:active {
+        transform: scale(0.98);
+      }
+      .btn-google .google-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+      .btn-google .google-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+      .btn-google .btn-text {
+        letter-spacing: 0.3px;
+      }
+
+      /* ========== INPUTS ========== */
+      .input-group {
+        margin-bottom: 14px;
+      }
+      .input-group label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 5px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      label.required::after {
+        content: " *";
+        color: var(--red);
+        font-weight: 800;
+      }
+
+      .input-field {
+        position: relative;
+      }
+      .input-field > i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted-light);
+        font-size: 0.85rem;
+        transition: color var(--transition);
+        z-index: 1;
+        pointer-events: none;
+      }
+      .input-field input,
+      .input-field select {
+        width: 100%;
+        padding: 11px 14px 11px 40px;
+        border: 1.5px solid var(--input-border);
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        font-family: var(--font-primary);
+        background: var(--input-bg);
+        color: var(--ink);
+        transition: all var(--transition);
+        outline: none;
+      }
+      .input-field input:focus,
+      .input-field select:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(10, 77, 140, 0.08);
+        background: var(--white);
+      }
+      .input-field input:focus ~ i,
+      .input-field select:focus ~ i {
+        color: var(--blue);
+      }
+      .input-field input::placeholder {
+        color: var(--muted-light);
+        opacity: 1;
+      }
+
+      /* Password */
+      .input-field.password-wrapper input {
+        padding-right: 46px;
+      }
+      .password-toggle {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-xs);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--muted-light);
+        transition: all var(--transition);
+        border: none;
+        background: none;
+        z-index: 1;
+      }
+      .password-toggle:hover {
+        color: var(--blue);
+        background: var(--blue-lighter);
+      }
+
+      /* Select */
+      .input-field select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235b6675' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 12px;
+        cursor: pointer;
+      }
+      .input-field select option {
+        color: var(--ink);
+        background: var(--white);
+        padding: 10px;
+      }
+
+      /* ========== BUTTON ========== */
+      .btn-primary {
+        width: 100%;
+        margin-top: 6px;
+        padding: 13px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+        color: var(--white);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition);
+        font-family: var(--font-primary);
+        box-shadow: 0 4px 16px rgba(10, 77, 140, 0.25);
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(10, 77, 140, 0.4);
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-primary-red {
+        background: linear-gradient(135deg, var(--red), var(--red-dark));
+        box-shadow: 0 4px 16px rgba(214, 40, 40, 0.25);
+      }
+      .btn-primary-red:hover {
+        box-shadow: 0 8px 28px rgba(214, 40, 40, 0.4);
+      }
+
+      /* ========== FOOTER ========== */
+      .auth-footer {
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 14px;
+      }
+      .link-btn {
+        background: none;
+        border: none;
+        color: var(--blue);
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font-primary);
+        font-size: inherit;
+        text-decoration: none;
+        transition: color var(--transition);
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .link-btn:hover {
+        color: var(--red);
+      }
+
+      /* ========== FORM ROW ========== */
+      .form-row {
+        display: flex;
+        gap: 10px;
+      }
+      .form-row .input-group {
+        flex: 1;
+      }
+
+      /* ========== HIDDEN ========== */
+      .hidden {
+        display: none !important;
+      }
+
+      /* ========== TOAST ========== */
+      .custom-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        z-index: 9999;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-primary);
+        color: var(--white);
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+
+      /* ========== RESPONSIVE ========== */
+      @media (max-width: 520px) {
+        .auth-box {
+          padding: 28px 20px;
+          border-radius: var(--radius);
+        }
+        .auth-logo {
+          width: 56px;
+          height: 56px;
+        }
+        .auth-logo.recup-logo {
+          width: 56px;
+          height: 56px;
+          font-size: 24px;
+        }
+        .auth-box h2 {
+          font-size: 1.2rem;
+        }
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+        }
+        .auth-box::before {
+          height: 3px;
+        }
+        .auth-toggle {
+          padding: 4px;
+        }
+        .toggle-btn {
+          padding: 8px;
+          font-size: 0.75rem;
+        }
+        .btn-google {
+          padding: 10px;
+          font-size: 0.8rem;
+        }
+        body {
+          padding: 12px;
+        }
+      }
+      @media (max-width: 360px) {
+        .auth-box {
+          padding: 22px 14px;
+        }
+        .input-field input,
+        .input-field select {
+          padding: 9px 9px 9px 34px;
+          font-size: 0.8rem;
+        }
+        .input-field > i {
+          left: 10px;
+          font-size: 0.75rem;
+        }
+        .btn-primary {
+          padding: 11px;
+          font-size: 0.82rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Conteneur d'authentification -->
+    <div class="auth-container">
+      <div class="auth-box">
+        <!-- En-tête -->
+        <div class="auth-header" id="authHeader">
+          <!-- Logo -->
+          <div class="auth-logo">
+            <img class="logo-img" src="assets/favicon.png" alt="logo cejec" />
+          </div>
+
+          <!-- Titre -->
+          <h2 id="formTitle">Connexion à la Plateforme CEJEC</h2>
+          <p class="auth-subtitle" id="formSubtitle">
+            Centre d'Études des Jeunes en Entrepreneuriat et Commerce
+          </p>
+
+          <!-- Bascule -->
+          <div class="auth-toggle" id="authToggle">
+            <button class="toggle-btn tab-btn active" onclick="showLogin()">
+              <i class="fas fa-sign-in-alt"></i> Connexion
+            </button>
+            <button class="toggle-btn tab-btn" onclick="showSignup()">
+              <i class="fas fa-user-plus"></i> Inscription
+            </button>
+          </div>
+        </div>
+
+        <!-- ========== FORMULAIRE DE CONNEXION ========== -->
+        <form id="loginForm">
+          <div class="input-group">
+            <label class="required">Adresse Email</label>
+            <div class="input-field">
+              <i class="fa-regular fa-envelope"></i>
+              <input type="email" placeholder="exemple@cejec.edu.ht" required />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="required">Type de Compte</label>
+            <div class="input-field">
+              <i class="fa-solid fa-user-gear"></i>
+              <select required>
+                <option value="" disabled selected hidden>
+                  Sélectionnez votre rôle...
+                </option>
+                <option value="ADMIN">Administrateur</option>
+                <option value="DIRECTOR">Direction Générale</option>
+                <option value="STAFF">Coordination</option>
+                <option value="TEACHER">Professeur</option>
+                <option value="ACCOUNTANT">Comptable</option>
+                <option value="SECRETARY">Secrétariat</option>
+                <option value="STUDENT">Étudiant</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="required">Mot de Passe</label>
+            <div class="input-field password-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="loginPassword"
+                placeholder="Entrez votre mot de passe"
+                required />
+              <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('loginPassword', this)"
+                tabindex="-1"
+                title="Afficher/Masquer">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Se Connecter
+          </button>
+
+          <div class="auth-footer">
+            <button type="button" class="link-btn" onclick="showRecup()">
+              <i class="fas fa-key"></i> Mot de passe oublié ?
+            </button>
+          </div>
+        </form>
+
+        <!-- ========== FORMULAIRE D'INSCRIPTION ========== -->
+        <form id="signupForm" class="hidden">
+          <div class="form-row">
+            <div class="input-group">
+              <label class="required">Prénom</label>
+              <div class="input-field">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" placeholder="Votre prénom" required />
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="required">Nom</label>
+              <div class="input-field">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" placeholder="Votre nom" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="required">Adresse Email</label>
+            <div class="input-field">
+              <i class="fa-regular fa-envelope"></i>
+              <input type="email" placeholder="exemple@cejec.edu.ht" required />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="required">Téléphone (WhatsApp)</label>
+            <div class="input-field">
+              <i class="fa-brands fa-whatsapp"></i>
+              <input type="tel" placeholder="+509 1234 5678" required />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="required">Type de Compte</label>
+            <div class="input-field">
+              <i class="fa-solid fa-user-gear"></i>
+              <select required>
+                <option value="" disabled selected hidden>
+                  Sélectionnez votre rôle...
+                </option>
+                <option value="ADMIN">Administrateur</option>
+                <option value="DIRECTOR">Direction Générale</option>
+                <option value="STAFF">Coordination</option>
+                <option value="TEACHER">Professeur</option>
+                <option value="ACCOUNTANT">Comptable</option>
+                <option value="SECRETARY">Secrétariat</option>
+                <option value="STUDENT">Étudiant</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label class="required">Mot de Passe</label>
+              <div class="input-field password-wrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input
+                  type="password"
+                  id="signupPassword"
+                  placeholder="Min. 6 caractères"
+                  required />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('signupPassword', this)"
+                  tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="required">Confirmation</label>
+              <div class="input-field password-wrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="Confirmer"
+                  required />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('confirmPassword', this)"
+                  tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-user-plus"></i> Créer Mon Compte
+          </button>
+        </form>
+
+        <!-- ========== FORMULAIRE DE RÉCUPÉRATION ========== -->
+        <form id="recupForm" class="hidden">
+          <div class="auth-logo recup-logo">
+            <i class="fa-solid fa-key"></i>
+          </div>
+
+          <h2>Mot de Passe Oublié</h2>
+          <p class="auth-subtitle">
+            Saisissez votre adresse email pour recevoir les instructions de
+            réinitialisation.
+          </p>
+
+          <div class="input-group">
+            <label class="required">Adresse Email</label>
+            <div class="input-field">
+              <i class="fa-regular fa-envelope"></i>
+              <input
+                type="email"
+                placeholder="votre-email@cejec.edu.ht"
+                required />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-primary-red">
+            <i class="fas fa-paper-plane"></i> Envoyer les Instructions
+          </button>
+
+          <div class="auth-footer" style="margin-top: 16px">
+            <button
+              type="button"
+              class="link-btn"
+              style="color: var(--blue)"
+              onclick="showLogin()">
+              <i class="fas fa-arrow-left"></i> Retour à la Connexion
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        signIn,
+        signUp,
+        logout,
+        isAuthenticated,
+        getCurrentUser,
+        getUserRole,
+      } from "./auth.js";
+
+      const loginForm = document.getElementById("loginForm");
+      const signupForm = document.getElementById("signupForm");
+      const recupForm = document.getElementById("recupForm");
+      const formTitle = document.getElementById("formTitle");
+      const formSubtitle = document.getElementById("formSubtitle");
+      const authHeader = document.getElementById("authHeader");
+      const authToggle = document.getElementById("authToggle");
+      const toggleBtns = document.querySelectorAll(".tab-btn");
+
+      function resetForms() {
+        loginForm.classList.add("hidden");
+        signupForm.classList.add("hidden");
+        recupForm.classList.add("hidden");
+      }
+
+      function resetToggles() {
+        toggleBtns.forEach((btn) => btn.classList.remove("active"));
+      }
+
+      function showLogin() {
+        resetForms();
+        resetToggles();
+        loginForm.classList.remove("hidden");
+        authHeader.style.display = "block";
+        authToggle.style.display = "flex";
+        toggleBtns[0].classList.add("active");
+        formTitle.innerText = "Connexion à la Plateforme CEJEC";
+        formSubtitle.innerText =
+          "Centre d'Études des Jeunes en Entrepreneuriat et Commerce";
+      }
+
+      function showSignup() {
+        resetForms();
+        resetToggles();
+        signupForm.classList.remove("hidden");
+        authHeader.style.display = "block";
+        authToggle.style.display = "flex";
+        toggleBtns[1].classList.add("active");
+        formTitle.innerText = "Créer un Compte";
+        formSubtitle.innerText = "Rejoignez la communauté académique du CEJEC";
+      }
+
+      function showRecup() {
+        resetForms();
+        resetToggles();
+        recupForm.classList.remove("hidden");
+        authHeader.style.display = "none";
+      }
+
+      // Auto-redirect if already authenticated
+      if (isAuthenticated()) {
+        console.log("Utilisateur déjà connecté. Redirection vers la page d'accueil...");
+        window.location.href = "./Home - Admin_Panel.html";
+      }
+
+      function togglePassword(id, btn) {
+        const input = document.getElementById(id);
+        const eye = btn.querySelector("i");
+        if (input.type === "password") {
+          input.type = "text";
+          eye.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+          input.type = "password";
+          eye.classList.replace("fa-eye-slash", "fa-eye");
+        }
+      }
+
+      // ========== TOAST NOTIFICATION ==========
+      function showToast(msg, type = "success") {
+        const existingToast = document.querySelector(".custom-toast");
+        if (existingToast) existingToast.remove();
+        const colors = {
+          success: "#065f46",
+          error: "#d62828",
+          info: "#0a4d8c",
+        };
+        const icons = {
+          success: "fa-check-circle",
+          error: "fa-times-circle",
+          info: "fa-info-circle",
+        };
+        const toast = document.createElement("div");
+        toast.className = "custom-toast";
+        toast.style.background = colors[type];
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transition = "opacity 0.3s";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+      // expose functions for inline onclick handlers
+      window.showLogin = showLogin;
+      window.showSignup = showSignup;
+      window.showRecup = showRecup;
+      window.togglePassword = togglePassword;
+
+      // ========== LOGIN FORM SUBMISSION ==========
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = loginForm.querySelector('input[type="email"]').value;
+        const password = loginForm.querySelector(
+          'input[type="password"]',
+        ).value;
+        const roleSelect = loginForm.querySelector("select");
+        const role = roleSelect ? roleSelect.value : null;
+        const btn = loginForm.querySelector(".btn-primary");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        btn.disabled = true;
+        try {
+          const result = await signIn({ email, password, role });
+          console.log("Connexion réussie:", result);
+          showToast("✅ Authentifié ! Redirection...", "success");
+          window.location.href = "./Home - Admin_Panel.html";
+        } catch (err) {
+          console.error("Erreur de connexion:", err);
+          showToast(err.message, "error");
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+
+      // ========== SIGNUP FORM SUBMISSION ==========
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const firstName = signupForm.querySelector(
+          'input[placeholder="Votre prénom"]',
+        ).value;
+        const lastName = signupForm.querySelector(
+          'input[placeholder="Votre nom"]',
+        ).value;
+        const email = signupForm.querySelector('input[type="email"]').value;
+        const phone = signupForm.querySelector('input[type="tel"]').value;
+        const role = signupForm.querySelector("select").value;
+        const password = signupForm.querySelector("#signupPassword").value;
+        const confirm = signupForm.querySelector("#confirmPassword").value;
+        const btn = signupForm.querySelector(".btn-primary");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        btn.disabled = true;
+        if (password !== confirm) {
+          showToast(
+            "❌ Mot de passe et confirmation ne correspondent pas",
+            "error",
+          );
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          return;
+        }
+        try {
+          const data = {
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            phone,
+            role,
+            password,
+            password_confirm: confirm,
+          };
+          const result = await signUp(data);
+          console.log("Inscription réussie:", result);
+          showToast("✅ Inscription réussie ! Redirection...", "success");
+          window.location.href = "./Home - Admin_Panel.html";
+        } catch (err) {
+          console.error("Erreur d'inscription:", err);
+          showToast(err.message, "error");
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+    </script>
+  <script src="js/user-profile.js"></script>
+</body>
+</html>

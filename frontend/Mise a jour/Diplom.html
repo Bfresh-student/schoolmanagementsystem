@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEJEC — Portails de Génération Académique & Professionnelle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Alex+Brush&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CEJEC — Club des Jeunes Entrepreneurs du Centre
+           Global stylesheet
+           ============================================ */
+
+        :root {
+          --white: #ffffff;
+          --blue: #0a4d8c;
+          --blue-dark: #073864;
+          --blue-light: #e8f1fa;
+          --red: #d62828;
+          --red-dark: #a81d1d;
+          --gold: #d4af37;
+          --gold-light: #f3e5ab;
+          --ink: #1a1f2b;
+          --muted: #5b6675;
+          --bg-soft: #f7f9fc;
+          --border: #e5ebf2;
+          --shadow-sm: 0 2px 8px rgba(10, 77, 140, 0.06);
+          --shadow-md: 0 8px 24px rgba(10, 77, 140, 0.1);
+          --shadow-lg: 0 20px 48px rgba(10, 77, 140, 0.16);
+          --radius-sm: 8px;
+          --radius: 14px;
+          --radius-lg: 22px;
+          --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+          --container: 1200px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+          font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+          color: var(--ink);
+          background: var(--bg-soft);
+          line-height: 1.6;
+          overflow-x: hidden;
+          -webkit-font-smoothing: antialiased;
+          padding: 40px 20px;
+        }
+
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            margin: 40px 0 20px 0;
+            color: var(--blue);
+            font-weight: 800;
+            text-transform: uppercase;
+            border-bottom: 3px solid var(--blue-light);
+            padding-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        /* Layout Kat yo */
+        .id-cards-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .id-card {
+            width: 330px;
+            height: 510px;
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Fòm koub sou kat yo */
+        .card-top-bg {
+            position: absolute;
+            top: -20px; left: -20px; right: -20px; height: 130px;
+            background: var(--blue);
+            border-bottom-left-radius: 50% 40px;
+            border-bottom-right-radius: 50% 40px;
+            z-index: 1;
+        }
+        .card-top-accent {
+            position: absolute;
+            top: -30px; left: -30px; width: 130px; height: 130px;
+            background: var(--red); border-radius: 50%; z-index: 2;
+        }
+        .card-bottom-bg {
+            position: absolute;
+            bottom: -30px; left: -20px; right: -20px; height: 130px;
+            background: var(--blue);
+            border-top-left-radius: 50% 50px; border-top-right-radius: 50% 50px;
+            z-index: 1;
+        }
+        .card-bottom-accent {
+            position: absolute;
+            bottom: -40px; right: -30px; width: 170px; height: 140px;
+            background: var(--red); border-radius: 50%; z-index: 2;
+        }
+
+        .card-content {
+            position: relative; z-index: 5; height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 30px 25px;
+        }
+
+        .front-logo {
+            position: absolute; top: 15px; right: 20px; z-index: 10;
+            width: 50px; height: 50px; background: var(--white);
+            border-radius: 50%; padding: 4px; border: 1px solid var(--blue-light);
+        }
+
+        .photo-frame {
+            width: 120px; height: 140px; border: 2px solid var(--blue);
+            border-radius: var(--radius); margin-top: 40px;
+            overflow: hidden; padding: 4px; background: var(--white);
+        }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--radius) - 4px); }
+
+        .member-name { font-size: 1.3rem; font-weight: 700; color: var(--blue); text-transform: uppercase; margin-top: 10px; }
+        .member-role { font-size: 0.8rem; font-weight: 600; color: var(--red); text-transform: uppercase; margin-bottom: 15px; }
+
+        .info-table { width: 100%; margin-bottom: auto; }
+        .info-row { display: flex; margin-bottom: 6px; font-size: 0.8rem; }
+        .info-label { font-weight: 600; color: var(--ink); width: 60px; text-align: left; }
+        .info-value { color: var(--muted); flex: 1; text-align: left; }
+
+        .barcode-container { width: 100%; background: var(--white); padding: 6px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .barcode-svg { width: 100%; height: 30px; }
+
+        /* Do Kat la */
+        .back-logo-section { margin-top: 45px; display: flex; flex-direction: column; align-items: center; }
+        .back-logo-wrap { width: 60px; height: 60px; background: var(--white); border-radius: var(--radius); padding: 4px; border: 1px solid var(--border); margin-bottom: 5px;}
+        .logo-text { font-size: 1rem; font-weight: 800; color: var(--blue); }
+        .logo-subtext { font-size: 0.65rem; color: var(--red); font-weight: 600; }
+        .signature-container { margin-top: 10px; border-bottom: 1px dashed var(--border); width: 60%; font-family: 'Alex Brush', cursive; font-size: 1.6rem; color: var(--blue-dark); }
+        .terms-text { font-size: 0.6rem; color: var(--muted); text-align: left; margin: 10px 0; }
+        .qr-container { background: var(--white); padding: 4px; border: 1px solid var(--border); margin-bottom: 25px; }
+
+        /* ============================================
+           STYLE SÈTIFIKA CEJEC (Daprè dezyèm imaj la)
+           ============================================ */
+        .certificate-container {
+            width: 840px;
+            height: 595px; /* A4 Ratio Landscape */
+            background: var(--white);
+            margin: 30px auto;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            padding: 40px;
+            border: 4px solid var(--blue);
+        }
+
+        /* Liy lò doub kreyasyon ankadreman */
+        .cert-border-frame {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px solid var(--gold);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* Fòm Jeyometrik Ble ak Lò nan Kwen yo (Jan imaj la te ye a) */
+        .cert-shape {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background: var(--blue);
+            transform: rotate(45deg);
+            z-index: 1;
+            border: 6px solid var(--gold);
+        }
+        .cert-shape.top-left { top: -80px; left: -80px; }
+        .cert-shape.bottom-right { bottom: -80px; right: -80px; background: var(--blue-dark); }
+
+        /* Kontni Sètifika a */
+        .cert-content {
+            position: relative;
+            z-index: 5;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .cert-logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 10px;
+        }
+
+        .cert-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            color: var(--blue);
+            font-weight: 700;
+            margin-bottom: 0px;
+            letter-spacing: 1px;
+        }
+
+        .cert-subtitle {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--red);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .cert-present {
+            font-style: italic;
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .cert-name {
+            font-family: 'Alex Brush', cursive;
+            font-size: 4rem;
+            color: var(--blue-dark);
+            border-bottom: 2px solid var(--gold);
+            width: 80%;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .cert-text {
+            font-size: 0.95rem;
+            color: var(--ink);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Siyati ak Dat nan sètifika a */
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-top: auto;
+        }
+
+        .cert-sign-block {
+            width: 200px;
+            border-top: 1px solid var(--muted);
+            padding-top: 5px;
+            font-size: 0.85rem;
+            color: var(--ink);
+        }
+
+        .cert-sign-value {
+            font-family: 'Alex Brush', cursive;
+            font-size: 1.5rem;
+            color: var(--blue);
+            margin-bottom: -5px;
+        }
+
+        /* Badge Batch Gold (Best Award) */
+        .gold-badge {
+            position: absolute;
+            top: 45px;
+            right: 60px;
+            width: 90px;
+            height: 90px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+            border: 4px dotted var(--white);
+        }
+
+        .gold-badge-inner {
+            text-align: center;
+            color: var(--white);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Fòm Kontwòl UI */
+        .interactive-form {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            max-width: 600px;
+            margin: 40px auto;
+            text-align: left;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full { grid-column: span 2; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+        .form-group input {
+            width: 100%; padding: 10px; border: 1px solid var(--border);
+            border-radius: var(--radius-sm); background: var(--bg-soft);
+        }
+
+        .btn-panel { margin: 20px 0; }
+        .btn {
+            background: var(--blue); color: var(--white); border: none;
+            padding: 12px 25px; border-radius: var(--radius-sm); font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn:hover { background: var(--blue-dark); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="section-title">Modèl Kat Idantite CEJEC</div>
+        <div class="id-cards-wrapper">
+            <div class="id-card">
+                <div class="card-top-accent"></div><div class="card-top-bg"></div>
+                <div class="front-logo"><img src="https://placehold.co/100x100/ffffff/0a4d8c?text=CEJEC" style="width:100%; height:100%; object-fit:contain;"></div>
+                <div class="card-content">
+                    <div class="photo-frame"><img id="id-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"></div>
+                    <h2 class="member-name" id="id-name">Jean-Baptiste Pierre</h2>
+                    <div class="member-role" id="id-role">Membre Actif</div>
+                    <div class="info-table">
+                        <div class="info-row"><div class="info-label">Dept</div><div class="info-value" id="id-dept">Entrepreneuriat</div></div>
+                        <div class="info-row"><div class="info-label">Email</div><div class="info-value" id="id-email">pierre@cejec.com</div></div>
+                        <div class="info-row"><div class="info-label">Code</div><div class="info-value" id="id-code">CJ-024</div></div>
+                    </div>
+                    <div class="barcode-container">
+                        <svg class="barcode-svg" viewBox="0 0 100 30" preserveAspectRatio="none"><rect x="5" width="2" height="30" fill="#111"/><rect x="10" width="4" height="30" fill="#111"/><rect x="20" width="1" height="30" fill="#111"/><rect x="25" width="3" height="30" fill="#111"/><rect x="35" width="2" height="30" fill="#111"/><rect x="45" width="4" height="30" fill="#111"/><rect x="55" width="1" height="30" fill="#111"/><rect x="65" width="3" height="30" fill="#111"/><rect x="75" width="2" height="30" fill="#111"/><rect x="85" width="4" height="30" fill="#111"/></svg>
+                    </div>
+                </div>
+                <div class="card-bottom-bg"></div><div class="card-bottom-accent"></div>
+            </div>
+
+            <div class="id-card">
+                <div class="card-top-accent"></div><div class="card-top-bg"></div>
+                <div class="card-content">
+                    <div class="back-logo-section">
+                        <div class="back-logo-wrap"><img src="https://placehold.co/100x100/ffffff/0a4d8c?text=CEJEC" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="logo-text">CEJEC CLUB</div>
+                        <div class="logo-subtext">Club des Jeunes Entrepreneurs du Centre</div>
+                    </div>
+                    <div class="signature-container"><div id="id-sign">J. Pierre</div></div>
+                    <div class="terms-text">
+                        <ul>
+                            <li>Cette carte est la propriété exclusive du CEJEC.</li>
+                            <li>En cas de perte, merci de la retourner au bureau central.</li>
+                        </ul>
+                    </div>
+                    <div class="qr-container">
+                        <svg class="qr-svg" viewBox="0 0 100 100"><path d="M0,0 h25 v25 h-25 z M5,5 h15 v15 h-15 z M75,0 h25 v25 h-25 z M0,75 h25 v25 h-25 z M40,40 h20 v20 h-20 z" fill="#1a1f2b"/></svg>
+                    </div>
+                </div>
+                <div class="card-bottom-bg"></div><div class="card-bottom-accent"></div>
+            </div>
+        </div>
+
+        <div class="section-title">Modèl Sètifika Ofisyèl CEJEC</div>
+        
+        <div class="certificate-container" id="cert-print-area">
+            <div class="cert-border-frame"></div>
+            <div class="cert-shape top-left"></div>
+            <div class="cert-shape bottom-right"></div>
+            
+            <div class="gold-badge">
+                <div class="gold-badge-inner">CEJEC<br><strong style="font-size:0.8rem;">BEST</strong><br>AWARD</div>
+            </div>
+
+            <div class="cert-content">
+                <img class="cert-logo" src="https://placehold.co/150x150/ffffff/0a4d8c?text=CEJEC" alt="Logo">
+                <h1 class="cert-title">Certificate</h1>
+                <div class="cert-subtitle">Of Appreciation</div>
+                
+                <p class="cert-present">Ce certificat est fièrement décerné à</p>
+                <div class="cert-name" id="cert-display-name">Jean-Baptiste Pierre</div>
+                
+                <p class="cert-text" id="cert-display-text">
+                    Pour son engagement exceptionnel, son leadership inspirant et sa contribution remarquable aux objectifs de développement entrepreneurial du Club des Jeunes Entrepreneurs du Centre.
+                </p>
+
+                <div class="cert-footer">
+                    <div class="cert-sign-block">
+                        <div class="cert-sign-value" id="cert-display-date">16 Juin 2026</div>
+                        <div>Date</div>
+                    </div>
+                    <div class="cert-sign-block">
+                        <div class="cert-sign-value" style="color: var(--red-dark);">Alix R.</div>
+                        <div>Signature Direction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-panel">
+            <button class="btn" onclick="window.print()">Imprimer les Documents</button>
+        </div>
+
+        <div class="interactive-form">
+            <h3>Panno Kontwòl En Fwa (Live Sync)</h3>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 15px;">Nenpòt sa ou ekri la ap chanje ni sou Kat la, ni sou Sètifika a anmenmtan pwo!</p>
+            
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>Nom Complet du Récipiendaire</label>
+                    <input type="text" id="in-name" value="Jean-Baptiste Pierre">
+                </div>
+                <div class="form-group">
+                    <label>Rôle / Poste</label>
+                    <input type="text" id="in-role" value="Membre Actif">
+                </div>
+                <div class="form-group">
+                    <label>Département</label>
+                    <input type="text" id="in-dept" value="Entrepreneuriat">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="in-email" value="pierre@cejec.com">
+                </div>
+                <div class="form-group">
+                    <label>Code ID Kat la</label>
+                    <input type="text" id="in-code" value="CJ-024">
+                </div>
+                <div class="form-group full">
+                    <label>Texte du Certificat</label>
+                    <input type="text" id="in-text" value="Pour son engagement exceptionnel, son leadership inspirant et sa contribution remarquable aux objectifs de développement entrepreneurial du Club des Jeunes Entrepreneurs du Centre.">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const inName = document.getElementById('in-name');
+            const inRole = document.getElementById('in-role');
+            const inDept = document.getElementById('in-dept');
+            const inEmail = document.getElementById('in-email');
+            const inCode = document.getElementById('in-code');
+            const inText = document.getElementById('in-text');
+
+            function syncData() {
+                // Kat la
+                document.getElementById('id-name').textContent = inName.value;
+                document.getElementById('id-role').textContent = inRole.value;
+                document.getElementById('id-dept').textContent = inDept.value;
+                document.getElementById('id-email').textContent = inEmail.value;
+                document.getElementById('id-code').textContent = inCode.value;
+                
+                // Siyati otomatik kout
+                const parts = inName.value.split(' ');
+                document.getElementById('id-sign').textContent = parts.length > 1 ? `${parts[0][0]}. ${parts[parts.length-1]}` : inName.value;
+
+                // Sètifika a
+                document.getElementById('cert-display-name').textContent = inName.value;
+                document.getElementById('cert-display-text').textContent = inText.value;
+            }
+
+            [inName, inRole, inDept, inEmail, inCode, inText].forEach(el => {
+                el.addEventListener('input', syncData);
+            });
+        });
+    </script>
+</body>
+</html>

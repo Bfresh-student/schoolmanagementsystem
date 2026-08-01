@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <title>CEJEC ERP · Inscription & Encaissement</title>
+    <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css">
+    <link rel="stylesheet" href="css/AI_Styles.css">
+    <link rel="stylesheet" href="css/styles_inscription.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- LOGO -->
+            <div class="header-left">
+                <!-- Menu Toggle Button -->
+                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+                    </svg>
+                </button>
+
+                <a href="Dashbord-Admin.html" class="logo-link">
+                    <i class="fas fa-chart-line logo-img"></i>
+                </a>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="header-center">
+                <div class="input-group">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
+                    <button type="submit" class="btn-search">Recherche</button>
+                </div>
+            </div>
+            
+            <!-- USER + NOTIFICATIONS -->
+            <div class="header-right">
+
+                <!-- USER MENU -->
+                <div class="user-section">
+                    <div class="user-trigger" onclick="toggleUserMenu()">
+                        <div class="avatar">B</div>
+                        <span class="user-name">Bruno Jean</span>
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </div>
+
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-info">
+                            <strong>CEJEC</strong>
+                            <span>brunojean90@gmail.com</span>
+                        </div>
+
+                        <!-- PARAMÈTRE -->
+                        <a href="Parametre_Admin.html" class="menu-item">
+                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+                        </a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="Se connecter - Admin.html" class="menu-item logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> 
+                            <span>Se déconnecter</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- NOTIFICATIONS -->
+                <div class="header-actions">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge44">5</span>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- BRAND -->
+            <div class="brand">
+                <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo">
+                </div>
+                <div>
+                <h1>CEJEC</h1>
+                <div class="muted">Admin Panel</div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav>
+
+                <!-- DASHBOARD -->
+                <p>Vue d'ensemble</p>                
+                <a href="Dashbord-Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Tableau de bord
+                </div>
+                </a>
+                
+                <!-- MANAGEMENT -->
+                <p>Opérations</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-school fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Académique
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
+                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
+                        <a class="dropdown22-item" href="gestion_medias.html">
+                            <span class="fa-stack" style="width: 1.5em;">
+                                    <!-- ICON PRINCIPAL -->
+                                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                                    <!-- PETIT GEAR (TOP RIGHT) -->
+                                    <i class="fa-solid fa-newspaper fa-stack-1x"
+                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                            </span>  
+                        Médias & Communication
+                    </a>
+                    </div>
+                </div>
+                
+                <!-- INCUBATEUR PROJETS & CALDRIER -->
+                <a href="incubateur_calendrier.html">
+                <div class="nav-item">
+                <span class="fa-stack" style="width: 1.5em;">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                </span>                    
+                Incubateur Projets & Calendrier
+                </div>
+                </a>
+             
+                <!-- OPERATIONS -->
+                <p>Système</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Opérations
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item active" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
+                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
+                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
+                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
+                    </div>
+                </div>   
+  
+                <!-- PARAMÈT -->
+                <a href="Parametre_Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                Paramètre
+                </div>
+                </a>
+
+            </nav>
+                
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+
+                <div class="user-profile2">
+                    <div class="avatar-wrapper2">
+                        <div class="avatar2">BJ</div>
+                        <span class="status-indicator2"></span>
+                    </div>
+                    
+                    <div class="user-info2">
+                        <div class="user-name2">Bruno Jean</div>
+                        <div class="user-role2">Super Admin</div>
+                    </div>
+                    <a href="Se connecter - Admin.html">
+                        <button class="logout-btn2" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </a>
+                </div>
+                
+            </div>
+
+        </aside>
+
+        <!-- OVERLAY -->
+        <div class="overlay"></div>
+        <!-- Main content -->    
+        <div class="container">
+            <div class="breadcrumb"><i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <span class="current" id="breadcrumbCurrent">Étudiants</span></div>
+
+            <header class="header-page">
+                <div>
+                    <h1><span class="icon-circle"><i class="fas fa-file-invoice-dollar"></i></span> Inscription & Encaissement</h1>
+                    <span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span>
+                    <p>Gestion des inscriptions, paiements et suivi financier</p>
+                </div>
+                <div class="header-actions26">
+                    <button class="btn btn-primary" onclick="openInscriptionModal()"><i class="fas fa-plus"></i> Nouvelle inscription</button>
+                    <button class="btn btn-success" onclick="openEncaissementModal()"><i class="fas fa-money-bill-wave"></i> Encaisser</button>
+                    <button class="btn btn-outline" onclick="exportListePDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </header>
+
+            <nav class="nav-tabs" id="navTabs">
+                <button class="active" data-page="etudiants"><i class="fas fa-user-graduate"></i> Étudiants</button>
+                <button data-page="paiements"><i class="fas fa-money-bill-wave"></i> Paiements</button>
+                <button data-page="dettes"><i class="fas fa-exclamation-triangle"></i> Dettes</button>
+                <button data-page="recus"><i class="fas fa-receipt"></i> Reçus</button>
+            </nav>
+
+            <div id="mainContent"></div>
+        </div>
+
+        <!-- MODAL DÉTAILS ÉTUDIANT -->
+        <div class="modal-overlay" id="detailsEtudiantModal">
+            <div class="modal" style="max-width:650px">
+                <div class="modal-header">
+                    <h3><i class="fas fa-eye"></i> Détails de l'Étudiant</h3>
+                    <button class="modal-close" onclick="closeModal('detailsEtudiantModal')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" id="detailsEtudiantContent"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('detailsEtudiantModal')">Fermer</button>
+                    <button class="btn btn-outline" onclick="imprimerFicheEtudiantPOS()"><i class="fas fa-print"></i> Imprimer POS-80</button>
+                    <button class="btn btn-outline" onclick="closeModal('detailsEtudiantModal'); ouvrirModifierEtudiant(currentDetailEtudiantId)"><i class="fas fa-edit"></i> Modifier</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL MODIFIER ÉTUDIANT -->
+        <div class="modal-overlay" id="modifierEtudiantModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> Modifier l'Étudiant</h3>
+                    <button class="modal-close" onclick="closeModal('modifierEtudiantModal')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-section-title"><i class="fas fa-user"></i> Informations personnelles</div>
+                        <div class="form-group"><label>Matricule</label><input type="text" id="modMatricule" readonly style="background:#e8f1fa;font-weight:600"></div>
+                        <div class="form-group"><label>Nom *</label><input type="text" id="modNom" placeholder="Nom"></div>
+                        <div class="form-group"><label>Prénom *</label><input type="text" id="modPrenom" placeholder="Prénom"></div>
+                        <div class="form-group"><label>Sexe</label><select id="modSexe"><option>Homme</option><option>Femme</option></select></div>
+                        <div class="form-group"><label>Date naissance</label><input type="date" id="modDateNaissance"></div>
+                        <div class="form-group"><label>Téléphone *</label><input type="tel" id="modTel" placeholder="+509 xxxx"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="modEmail" placeholder="email@exemple.com"></div>
+                        <div class="form-group full"><label>Adresse</label><input type="text" id="modAdresse" placeholder="Adresse complète"></div>
+                        <div class="form-group"><label>Commune</label><input type="text" id="modCommune" placeholder="Commune"></div>
+                        <div class="form-group"><label>Département</label><select id="modDepartement"><option>Ouest</option><option>Nord</option><option>Sud</option><option>Artibonite</option></select></div>
+                        <div class="form-section-title"><i class="fas fa-user-tie"></i> Personne responsable</div>
+                        <div class="form-group"><label>Nom parent/responsable</label><input type="text" id="modParentNom" placeholder="Nom complet"></div>
+                        <div class="form-group"><label>Téléphone</label><input type="tel" id="modParentTel" placeholder="+509 xxxx"></div>
+                        <div class="form-group"><label>Profession</label><input type="text" id="modParentProfession" placeholder="Profession"></div>
+                        <div class="form-group full"><label>Adresse</label><input type="text" id="modParentAdresse" placeholder="Adresse"></div>
+                        <div class="form-section-title"><i class="fas fa-graduation-cap"></i> Formation</div>
+                        <div class="form-group"><label>Promotion</label><select id="modPromotion"><option>Promotion 2026</option><option>Promotion 2027</option><option>Promotion 2028</option><option>Promotion 2025</option></select></div>
+                        <div class="form-group"><label>Statut</label><select id="modStatut"><option>Pré-inscrit</option><option>Inscrit</option><option>Suspendu</option><option>Diplômé</option></select></div>
+                        <div class="form-group"><label>Plan</label><select id="modPlan"><option>Standard</option><option>VIP</option></select></div>
+                        <div class="form-group"><label>Total Formation (HTG)</label><input type="number" id="modTotalFormation" value="50000"></div>
+                        <div class="form-group"><label>Montant Payé (HTG)</label><input type="number" id="modMontantPaye" value="0"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="supprimerEtudiant()"><i class="fas fa-trash"></i> Supprimer</button>
+                    <button class="btn btn-outline" onclick="closeModal('modifierEtudiantModal')">Annuler</button>
+                    <button class="btn btn-primary" onclick="sauvegarderModifications()"><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL INSCRIPTION -->
+        <div class="modal-overlay" id="inscriptionModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-plus"></i> Nouvelle Inscription</h3>
+                    <button class="modal-close" onclick="closeModal('inscriptionModal')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-section-title"><i class="fas fa-user"></i> Informations personnelles</div>
+                        <div class="form-group"><label>Matricule</label><input type="text" id="matricule" value="ETU-2026-013" readonly style="background:#e8f1fa;font-weight:600"></div>
+                        <div class="form-group"><label>Date inscription</label><input type="date" id="dateInscription" value="2026-06-12"></div>
+                        <div class="form-group"><label>Nom *</label><input type="text" id="nom" placeholder="Nom"></div>
+                        <div class="form-group"><label>Prénom *</label><input type="text" id="prenom" placeholder="Prénom"></div>
+                        <div class="form-group"><label>Sexe</label><select id="sexe"><option>Homme</option><option>Femme</option></select></div>
+                        <div class="form-group"><label>Date naissance</label><input type="date" id="dateNaissance"></div>
+                        <div class="form-group"><label>Téléphone *</label><input type="tel" id="tel" placeholder="+509 xxxx"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="email@exemple.com"></div>
+                        <div class="form-group full"><label>Adresse</label><input type="text" id="adresse" placeholder="Adresse complète"></div>
+                        <div class="form-group"><label>Commune</label><input type="text" id="commune" placeholder="Commune"></div>
+                        <div class="form-group"><label>Département</label><select id="departement"><option>Ouest</option><option>Nord</option><option>Sud</option><option>Artibonite</option></select></div>
+
+                        <div class="form-section-title"><i class="fas fa-user-tie"></i> Personne responsable</div>
+                        <div class="form-group"><label>Nom parent/responsable</label><input type="text" id="parentNom" placeholder="Nom complet"></div>
+                        <div class="form-group"><label>Téléphone</label><input type="tel" id="parentTel" placeholder="+509 xxxx"></div>
+                        <div class="form-group"><label>Profession</label><input type="text" id="parentProfession" placeholder="Profession"></div>
+                        <div class="form-group full"><label>Adresse</label><input type="text" id="parentAdresse" placeholder="Adresse"></div>
+
+                        <div class="form-section-title"><i class="fas fa-graduation-cap"></i> Formation</div>
+                        <div class="form-group full"><label>Formation</label><input type="text" value="Entrepreneuriat" readonly style="background:#e8f1fa;font-weight:600"></div>
+                        <div class="form-group"><label>Durée</label><input type="text" value="10 mois" readonly style="background:#e8f1fa"></div>
+                        <div class="form-group"><label>Promotion</label><select id="promotion"><option>Promotion 2026</option><option>Promotion 2027</option><option>Promotion 2028</option></select></div>
+                        <div class="form-group"><label>Statut</label><select id="statut"><option>Pré-inscrit</option><option>Inscrit</option><option>Suspendu</option><option>Diplômé</option></select></div>
+                        <div class="matieres-list">
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Entrepreneuriat</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Plan d'affaires</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Sociologie de la pratique des affaires</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Éducation à la technologie</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Développement personnel</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Marketing</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Droit des affaires</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Les lois du succès</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Gestion des ressources humaines</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Leadership</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Correspondance administrative</div>
+                            <div class="matiere-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> Art oratoire</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('inscriptionModal')">Annuler</button>
+                    <button class="btn btn-outline" onclick="saveInscription()"><i class="fas fa-print"></i> Imprimer fiche</button>
+                    <button class="btn btn-primary" onclick="saveInscription()"><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL ENCAISSEMENT -->
+        <div class="modal-overlay" id="encaissementModal">
+            <div class="modal" style="max-width:550px">
+                <div class="modal-header">
+                    <h3><i class="fas fa-money-bill-wave"></i> Encaissement</h3>
+                    <button class="modal-close" onclick="closeModal('encaissementModal')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group full"><label>Étudiant</label><select id="encEtudiant"></select></div>
+                        <div class="form-group"><label>Montant total formation</label><input type="text" id="encTotalFormation" readonly style="background:#e8f1fa"></div>
+                        <div class="form-group"><label>Déjà payé</label><input type="text" id="encDejaPaye" readonly style="background:#e8f1fa"></div>
+                        <div class="form-group"><label>Solde restant</label><input type="text" id="encSoldeRestant" readonly style="background:var(--red-light);color:var(--red);font-weight:700"></div>
+                        <div class="form-group"><label>Montant à verser *</label><input type="number" id="montantVerse" placeholder="0" value="5000"></div>
+                        <div class="form-group"><label>Mode de paiement</label><select id="modePaiement"><option>Espèces</option><option>MonCash</option><option>NatCash</option><option>Virement bancaire</option><option>Chèque</option></select></div>
+                        <div class="form-group"><label>Référence transaction</label><input type="text" id="refTransaction" placeholder="N° référence"></div>
+                        <div class="form-group"><label>Date</label><input type="date" id="datePaiement" value="2026-06-12"></div>
+                        <div class="form-group full"><label>Observation</label><textarea id="observation" rows="2" placeholder="Note..."></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('encaissementModal')">Annuler</button>
+                    <button class="btn btn-outline" onclick="genererRecu()"><i class="fas fa-print"></i> Imprimer reçu</button>
+                    <button class="btn btn-primary" onclick="validerPaiement()"><i class="fas fa-check-circle"></i> Valider paiement</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL REÇU -->
+        <div class="modal-overlay" id="recuModal">
+            <div class="modal" style="max-width:580px">
+                <div class="modal-header">
+                    <h3><i class="fas fa-receipt"></i> Reçu de Paiement</h3>
+                    <button class="modal-close" onclick="closeModal('recuModal')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="payslip-card" id="recuContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('recuModal')">Fermer</button>
+                    <button class="btn btn-outline" onclick="showToast('Reçu envoyé via WhatsApp','success')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn btn-outline" onclick="imprimerRecuThermique()"><i class="fas fa-print"></i> Pos-80</button>
+                    <button class="btn btn-primary" onclick="telechargerRecuPDF()"><i class="fas fa-download"></i> PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+        <div id="pos-print-area" style="display:none;"></div>
+        <!-- AI Systeme -->
+        <div id="orion-concierge-sistem"></div>        
+    </div>
+<script src="js/Script_Ad.js"></script>
+<script src="js/AI_Script.js"></script>
+<script src="js/script_inscription.js"></script>
+<script src="js/user-profile.js"></script>
+</body>
+</html>

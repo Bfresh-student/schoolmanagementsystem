@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEJEC — Certificat d'Appréciation Officiel</title>
+    <!-- Google Fonts pou Tipografi ak Siyati Elegant -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Alex+Brush&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CEJEC — Club des Jeunes Entrepreneurs du Centre
+           Palette: White (#FFFFFF), Blue (#0A4D8C), Red (#D62828)
+           Style Enspiré de l'image Pngtree
+           ============================================ */
+
+        :root {
+          --white: #ffffff;
+          --blue: #0a4d8c;
+          --blue-dark: #073864;
+          --blue-light: #e8f1fa;
+          --red: #d62828;
+          --gold: #c5a059; /* Ton lò rafine jan li ye nan foto a */
+          --gold-light: #f4ebd0;
+          --ink: #1a1f2b;
+          --muted: #5b6675;
+          --bg-soft: #f0f2f5;
+          --border: #e5ebf2;
+          --shadow-lg: 0 20px 50px rgba(10, 77, 140, 0.15);
+          --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+          font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+          color: var(--ink);
+          background: var(--bg-soft);
+          line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 40px 20px;
+        }
+
+        /* ============================================
+           ESTRIKTI SÈTIFIKA A (Ratio A4 Landscape)
+           ============================================ */
+        .certificate-container {
+            width: 842px;
+            height: 595px; 
+            background: var(--white);
+            border-radius: 4px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            padding: 50px;
+            border: 16px solid var(--white); /* Marge blan ki deyò nèt la */
+            outline: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Doub Liy An Lò (Inner Frame) */
+        .cert-border-frame {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px solid var(--gold);
+            pointer-events: none;
+            z-index: 4;
+        }
+        .cert-border-frame-inner {
+            position: absolute;
+            top: 21px; left: 21px; right: 21px; bottom: 21px;
+            border: 1px solid var(--gold);
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.7;
+        }
+
+        /* ============================================
+           FÒM JEYOMETRIK BLE & LÒ (Jan yo ye nan foto a)
+           ============================================ */
+        
+        /* Kwen Anlè Sou Gòch (Top-Left Corner Shapes) */
+        .shape-tl-1 {
+            position: absolute;
+            top: -70px; left: -70px; width: 180px; height: 180px;
+            background: var(--blue-dark); transform: rotate(45deg);
+            z-index: 3; border: 4px solid var(--gold);
+        }
+        .shape-tl-2 {
+            position: absolute;
+            top: -20px; left: -110px; width: 170px; height: 170px;
+            background: var(--blue); transform: rotate(45deg);
+            z-index: 2; border: 4px solid var(--gold);
+        }
+        .shape-tl-3 {
+            position: absolute;
+            top: -110px; left: -20px; width: 170px; height: 170px;
+            background: var(--blue); transform: rotate(45deg);
+            z-index: 2; border: 4px solid var(--gold);
+        }
+
+        /* Kwen Anba Sou Dwa (Bottom-Right Corner Shapes) */
+        .shape-br-1 {
+            position: absolute;
+            bottom: -70px; right: -70px; width: 180px; height: 180px;
+            background: var(--blue-dark); transform: rotate(45deg);
+            z-index: 3; border: 4px solid var(--gold);
+        }
+        .shape-br-2 {
+            position: absolute;
+            bottom: -20px; right: -110px; width: 170px; height: 170px;
+            background: var(--blue); transform: rotate(45deg);
+            z-index: 2; border: 4px solid var(--gold);
+        }
+        .shape-br-3 {
+            position: absolute;
+            bottom: -110px; right: -20px; width: 170px; height: 170px;
+            background: var(--blue); transform: rotate(45deg);
+            z-index: 2; border: 4px solid var(--gold);
+        }
+
+        /* Background ak ti liy dyagonal fen (Background Texture Simulation) */
+        .cert-bg-texture {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(135deg, #fbfbfb 25%, transparent 25%, transparent 50%, #fbfbfb 50%, #fbfbfb 75%, transparent 75%, transparent 100%);
+            background-size: 8px 8px;
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        /* ============================================
+           KONTNI SÈTIFIKA A
+           ============================================ */
+        .cert-content {
+            position: relative;
+            z-index: 5;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 40px;
+        }
+
+        /* KOTE LOGO CEJEC LA MÈT */
+        .cert-logo-container {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        .cert-logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .cert-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.4rem;
+            color: var(--gold);
+            font-weight: 600;
+            line-height: 1.1;
+            font-style: italic;
+        }
+
+        .cert-subtitle {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--muted);
+            font-weight: 500;
+            margin-bottom: 25px;
+            margin-top: -5px;
+        }
+
+        .cert-present-text {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ink);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .cert-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            color: var(--gold);
+            font-style: italic;
+            font-weight: 600;
+            border-bottom: 1px solid var(--ink);
+            width: 75%;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 2px;
+        }
+
+        .cert-main-text {
+            font-size: 0.85rem;
+            color: var(--muted);
+            max-width: 580px;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        /* Anba: Dat ak Siyati */
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            width: 75%;
+            margin-top: auto;
+        }
+
+        .footer-block {
+            width: 180px;
+            text-align: center;
+            border-top: 1px solid var(--ink);
+            padding-top: 5px;
+            font-size: 0.78rem;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .footer-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+            min-height: 24px;
+        }
+        
+        .footer-value.signature {
+            font-family: 'Alex Brush', cursive;
+            font-size: 1.6rem;
+            color: var(--blue-dark);
+            margin-top: -15px;
+        }
+
+        /* Badge Round Gold ki sou dwa a (Jan li ye nan foto a) */
+        .cert-gold-badge {
+            position: absolute;
+            top: 110px;
+            right: 80px;
+            width: 95px;
+            height: 95px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3);
+            z-index: 10;
+            border: 2px dashed var(--white);
+            outline: 4px solid var(--gold);
+        }
+
+        .badge-inner {
+            text-align: center;
+            color: var(--white);
+            font-weight: 700;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        .badge-inner .top-txt { font-size: 0.55rem; letter-spacing: 1px; }
+        .badge-inner .mid-txt { font-size: 0.75rem; color: var(--ink); }
+        .badge-inner .bot-txt { font-size: 0.55rem; }
+
+        /* ============================================
+           PANNO KONTWÒL UI (Pou ou ka edite fasil)
+           ============================================ */
+        .control-panel {
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 842px;
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .control-panel h3 {
+            color: var(--blue);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: span 2; }
+        .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; color: var(--ink); }
+        .form-group input {
+            padding: 10px; border: 1px solid var(--border);
+            border-radius: 4px; font-family: 'Poppins', sans-serif;
+            background: #fdfdfd;
+        }
+        .form-group input:focus { outline: none; border-color: var(--gold); }
+        
+        .print-btn {
+            background: var(--blue); color: var(--white); border: none;
+            padding: 12px 25px; border-radius: 4px; font-weight: 600;
+            cursor: pointer; margin-top: 15px; transition: 0.2s;
+        }
+        .print-btn:hover { background: var(--blue-dark); }
+
+        /* Print CSS optimization */
+        @media print {
+            body { background: var(--white); padding: 0; }
+            .control-panel, .print-btn { display: none; }
+            .certificate-container { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- KONTENÈ SÈTIFIKA CENTRAL LA -->
+    <div class="certificate-container">
+        <!-- Liy kad yo -->
+        <div class="cert-border-frame"></div>
+        <div class="cert-border-frame-inner"></div>
+        
+        <!-- Tekstire background lan -->
+        <div class="cert-bg-texture"></div>
+
+        <!-- Ti Kare Ble ak Lò ki nan kwen yo (Jan imaj la ye a) -->
+        <div class="shape-tl-3"></div>
+        <div class="shape-tl-2"></div>
+        <div class="shape-tl-1"></div>
+
+        <div class="shape-br-3"></div>
+        <div class="shape-br-2"></div>
+        <div class="shape-br-1"></div>
+
+        <!-- Selebrasyon Ti Badge Round Gold la -->
+        <div class="cert-gold-badge">
+            <div class="badge-inner">
+                <div class="top-txt">BEST</div>
+                <div class="mid-txt">AWARD</div>
+                <div class="bot-txt">2026</div>
+            </div>
+        </div>
+
+        <!-- Vre Kontni Sètifika a -->
+        <div class="cert-content">
+            
+            <!-- KOTE POU METE LOGO CEJEC LA -->
+            <div class="cert-logo-container">
+                <!-- Chanje lyen "src" sa pou w mete lyen reyèl logo CEJEC ou a pwo -->
+                <img id="cert-logo-img" src="https://placehold.co/150x150/ffffff/0a4d8c?text=CEJEC" alt="Logo CEJEC">
+            </div>
+
+            <h1 class="cert-title">Certificate</h1>
+            <div class="cert-subtitle">Of Appreciation</div>
+            
+            <p class="cert-present-text">This Certificate is Proudly Presented To</p>
+            <div class="cert-name" id="display-name">Name Surname</div>
+            
+            <p class="cert-main-text" id="display-text">
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </p>
+
+            <div class="cert-footer">
+                <div class="footer-block">
+                    <div class="footer-value" id="display-date">16 Juin 2026</div>
+                    <div>Date</div>
+                </div>
+                <div class="footer-block">
+                    <div class="footer-value signature" id="display-sign">Alix R.</div>
+                    <div>Signature</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PANNO KONTWÒL ENTÈAKTIF -->
+    <div class="control-panel">
+        <h3>Panno Modifikasyon Sètifika</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nom & Prénom (Récipiendaire)</label>
+                <input type="text" id="in-name" value="Jean-Baptiste Pierre">
+            </div>
+            <div class="form-group">
+                <label>URL / Lyen Logo CEJEC la</label>
+                <input type="text" id="in-logo" value="https://placehold.co/150x150/ffffff/0a4d8c?text=CEJEC">
+            </div>
+            <div class="form-group full">
+                <label>Texte de Motivation / Description</label>
+                <input type="text" id="in-text" value="Pour son dévouement exceptionnel, son leadership inspirant et sa contribution remarquable au Club des Jeunes Entrepreneurs du Centre (CEJEC).">
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="text" id="in-date" value="16 Juin 2026">
+            </div>
+            <div class="form-group">
+                <label>Nom Responsable (Signature)</label>
+                <input type="text" id="in-sign" value="Alix R.">
+            </div>
+        </div>
+        <button class="print-btn" onclick="window.print()">Inprime Sètifika a</button>
+    </div>
+
+    <!-- JAVASCRIPT DIRECT LIVE SYNC -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const inName = document.getElementById('in-name');
+            const inLogo = document.getElementById('in-logo');
+            const inText = document.getElementById('in-text');
+            const inDate = document.getElementById('in-date');
+            const inSign = document.getElementById('in-sign');
+
+            function updateCertificate() {
+                document.getElementById('display-name').textContent = inName.value;
+                document.getElementById('cert-logo-img').src = inLogo.value;
+                document.getElementById('display-text').textContent = inText.value;
+                document.getElementById('display-date').textContent = inDate.value;
+                document.getElementById('display-sign').textContent = inSign.value;
+            }
+
+            // Koute lè itilizatè a ap tape nan bwat yo
+            [inName, inLogo, inText, inDate, inSign].forEach(input => {
+                input.addEventListener('input', updateCertificate);
+            });
+
+            // Lanse premye fwa pou senkronize valè yo
+            updateCertificate();
+        });
+    </script>
+</body>
+</html>

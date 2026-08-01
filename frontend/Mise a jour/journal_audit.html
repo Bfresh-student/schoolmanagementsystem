@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Journal d'Audit · CEJEC ERP</title>
+    <meta name="description" content="Journal d'audit CEJEC - Traçabilité complète des actions système, académiques et financières">
+    <meta name="theme-color" content="#0A4D8C">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230A4D8C'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='52' font-weight='bold' font-family='sans-serif'%3EC%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --white: #ffffff;
+            --blue: #0A4D8C;
+            --blue-dark: #073864;
+            --blue-darker: #052440;
+            --blue-light: #e8f1fa;
+            --blue-lighter: #f4f8fd;
+            --blue-soft: #d0e2f5;
+            --red: #D62828;
+            --red-dark: #a81d1d;
+            --red-light: #fef2f2;
+            --red-soft: #fde8e8;
+            --ink: #1a1f2b;
+            --ink-light: #2d3543;
+            --muted: #5b6675;
+            --muted-light: #8b95a5;
+            --bg-soft: #f7f9fc;
+            --bg-white: #ffffff;
+            --border: #e5ebf2;
+            --border-light: #f0f4f8;
+            --input-bg: #f8fafc;
+            --input-border: #dce2e8;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --shadow-xs: 0 1px 2px rgba(10,77,140,0.04);
+            --shadow-sm: 0 2px 8px rgba(10,77,140,0.06);
+            --shadow-md: 0 8px 24px rgba(10,77,140,0.1);
+            --shadow-lg: 0 20px 48px rgba(10,77,140,0.16);
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --ease: cubic-bezier(0.25,0.8,0.25,1);
+            --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+            --transition-fast: 0.15s var(--ease);
+            --transition: 0.25s var(--ease);
+            --transition-slow: 0.4s var(--ease);
+            --content-max: 1400px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--ink);
+            background: var(--bg-soft);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            padding: 20px;
+            background-image:
+                radial-gradient(ellipse at 0% 0%, rgba(10, 77, 140, 0.02) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(214, 40, 40, 0.01) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: var(--content-max);
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* ========== BREADCRUMB ========== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted-light);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            padding: 10px 0;
+            flex-wrap: wrap;
+        }
+        .breadcrumb i {
+            color: var(--blue);
+            font-size: 0.7rem;
+        }
+        .breadcrumb .separator {
+            color: var(--muted-light);
+            opacity: 0.5;
+        }
+        .breadcrumb .current {
+            color: var(--ink);
+            font-weight: 600;
+        }
+        .breadcrumb a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        .breadcrumb a:hover {
+            color: var(--blue);
+        }
+
+        /* ========== HEADER ========== */
+        .header22 {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 0 4px;
+        }
+        .header-left2 {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 250px;
+        }
+        .header-left2 h1 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 800;
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--blue-dark);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            letter-spacing: -0.02em;
+        }
+        .header-left2 h1 .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 24px rgba(10, 77, 140, 0.25);
+            flex-shrink: 0;
+        }
+        .header-left2 .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--blue-lighter);
+            color: var(--blue);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 4px;
+            width: fit-content;
+        }
+        .header-left2 p {
+            color: var(--muted);
+            font-size: clamp(0.8rem, 1.5vw, 0.93rem);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .header-left2 p i {
+            color: var(--blue);
+            font-size: 0.85rem;
+        }
+        .header-actions2 {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1.5px solid var(--input-border);
+            background: var(--white);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink);
+            white-space: nowrap;
+            text-decoration: none;
+            user-select: none;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.01em;
+        }
+        .btn:hover {
+            background: var(--blue-lighter);
+            border-color: var(--blue-soft);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .btn i {
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: white;
+            border-color: var(--blue);
+            box-shadow: 0 4px 12px rgba(10, 77, 140, 0.2);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(10, 77, 140, 0.35);
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-darker) 100%);
+            color: white;
+        }
+        .btn-danger {
+            border-color: #fecaca;
+            color: var(--red);
+            background: var(--white);
+        }
+        .btn-danger i {
+            color: var(--red);
+        }
+        .btn-danger:hover {
+            background: var(--red);
+            color: white;
+            border-color: var(--red);
+            box-shadow: 0 4px 12px rgba(214, 40, 40, 0.25);
+        }
+        .btn-danger:hover i {
+            color: white;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            border-radius: 40px;
+        }
+
+        /* ========== STATS CARDS ========== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-xs);
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .stat-card .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .stat-card .stat-info h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .stat-card .stat-info p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .stat-blue {
+            background: var(--blue-lighter);
+            color: var(--blue);
+        }
+        .stat-green {
+            background: var(--success-light);
+            color: #065f46;
+        }
+        .stat-red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+        .stat-yellow {
+            background: var(--warning-light);
+            color: #92400e;
+        }
+
+        /* ========== FILTER BAR ========== */
+        .filter-bar {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-xs);
+        }
+        .search-wrapper2 {
+            flex: 1;
+            min-width: 200px;
+            max-width: 450px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--input-bg);
+            border-radius: 50px;
+            padding: 4px 18px;
+            border: 1.5px solid var(--input-border);
+            transition: all var(--transition);
+        }
+        .search-wrapper2:focus-within {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px rgba(10, 77, 140, 0.08);
+            background: var(--white);
+        }
+        .search-wrapper2 i {
+            color: var(--muted-light);
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .search-wrapper2 input {
+            border: none;
+            background: transparent;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+        }
+        .search-wrapper2 input::placeholder {
+            color: var(--muted-light);
+        }
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 9px 36px 9px 16px;
+            border-radius: 50px;
+            border: 1.5px solid var(--input-border);
+            background: var(--white);
+            font-size: 0.85rem;
+            color: var(--ink);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235b6675' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+        .filter-select:hover {
+            border-color: #c4cfdb;
+        }
+        .filter-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(10, 77, 140, 0.08);
+        }
+        .entries-badge {
+            font-size: 0.82rem;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            background: var(--blue-lighter);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--blue-soft);
+            white-space: nowrap;
+        }
+        .entries-badge i {
+            font-size: 8px;
+            color: var(--success);
+        }
+
+        /* ========== TABLE CONTAINER ========== */
+        .table-container {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-xs);
+            transition: box-shadow var(--transition);
+        }
+        .table-container:hover {
+            box-shadow: var(--shadow-sm);
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            min-width: 950px;
+        }
+        thead {
+            background: var(--blue-lighter);
+            border-bottom: 2px solid var(--blue-soft);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-weight: 700;
+            color: var(--blue-dark);
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        th i {
+            margin-right: 6px;
+            color: var(--blue);
+            font-size: 0.8rem;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--ink);
+            vertical-align: middle;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+        tbody tr:hover {
+            background: var(--blue-lighter);
+        }
+        .new-entry {
+            animation: fadeInRow 0.6s ease forwards;
+        }
+        @keyframes fadeInRow {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+                background: var(--warning-light);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                background: transparent;
+            }
+        }
+
+        /* ========== USER CELL ========== */
+        .user-cell {
+            min-width: 170px;
+        }
+        .user-name {
+            font-weight: 600;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-name i {
+            color: var(--blue);
+            font-size: 0.9rem;
+        }
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 24px;
+        }
+        .user-role i {
+            font-size: 0.65rem;
+            color: var(--muted-light);
+        }
+        .role-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .dot-admin {
+            background: #f59e0b;
+        }
+        .dot-direction {
+            background: #3b82f6;
+        }
+        .dot-secretaire {
+            background: #10b981;
+        }
+        .dot-comptable {
+            background: #8b5cf6;
+        }
+        .dot-professeur {
+            background: #ec4899;
+        }
+        .dot-etudiant {
+            background: #6366f1;
+        }
+
+        /* ========== CATEGORY TAG ========== */
+        .category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid;
+        }
+        .category-tag i {
+            font-size: 0.75rem;
+        }
+        .cat-systeme {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+        .cat-academique {
+            background: #ede9fe;
+            color: #5b21b6;
+            border-color: #ddd6fe;
+        }
+        .cat-finance {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .cat-utilisateur {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .cat-securite {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+        .cat-cours {
+            background: #e0e7ff;
+            color: #3730a3;
+            border-color: #c7d2fe;
+        }
+
+        /* ========== SEVERITY BADGE ========== */
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid;
+        }
+        .severity-badge i {
+            font-size: 0.75rem;
+        }
+        .severity-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+        .severity-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .severity-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .severity-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted-light);
+        }
+        .empty-state i {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--muted);
+        }
+        .empty-state span {
+            font-size: 0.85rem;
+            color: var(--muted-light);
+        }
+
+        /* ========== PAGINATION ========== */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--white);
+        }
+        .pagination-info {
+            font-size: 0.83rem;
+            color: var(--muted);
+        }
+        .pagination-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-xs);
+            border: 1.5px solid var(--input-border);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: var(--ink);
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page-btn:hover {
+            background: var(--blue-lighter);
+            border-color: var(--blue-soft);
+        }
+        .page-btn.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(10, 77, 140, 0.25);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            color: white;
+            padding: 14px 22px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(120px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s var(--ease-spring);
+            z-index: 1000;
+            font-family: 'Inter', sans-serif;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .toast.success {
+            background: #065f46;
+        }
+        .toast.error {
+            background: var(--red);
+        }
+        .toast i {
+            font-size: 1.1rem;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .header22 {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            .header-actions2 {
+                justify-content: flex-start;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper2 {
+                max-width: 100%;
+            }
+            .filter-right {
+                justify-content: space-between;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            .table-responsive {
+                border-radius: var(--radius);
+            }
+            table {
+                font-size: 0.8rem;
+                min-width: 700px;
+            }
+            th,
+            td {
+                padding: 10px 8px;
+            }
+            .user-role {
+                display: none;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .filter-right {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .filter-select,
+            .entries-badge {
+                width: 100%;
+                justify-content: center;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            .header-left2 h1 {
+                font-size: 1.3rem;
+            }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            th:nth-child(5),
+            td:nth-child(5) {
+                max-width: 100px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .pagination {
+                justify-content: center;
+                text-align: center;
+            }
+            .pagination-info {
+                width: 100%;
+                text-align: center;
+            }
+            .toast {
+                left: 20px;
+                right: 20px;
+                bottom: 20px;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ========== BREADCRUMB ========== -->
+        <div class="breadcrumb">
+            <a href="#"><i class="fas fa-home"></i></a>
+            <i class="fas fa-chevron-right separator"></i>
+            <a href="#">Tableau de bord</a>
+            <i class="fas fa-chevron-right separator"></i>
+            <a href="#">Paramètres</a>
+            <i class="fas fa-chevron-right separator"></i>
+            <span class="current">Journal d'audit</span>
+        </div>
+
+        <!-- ========== HEADER ========== -->
+        <div class="header22">
+            <div class="header-left2">
+                <h1>
+                    <span class="icon-circle"><i class="fas fa-shield-halved"></i></span>
+                    Journal d'Audit
+                </h1>
+                <span class="header-badge"><i class="fas fa-clock"></i> Surveillance en temps réel</span>
+                <p>
+                    <i class="fas fa-route"></i>
+                    Traçabilité complète des actions : inscriptions, paiements, modifications de cours, connexions et décisions administratives.
+                </p>
+            </div>
+            <div class="header-actions2">
+                <button class="btn btn-primary" onclick="exportCSV()" aria-label="Exporter le journal en CSV">
+                    <i class="fas fa-download"></i> Exporter CSV
+                </button>
+                <button class="btn btn-danger" onclick="clearLog()" aria-label="Vider le journal d'audit">
+                    <i class="fas fa-trash-alt"></i> Vider le journal
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== STATS CARDS ========== -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon stat-blue"><i class="fas fa-list-alt"></i></div>
+                <div class="stat-info"><h3 id="statTotal">12</h3><p>Total actions</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info"><h3 id="statSuccess">6</h3><p>Succès</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-yellow"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info"><h3 id="statWarning">3</h3><p>Avertissements</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-red"><i class="fas fa-times-circle"></i></div>
+                <div class="stat-info"><h3 id="statDanger">2</h3><p>Critiques</p></div>
+            </div>
+        </div>
+
+        <!-- ========== FILTER BAR ========== -->
+        <div class="filter-bar">
+            <div class="search-wrapper2">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher action, utilisateur, cible..." oninput="filterTable()" aria-label="Rechercher dans le journal">
+            </div>
+            <div class="filter-right">
+                <select class="filter-select" id="categoryFilter" onchange="filterTable()" aria-label="Filtrer par catégorie">
+                    <option value="all">📋 Toutes catégories</option>
+                    <option value="Système">⚙️ Système</option>
+                    <option value="Académique">🎓 Académique</option>
+                    <option value="Finance">💰 Finance</option>
+                    <option value="Utilisateur">👤 Utilisateur</option>
+                    <option value="Sécurité">🔐 Sécurité</option>
+                    <option value="Cours">📚 Cours</option>
+                </select>
+                <span class="entries-badge">
+                    <i class="fas fa-circle"></i>
+                    <span id="entryCount">0</span> entrée(s)
+                </span>
+            </div>
+        </div>
+
+        <!-- ========== TABLE ========== -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table aria-label="Journal d'audit CEJEC">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-clock"></i> Horodatage</th>
+                            <th><i class="fas fa-user-circle"></i> Utilisateur</th>
+                            <th><i class="fas fa-tag"></i> Catégorie</th>
+                            <th><i class="fas fa-bolt"></i> Action</th>
+                            <th><i class="fas fa-bullseye"></i> Cible / Détails</th>
+                            <th><i class="fas fa-flag"></i> Sévérité</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditBody">
+                        <!-- JavaScript va remplir -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- PAGINATION -->
+            <div class="pagination" id="pagination">
+                <div class="pagination-info">
+                    Affichage <span id="pageStart">1</span>-<span id="pageEnd">5</span> sur <span id="totalEntries">5</span>
+                </div>
+                <div class="pagination-buttons" id="paginationButtons"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TOAST ========== -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action effectuée</span>
+    </div>
+
+    <script>
+        // ========== DONNÉES D'AUDIT CEJEC ==========
+        let auditData = [{
+            id: 1,
+            timestamp: "15/06/2026 08:12:34",
+            user: "Jean-Marc Dubois",
+            role: "Administrateur",
+            roleDot: "dot-admin",
+            category: "Système",
+            action: "Connexion à la plateforme",
+            target: "Tableau de bord administrateur",
+            severity: "info"
+        }, {
+            id: 2,
+            timestamp: "15/06/2026 08:45:12",
+            user: "Marie Thérèse Louis",
+            role: "Secrétaire",
+            roleDot: "dot-secretaire",
+            category: "Académique",
+            action: "Inscription validée",
+            target: "Étudiant #ETU-2026-089 · Pierre Antoine",
+            severity: "success"
+        }, {
+            id: 3,
+            timestamp: "15/06/2026 09:30:05",
+            user: "Dr. Jacques Mentor",
+            role: "Professeur",
+            roleDot: "dot-professeur",
+            category: "Cours",
+            action: "Notes saisies",
+            target: "Cours Entrepreneuriat 201 · 22 étudiants évalués",
+            severity: "success"
+        }, {
+            id: 4,
+            timestamp: "15/06/2026 10:15:44",
+            user: "Carline Étienne",
+            role: "Comptable",
+            roleDot: "dot-comptable",
+            category: "Finance",
+            action: "Paiement enregistré",
+            target: "Frais formation · 15,000 HTG · Reçu #RECU-2026-452",
+            severity: "success"
+        }, {
+            id: 5,
+            timestamp: "15/06/2026 11:02:18",
+            user: "Jean-Marc Dubois",
+            role: "Administrateur",
+            roleDot: "dot-admin",
+            category: "Sécurité",
+            action: "Tentative de connexion échouée",
+            target: "IP 192.168.1.45 · Mot de passe incorrect (3e tentative)",
+            severity: "danger"
+        }, {
+            id: 6,
+            timestamp: "15/06/2026 11:30:00",
+            user: "Marie Thérèse Louis",
+            role: "Secrétaire",
+            roleDot: "dot-secretaire",
+            category: "Utilisateur",
+            action: "Compte étudiant créé",
+            target: "Marie Claude Joseph · Promotion 2026",
+            severity: "success"
+        }, {
+            id: 7,
+            timestamp: "15/06/2026 13:05:22",
+            user: "Dr. Jacques Mentor",
+            role: "Professeur",
+            roleDot: "dot-professeur",
+            category: "Cours",
+            action: "Absence signalée",
+            target: "Étudiant #ETU-2026-045 · Absence non justifiée",
+            severity: "warning"
+        }, {
+            id: 8,
+            timestamp: "15/06/2026 14:20:10",
+            user: "Carline Étienne",
+            role: "Comptable",
+            roleDot: "dot-comptable",
+            category: "Finance",
+            action: "Rapport financier généré",
+            target: "Rapport mensuel · Juin 2026 · Chiffre d'affaires 450,000 HTG",
+            severity: "info"
+        }, {
+            id: 9,
+            timestamp: "15/06/2026 15:00:45",
+            user: "Jean-Marc Dubois",
+            role: "Administrateur",
+            roleDot: "dot-admin",
+            category: "Sécurité",
+            action: "Permissions modifiées",
+            target: "Rôle Professeur · Accès rapports désactivé",
+            severity: "warning"
+        }, {
+            id: 10,
+            timestamp: "15/06/2026 16:10:33",
+            user: "Marie Thérèse Louis",
+            role: "Secrétaire",
+            roleDot: "dot-secretaire",
+            category: "Académique",
+            action: "Diplôme généré",
+            target: "Certificat #CERT-2026-128 · Entrepreneuriat Avancé",
+            severity: "success"
+        }, {
+            id: 11,
+            timestamp: "15/06/2026 17:05:00",
+            user: "Système",
+            role: "Automatique",
+            roleDot: "dot-admin",
+            category: "Système",
+            action: "Sauvegarde automatique",
+            target: "Base de données · Sauvegarde quotidienne 02:00 UTC",
+            severity: "info"
+        }, {
+            id: 12,
+            timestamp: "15/06/2026 17:30:28",
+            user: "Jean-Marc Dubois",
+            role: "Administrateur",
+            roleDot: "dot-admin",
+            category: "Sécurité",
+            action: "Session suspecte bloquée",
+            target: "IP 203.45.67.89 · Miami, USA · Connexion non autorisée",
+            severity: "danger"
+        }];
+
+        // ========== PAGINATION STATE ==========
+        const ITEMS_PER_PAGE = 5;
+        let currentPage = 1;
+        let currentFilteredData = [...auditData];
+
+        // ========== TOAST SYSTEM ==========
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const icon = toast.querySelector('i');
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            icon.className = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-times-circle' :
+                'fas fa-info-circle';
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ========== UPDATE STATS ==========
+        function updateStats(data) {
+            const total = data.length;
+            const success = data.filter(r => r.severity === 'success').length;
+            const warning = data.filter(r => r.severity === 'warning').length;
+            const danger = data.filter(r => r.severity === 'danger').length;
+            const info = data.filter(r => r.severity === 'info').length;
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statSuccess').textContent = success;
+            document.getElementById('statWarning').textContent = warning;
+            document.getElementById('statDanger').textContent = danger;
+        }
+
+        // ========== RENDER TABLE WITH PAGINATION ==========
+        function renderTable(data = currentFilteredData, page = currentPage) {
+            const tbody = document.getElementById('auditBody');
+            tbody.innerHTML = '';
+            if (data !== currentFilteredData) {
+                currentFilteredData = data;
+                currentPage = 1;
+                page = 1;
+                updateStats(data);
+            }
+            const totalItems = currentFilteredData.length;
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+            const startIndex = (page - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+            const pageData = currentFilteredData.slice(startIndex, endIndex);
+            currentPage = page;
+            if (totalItems === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>Aucune entrée trouvée</p><span>Modifiez vos filtres ou ajoutez des actions</span></div></td></tr>`;
+                document.getElementById('entryCount').textContent = '0';
+                updatePagination(0, 0, 0, 1);
+                return;
+            }
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                let catIcon, catClass;
+                switch (row.category) {
+                    case 'Système':
+                        catIcon = '<i class="fas fa-cogs"></i>';
+                        catClass = 'cat-systeme';
+                        break;
+                    case 'Académique':
+                        catIcon = '<i class="fas fa-graduation-cap"></i>';
+                        catClass = 'cat-academique';
+                        break;
+                    case 'Finance':
+                        catIcon = '<i class="fas fa-coins"></i>';
+                        catClass = 'cat-finance';
+                        break;
+                    case 'Utilisateur':
+                        catIcon = '<i class="fas fa-user-plus"></i>';
+                        catClass = 'cat-utilisateur';
+                        break;
+                    case 'Sécurité':
+                        catIcon = '<i class="fas fa-shield-halved"></i>';
+                        catClass = 'cat-securite';
+                        break;
+                    case 'Cours':
+                        catIcon = '<i class="fas fa-book-open"></i>';
+                        catClass = 'cat-cours';
+                        break;
+                    default:
+                        catIcon = '<i class="fas fa-circle"></i>';
+                        catClass = 'cat-systeme';
+                }
+                let severityIcon;
+                switch (row.severity) {
+                    case 'info':
+                        severityIcon = '<i class="fas fa-info-circle"></i>';
+                        break;
+                    case 'success':
+                        severityIcon = '<i class="fas fa-check-circle"></i>';
+                        break;
+                    case 'warning':
+                        severityIcon = '<i class="fas fa-exclamation-triangle"></i>';
+                        break;
+                    case 'danger':
+                        severityIcon = '<i class="fas fa-times-circle"></i>';
+                        break;
+                    default:
+                        severityIcon = '<i class="fas fa-circle"></i>';
+                }
+                tr.innerHTML = `
+                    <td>${escapeHtml(row.timestamp)}</td>
+                    <td class="user-cell">
+                        <span class="user-name"><i class="fas fa-user"></i>${escapeHtml(row.user)}</span>
+                        <span class="user-role"><span class="role-dot ${row.roleDot}"></span> ${escapeHtml(row.role)}</span>
+                    </td>
+                    <td><span class="category-tag ${catClass}">${catIcon} ${escapeHtml(row.category)}</span></td>
+                    <td style="font-weight:500;">${escapeHtml(row.action)}</td>
+                    <td style="color:var(--muted);max-width:280px;word-break:break-word;">${escapeHtml(row.target)}</td>
+                    <td><span class="severity-badge severity-${row.severity}">${severityIcon} ${capitalize(row.severity)}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('entryCount').textContent = totalItems;
+            updatePagination(startIndex + 1, endIndex, totalItems, totalPages);
+        }
+
+        // ========== UPDATE PAGINATION ==========
+        function updatePagination(start, end, total, totalPages) {
+            document.getElementById('pageStart').textContent = total === 0 ? 0 : start;
+            document.getElementById('pageEnd').textContent = end;
+            document.getElementById('totalEntries').textContent = total;
+            const paginationButtons = document.getElementById('paginationButtons');
+            paginationButtons.innerHTML = '';
+            if (totalPages <= 1) return;
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => renderTable(currentFilteredData, currentPage - 1);
+            paginationButtons.appendChild(prevBtn);
+            for (let i = 1; i <= totalPages; i++) {
+                if (totalPages > 7 && i > 1 && i < totalPages && Math.abs(i - currentPage) > 2) {
+                    if (i === 2 || i === totalPages - 1) {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.textContent = '...';
+                        ellipsis.style.cssText = 'padding:0 8px;color:var(--muted-light);';
+                        paginationButtons.appendChild(ellipsis);
+                    }
+                    continue;
+                }
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => renderTable(currentFilteredData, i);
+                paginationButtons.appendChild(pageBtn);
+            }
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => renderTable(currentFilteredData, currentPage + 1);
+            paginationButtons.appendChild(nextBtn);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // ========== FILTER ==========
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('categoryFilter').value;
+            const filtered = auditData.filter(row => {
+                if (category !== 'all' && row.category !== category) return false;
+                if (searchTerm !== '') {
+                    const searchable =
+                        `${row.user} ${row.role} ${row.action} ${row.target} ${row.category} ${row.timestamp}`
+                        .toLowerCase();
+                    if (!searchable.includes(searchTerm)) return false;
+                }
+                return true;
+            });
+            renderTable(filtered);
+        }
+
+        // ========== EXPORT CSV ==========
+        function exportCSV() {
+            if (currentFilteredData.length === 0) {
+                showToast("Aucune donnée à exporter.", "error");
+                return;
+            }
+            const escapeCSV = (str) => {
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) return '"' + str.replace(/"/g,
+                    '""') + '"';
+                return str;
+            };
+            let csv = "Horodatage,Utilisateur,Rôle,Catégorie,Action,Cible,Sévérité\n";
+            currentFilteredData.forEach(row => {
+                csv += [escapeCSV(row.timestamp), escapeCSV(row.user), escapeCSV(row.role), escapeCSV(row.category),
+                    escapeCSV(row.action), escapeCSV(row.target), escapeCSV(row.severity)
+                ].join(',') + '\n';
+            });
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `audit_cejec_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast(`✅ Export réussi : ${currentFilteredData.length} entrée(s)`, "success");
+        }
+
+        // ========== CLEAR LOG ==========
+        function clearLog() {
+            if (auditData.length === 0) {
+                showToast("Le journal est déjà vide.", "error");
+                return;
+            }
+            if (confirm(
+                    `⚠️ Voulez-vous vraiment supprimer définitivement les ${auditData.length} entrée(s) du journal d'audit ? Cette action est irréversible.`
+                    )) {
+                auditData = [];
+                currentFilteredData = [];
+                currentPage = 1;
+                renderTable([], 1);
+                updateStats([]);
+                showToast("🗑️ Journal d'audit vidé avec succès.", "success");
+            }
+        }
+
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                setTimeout(() => document.getElementById('searchInput').focus(), 100);
+            }
+            if (e.key === 'Escape' && document.activeElement === document.getElementById('searchInput')) {
+                document.getElementById('searchInput').value = '';
+                filterTable();
+            }
+        });
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats(auditData);
+            renderTable(auditData);
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                document.getElementById('searchInput').value = searchParam;
+                filterTable();
+            }
+        });
+    </script>
+</body>
+</html>

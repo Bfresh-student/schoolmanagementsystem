@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Offline‑First Demo (Dexie + Sync Queue)</title>
+  <style>
+    body {font-family: Arial, sans-serif; margin: 2rem;}
+    .log {margin-top: 1rem; padding: 0.5rem; background:#f9f9f9; border:1px solid #ddd;}
+    button {margin-right:0.5rem;}
+  </style>
+</head>
+<body>
+  <h1>Dexie.js Offline‑First Demo</h1>
+  <button id="addLead">Add Lead (POST)</button>
+  <button id="showOutbox">Show Outbox Count</button>
+  <div class="log" id="log"></div>
+
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.error('SW registration failed', err));
+    }
+  </script>
+
+  <!-- Load modules -->
+  <script type="module">
+    import { saveData } from './apiManager.js';
+    import { db } from './db.js';
+
+    const logEl = document.getElementById('log');
+    const addBtn = document.getElementById('addLead');
+    const outboxBtn = document.getElementById('showOutbox');
+
+    function log(msg) {
+      const p = document.createElement('p');
+      p.textContent = msg;
+      logEl.appendChild(p);
+    }
+
+    addBtn.addEventListener('click', async () => {
+      const payload = {
+        name: 'Demo User',
+        email: `demo${Date.now()}@example.com`,
+        status: 'new'
+      };
+      await saveData('leads', 'POST', payload);
+      log('Added lead – check console/network tab to see if request was sent or queued.');
+    });
+
+    outboxBtn.addEventListener('click', async () => {
+      const count = await db.outbox.count();
+      log(`Outbox entries: ${count}`);
+    });
+
+    // Optional: auto‑refresh outbox count when DB changes
+    db.outbox.hook('creating', () => outboxBtn.click());
+    db.outbox.hook('deleting', () => outboxBtn.click());
+  </script>
+</body>
+</html>

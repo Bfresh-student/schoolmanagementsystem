@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Gestion Élèves & Professeurs · Présences · CEJEC ERP</title>
+    <meta name="theme-color" content="#0A4D8C">
+    <link rel="manifest" href="manifest.json">
+    <script src="sw-register.js" defer></script>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/StyleBordAD.css">
+    <link rel="stylesheet" href="css/AI_Styles.css">
+    <link rel="stylesheet" href="css/styles_utilisateur.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- LOGO -->
+            <div class="header-left">
+                <!-- Menu Toggle Button -->
+                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+                    </svg>
+                </button>
+
+                <a href="Dashbord-Admin.html" class="logo-link">
+                    <i class="fas fa-chart-line logo-img"></i>
+                </a>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="header-center">
+                <div class="input-group">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
+                    <button type="submit" class="btn-search">Recherche</button>
+                </div>
+            </div>
+            
+            <!-- USER + NOTIFICATIONS -->
+            <div class="header-right">
+
+                <!-- USER MENU -->
+                <div class="user-section">
+                    <div class="user-trigger" onclick="toggleUserMenu()">
+                        <div class="avatar">B</div>
+                        <span class="user-name">Bruno Jean</span>
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </div>
+
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-info">
+                            <strong>CEJEC</strong>
+                            <span>brunojean90@gmail.com</span>
+                        </div>
+
+                        <!-- PARAMÈTRE -->
+                        <a href="Parametre_Admin.html" class="menu-item">
+                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+                        </a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="Se connecter - Admin.html" class="menu-item logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> 
+                            <span>Se déconnecter</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- NOTIFICATIONS -->
+                <div class="header-actions">
+                    <div class="notification-bell">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge44">5</span>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <!-- BRAND -->
+            <div class="brand">
+                <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo">
+                </div>
+                <div>
+                <h1>CEJEC</h1>
+                <div class="muted">Admin Panel</div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav>
+
+                <!-- DASHBOARD -->
+                <p>Vue d'ensemble</p>                
+                <a href="Dashbord-Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Tableau de bord
+                </div>
+                </a>
+                
+                <!-- MANAGEMENT -->
+                <p>Opérations</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-school fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Académique
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
+                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
+                        <a class="dropdown22-item" href="gestion_medias.html">
+                            <span class="fa-stack" style="width: 1.5em;">
+                                    <!-- ICON PRINCIPAL -->
+                                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                                    <!-- PETIT GEAR (TOP RIGHT) -->
+                                    <i class="fa-solid fa-newspaper fa-stack-1x"
+                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                            </span>  
+                        Médias & Communication
+                    </a>
+                    </div>
+                </div>
+                
+                <!-- INCUBATEUR PROJETS & CALDRIER -->
+                <a href="incubateur_calendrier.html">
+                <div class="nav-item">
+                <span class="fa-stack" style="width: 1.5em;">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                </span>                    
+                Incubateur Projets & Calendrier
+                </div>
+                </a>
+             
+                <!-- OPERATIONS -->
+                <p>Système</p> 
+                <!-- DROPDOWN -->
+                <div class="dropdown22">
+                    <div class="dropdown22-toggle" id="chevrToggle">
+                        <span class="fa-stack" style="width: 1.5em;">
+                            <!-- ICON PRINCIPAL -->
+                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                            <!-- PETIT GEAR (TOP RIGHT) -->
+                            <i class="fa-solid fa-gear fa-stack-1x"
+                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
+                        </span>
+                        Opérations
+                        <!-- CHEVRON DEROULE -->
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
+                    </div>
+                    <!-- MENI DEROULE -->
+                    <div class="dropdown22-menu" id="itemMenu">
+                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
+                        <a class="dropdown22-item active" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
+                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
+                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
+                    </div>
+                </div>   
+  
+                <!-- PARAMÈT -->
+                <a href="Parametre_Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                Paramètre
+                </div>
+                </a>
+
+            </nav>
+                
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+
+                <div class="user-profile2">
+                    <div class="avatar-wrapper2">
+                        <div class="avatar2">BJ</div>
+                        <span class="status-indicator2"></span>
+                    </div>
+                    
+                    <div class="user-info2">
+                        <div class="user-name2">Bruno Jean</div>
+                        <div class="user-role2">Super Admin</div>
+                    </div>
+                    <a href="Se connecter - Admin.html">
+                        <button class="logout-btn2" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </a>
+                </div>
+                
+            </div>
+
+        </aside>
+
+        <!-- OVERLAY -->
+        <div class="overlay"></div>
+        
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="#"><i class="fas fa-home"></i></a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="#">Tableau de bord</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="current" id="breadcrumbCurrent">Gestion Élèves & Professeurs</span>
+            </div>
+            <div class="header34">
+                <div class="header-left34">
+                    <h1>
+                        <span class="icon-circle"><i class="fas fa-users"></i></span>
+                        <span id="headerTitle">Gestion des Professeurs</span>
+                    </h1>
+                    <span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span>
+                    <p id="headerSubtitle"><i class="fas fa-chalkboard-teacher"></i> Gérez vos professeurs et le personnel académique</p>
+                </div>
+                <div class="header-actions25">
+                    <button class="btn-export" onclick="exportCurrentView()" title="Exporter en CSV">
+                        <i class="fas fa-download"></i> Exporter CSV
+                    </button>
+                </div>
+            </div>
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="personnel" onclick="switchMainTab('personnel')">
+                        <i class="fas fa-chalkboard-teacher"></i> Professeurs
+                        <span class="badge-count" id="personnelCount">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="clients" onclick="switchMainTab('clients')">
+                        <i class="fas fa-user-graduate"></i> Élèves
+                        <span class="badge-count" id="clientCount">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="presences" onclick="switchMainTab('presences')">
+                        <i class="fas fa-clock"></i> Présences
+                    </button>
+                </div>
+                <button class="section-action-btn" onclick="handleAddButton()">
+                    <i class="fas fa-user-plus"></i> <span id="addBtnText">Ajouter</span>
+                </button>
+            </div>
+            <div id="page-personnel" class="page-section active">
+                <div class="stats-container" id="statsContainerPersonnel"></div>
+                <div class="top-controls-row">
+                    <div class="search-bar-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInputPersonnel" placeholder="Rechercher un professeur (nom, email, matière)..." oninput="handleSearchInput('personnel', this.value)">
+                        <button class="btn-clear-search" id="clearSearchPersonnel" style="display:none" onclick="clearSearch('personnel')" title="Effacer"><i class="fas fa-times"></i></button>
+                        <span class="kbd-hint">Ctrl+K</span>
+                    </div>
+                    <button class="btn-reset-filters" onclick="resetAllFilters('personnel')" title="Réinitialiser les filtres">
+                        <i class="fas fa-rotate-left"></i> Réinitialiser
+                    </button>
+                </div>
+                <div class="controller-bar">
+                    <button class="btn-toggle-all" onclick="toggleAllDetails()">
+                        <i class="fas fa-eye-slash"></i> <span>Masquer tous les détails</span>
+                    </button>
+                    <span class="result-count" id="personnelResultCount"></span>
+                </div>
+                <div class="users-grid" id="usersContainerPersonnel"></div>
+                <div class="backup-indicator">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Sauvegarde automatique activée · Dernière: <span id="lastBackupTime">À l'instant</span></span>
+                </div>
+            </div>
+            <div id="page-clients" class="page-section">
+                <div class="stats-container" id="statsContainerClients"></div>
+                <div class="filiere-filter-bar" id="filiereFilterBar"></div>
+                <div class="top-controls-row">
+                    <div class="search-bar-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInputClients" placeholder="Rechercher un élève (nom, email, classe)..." oninput="handleSearchInput('clients', this.value)">
+                        <button class="btn-clear-search" id="clearSearchClients" style="display:none" onclick="clearSearch('clients')" title="Effacer"><i class="fas fa-times"></i></button>
+                        <span class="kbd-hint">Ctrl+K</span>
+                    </div>
+                    <button class="btn-reset-filters" onclick="resetAllFilters('clients')" title="Réinitialiser les filtres">
+                        <i class="fas fa-rotate-left"></i> Réinitialiser
+                    </button>
+                </div>
+                <div class="controller-bar">
+                    <button class="btn-toggle-all" onclick="toggleAllDetails()">
+                        <i class="fas fa-eye-slash"></i> <span>Masquer tous les détails</span>
+                    </button>
+                    <span class="result-count" id="clientResultCount"></span>
+                </div>
+                <div class="users-grid" id="usersContainerClients"></div>
+                <div class="backup-indicator">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Sauvegarde automatique activée · Dernière: <span id="lastBackupTimeClients">À l'instant</span></span>
+                </div>
+            </div>
+            <div id="page-presences" class="page-section">
+                <section class="stats-row-presence">
+                    <div class="stat-card-presence stat-total"><div class="stat-info"><span class="stat-label">Total Élèves</span><span class="stat-value" id="count-total">0</span></div><div class="stat-icon-presence"><i class="fas fa-users"></i></div></div>
+                    <div class="stat-card-presence stat-present"><div class="stat-info"><span class="stat-label">Présents</span><span class="stat-value" id="count-presents">0</span></div><div class="stat-icon-presence"><i class="fas fa-check-circle"></i></div></div>
+                    <div class="stat-card-presence stat-absent"><div class="stat-info"><span class="stat-label">Absents</span><span class="stat-value" id="count-absents">0</span></div><div class="stat-icon-presence"><i class="fas fa-times-circle"></i></div></div>
+                    <div class="stat-card-presence stat-retard"><div class="stat-info"><span class="stat-label">Retards</span><span class="stat-value" id="count-retards">0</span></div><div class="stat-icon-presence"><i class="fas fa-clock"></i></div></div>
+                </section>
+                <div class="chart-row">
+                    <div class="chart-box"><h3><i class="fas fa-chart-pie"></i> Répartition des présences</h3><div class="chart-wrap"><canvas id="presencePieChart"></canvas></div></div>
+                    <div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Taux de présence par filière</h3><div class="chart-wrap"><canvas id="courseBarChart"></canvas></div></div>
+                </div>
+                <section class="card" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-xs);margin-bottom:28px">
+                    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+                        <h2 style="font-size:1.1rem;font-weight:700;color:var(--blue-dark);display:flex;align-items:center;gap:10px"><i class="fas fa-clipboard-list" style="color:var(--blue)"></i> Feuille d'Appel — <span id="courseDisplay" style="color:var(--blue)">Entrepreneuriat</span></h2>
+                        <div class="filters-row">
+                            <div class="filter-item"><i class="fas fa-calendar-alt"></i><input type="date" id="dateFilter" onchange="applyFilter()"></div>
+                            <div class="filter-item"><i class="fas fa-book-open"></i><select id="courseFilter" onchange="applyFilter()"></select></div>
+                            <button class="btn-primary" onclick="savePresences()"><i class="fas fa-save"></i> Enregistrer l'appel</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table><thead><tr><th><i class="fas fa-user"></i> Élève</th><th><i class="fas fa-flag"></i> Statut</th><th><i class="fas fa-cog"></i> Actions</th></tr></thead><tbody id="attendanceBody"></tbody></table>
+                    </div>
+                </section>
+                <section class="card" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-xs);margin-bottom:28px">
+                    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+                        <h2 style="font-size:1.1rem;font-weight:700;color:var(--blue-dark);display:flex;align-items:center;gap:10px"><i class="fas fa-history" style="color:var(--blue)"></i> Historique des Présences</h2>
+                        <button class="btn-outline" onclick="clearHistory()"><i class="fas fa-trash"></i> Effacer l'historique</button>
+                    </div>
+                    <div id="historyContainer"></div>
+                </section>
+                <section class="card" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-xs);margin-bottom:28px">
+                    <h2 style="font-size:1.1rem;font-weight:700;color:var(--blue-dark);display:flex;align-items:center;gap:10px;margin-bottom:20px"><i class="fas fa-chart-line" style="color:var(--blue)"></i> Statistiques des Présences par Élève</h2>
+                    <div class="stats-grid-presence" id="presenceStatsGrid"></div>
+                </section>
+            </div>
+        </div>
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal" id="modalContent"></div>
+        </div>
+        <div class="toast-container" id="toastContainer"></div>
+        <!-- AI Systeme -->
+        <div id="orion-concierge-sistem"></div>        
+    </div>
+
+    <script type="module">
+      import { authFetch, isAuthenticated, getCurrentUser, logout } from './auth.js';
+      
+      window.authFetch = authFetch;
+      window.isAuthenticated = isAuthenticated;
+      window.getCurrentUser = getCurrentUser;
+      window.logoutUser = () => {
+        logout();
+        window.location.href = 'Se connecter - Admin.html';
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const user = getCurrentUser();
+        if (user) {
+          const nameStr = user.username || user.email || 'Utilisateur';
+          document.querySelectorAll('.user-name, .user-name2').forEach(el => { if (el) el.textContent = nameStr; });
+          document.querySelectorAll('.user-info span').forEach(el => { if (el && user.email) el.textContent = user.email; });
+        }
+      });
+    </script>
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_utilisateur.js"></script>
+<script src="js/user-profile.js"></script>
+</body>
+</html>
