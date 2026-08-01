@@ -76,6 +76,7 @@ class HRDocumentType(models.TextChoices):
 
 
 class HRDocumentStatus(models.TextChoices):
+    PENDING = "pending", "En attente"
     VALID = "valid", "Valide"
     EXPIRING_SOON = "expiring_soon", "Expire bientôt"
     EXPIRED = "expired", "Expiré"
@@ -349,7 +350,7 @@ class HRDocument(models.Model):
     file = models.FileField(upload_to="hr/documents/")
     expiry_date = models.DateField(null=True, blank=True)
     status = models.CharField(
-        max_length=20, choices=HRDocumentStatus.choices, default=HRDocumentStatus.VALID
+        max_length=20, choices=HRDocumentStatus.choices, default=HRDocumentStatus.PENDING
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,5 +1,20 @@
 {
-  "devDependencies": {
-    "eslint": "^10.7.0"
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "- **index.html** - Page principale\r - **css/** - Feuilles de style\r - **js/** - Scripts JavaScript\r - **manifest.json** - Configuration PWA",
+  "main": "apiManager.js",
+  "scripts": {
+    "test": "npm run test:auth && npm run test:offline",
+    "test:auth": "node auth_test.js",
+    "test:offline": "node node_test_runner.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dexie": "^4.4.4",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^29.1.1"
   }
 }

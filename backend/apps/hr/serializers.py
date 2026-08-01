@@ -87,6 +87,12 @@ class PerformanceEvaluationSerializer(serializers.ModelSerializer):
 
 
 class HRDocumentSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        uploaded = validated_data.get('file')
+        if uploaded and not validated_data.get('filename'):
+            validated_data['filename'] = uploaded.name
+        return super().create(validated_data)
+
     class Meta:
         model = HRDocument
         fields = [
