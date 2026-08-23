@@ -1,4 +1,4 @@
-        document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
             
             // Configuration globale de Chart.js pour la responsivité
             Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
@@ -278,106 +278,38 @@
             // ============================================
             // BASE DE DONNÉES DES ÉVÉNEMENTS
             // ============================================
-            const eventsDatabase = [
-                {
-                    id: 1,
-                    title: 'Soutenance de Projet',
-                    start: '2026-06-15',
-                    end: '2026-06-15',
-                    allDay: true,
-                    backgroundColor: '#0a4d8c',
-                    borderColor: '#0a4d8c',
-                    description: 'Présentation des projets de fin d\'études devant le jury académique.',
-                    time: 'Toute la journée',
-                    icon: 'fa-solid fa-presentation-screen',
-                    location: 'Salle de Conférence A',
-                    participants: 'Tous les étudiants de dernière année'
-                },
-                {
-                    id: 2,
-                    title: 'Séminaire Stratégique',
-                    start: '2026-06-18',
-                    end: '2026-06-20',
-                    allDay: true,
-                    backgroundColor: '#073864',
-                    borderColor: '#073864',
-                    description: 'Séminaire de planification stratégique pour l\'année académique 2026-2027.',
-                    time: 'Du 18 au 20 juin',
-                    icon: 'fa-solid fa-people-arrows',
-                    location: 'Hôtel Montana',
-                    participants: 'Direction et corps professoral'
-                },
-                {
-                    id: 3,
-                    title: 'Examens Mi-Session',
-                    start: '2026-06-24',
-                    end: '2026-06-24',
-                    allDay: true,
-                    backgroundColor: '#d62828',
-                    borderColor: '#d62828',
-                    description: 'Examens de mi-session pour toutes les promotions. Vérifiez votre horaire.',
-                    time: '8:00 - 16:00',
-                    icon: 'fa-solid fa-file-pen',
-                    location: 'Toutes les salles de classe',
-                    participants: 'Tous les étudiants'
-                },
-                {
-                    id: 4,
-                    title: 'Remise de Diplômes',
-                    start: '2026-06-30',
-                    end: '2026-06-30',
-                    allDay: true,
-                    backgroundColor: '#10b981',
-                    borderColor: '#10b981',
-                    description: 'Cérémonie officielle de remise des diplômes pour la promotion sortante.',
-                    time: '10:00 - 14:00',
-                    icon: 'fa-solid fa-graduation-cap',
-                    location: 'Auditorium Principal',
-                    participants: 'Étudiants, familles et invités'
-                },
-                {
-                    id: 5,
-                    title: 'Atelier Entrepreneuriat',
-                    start: '2026-06-16',
-                    end: '2026-06-16',
-                    allDay: false,
-                    backgroundColor: '#8b5cf6',
-                    borderColor: '#8b5cf6',
-                    description: 'Atelier pratique sur la création d\'entreprise et le business plan.',
-                    time: '14:00 - 17:00',
-                    icon: 'fa-solid fa-lightbulb',
-                    location: 'Salle Incubateur',
-                    participants: 'Étudiants entrepreneurs'
-                },
-                {
-                    id: 6,
-                    title: 'Conférence Innovation',
-                    start: '2026-06-22',
-                    end: '2026-06-22',
-                    allDay: false,
-                    backgroundColor: '#f59e0b',
-                    borderColor: '#f59e0b',
-                    description: 'Conférence sur l\'innovation technologique dans les pays en développement.',
-                    time: '9:00 - 12:00',
-                    icon: 'fa-solid fa-microchip',
-                    location: 'Amphithéâtre B',
-                    participants: 'Ouvert au public'
-                },
-                {
-                    id: 7,
-                    title: 'Réunion Pédagogique',
-                    start: '2026-06-25',
-                    end: '2026-06-25',
-                    allDay: false,
-                    backgroundColor: '#06b6d4',
-                    borderColor: '#06b6d4',
-                    description: 'Réunion mensuelle du corps professoral pour le suivi pédagogique.',
-                    time: '13:00 - 15:00',
-                    icon: 'fa-solid fa-chalkboard-user',
-                    location: 'Salle des Professeurs',
-                    participants: 'Corps professoral'
+            let eventsDatabase = [];
+            try {
+                const token = localStorage.getItem('cejec_token');
+                if (token) {
+                    const evtRes = await fetch('http://localhost:8000/api/v1/events/events/', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (evtRes.ok) {
+                        const rawEvents = await evtRes.json();
+                        const evtList = Array.isArray(rawEvents) ? rawEvents : (rawEvents.results || []);
+                        eventsDatabase = evtList.map(e => {
+                            const meta = e.calendar_metadata || {};
+                            return {
+                                id: e.id,
+                                title: e.title,
+                                start: meta.dateDebut || e.created_at.split('T')[0],
+                                end: meta.dateFin || meta.dateDebut || e.created_at.split('T')[0],
+                                allDay: true,
+                                backgroundColor: meta.couleur === 'blue' ? '#0a4d8c' : (meta.couleur === 'red' ? '#d62828' : (meta.couleur === 'green' ? '#10b981' : (meta.couleur === 'orange' ? '#f97316' : '#8b5cf6'))),
+                                borderColor: 'transparent',
+                                description: e.description || '',
+                                time: meta.heureDebut ? `${meta.heureDebut} - ${meta.heureFin || ''}` : 'Toute la journée',
+                                icon: meta.cat === 'Cours' ? 'fa-solid fa-book' : 'fa-solid fa-calendar-check',
+                                location: meta.lieu || '',
+                                participants: meta.resp || ''
+                            };
+                        });
+                    }
                 }
-            ];
+            } catch (err) {
+                console.error("Erreur chargement événements", err);
+            }
 
             // ============================================
             // FONCTIONS DU MODAL AVEC REDIRECTION
@@ -445,7 +377,7 @@
                     events.forEach(event => {
                         const iconClass = event.icon || 'fa-regular fa-calendar-check';
                         eventsHTML += `
-                            <div class="event-item" onclick="window.location.href='incubateur_calendrier.html#event-${event.id}'" 
+                            <div class="event-item" onclick="window.location.href='incubateur_calendrier.html#event-${event.id}'"
                                  title="Cliquez pour voir les détails de : ${event.title}"
                                  role="button" tabindex="0" 
                                  onkeydown="if(event.key==='Enter')window.location.href='incubateur_calendrier.html#event-${event.id}'">
@@ -490,7 +422,7 @@
             // Bouton "Nouvel événement"
             addEventBtn.addEventListener('click', function() {
                 // Rediriger vers la page du calendrier avec ancre pour nouvel événement
-                window.location.href = 'incubateur_calendrier.html#nouvel-evenement';
+                window.location.href = 'incubateur_calendrier.html#eventModal';
             });
 
             // Touche Échap
@@ -530,8 +462,7 @@
                     eventClick: function(info) {
                         const eventId = parseInt(info.event.id);
                         if (eventId) {
-                            // Redirection vers la page incubateur_calendrier.html avec ancre
-                            window.location.href = 'incubateur_calendrier.html#rendercalendrier-' + eventId;
+                            redirectToEventDetail(eventId);
                         }
                     },
                     windowResize: function() {
@@ -559,6 +490,42 @@
                 }, 250);
             });
 
+            // Charger les KPIs depuis le backend
+            async function loadDashboardStats() {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) return;
+                    const res = await fetch('http://localhost:8000/api/v1/dashboard/stats/', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    
+                    const updateKpiByTitle = (titleKey, value) => {
+                        const normalizedKey = titleKey.toLowerCase().trim();
+                        document.querySelectorAll('.kpi-title').forEach(el => {
+                            const elText = el.textContent.toLowerCase().trim();
+                            if (elText.includes(normalizedKey)) {
+                                const valueEl = el.closest('.kpi-card')?.querySelector('.kpi-value');
+                                if (valueEl) valueEl.textContent = value;
+                            }
+                        });
+                    };
+                    
+                    updateKpiByTitle('tudiants', data.students_count); // matches Étudiants or étudiants
+                    updateKpiByTitle('promotions', data.students_count);
+                    updateKpiByTitle('professeurs', data.teachers_count);
+                    updateKpiByTitle('cours', data.courses_count);
+                    updateKpiByTitle('revenus', Number(data.revenue).toLocaleString('fr-FR') + ' $');
+                    updateKpiByTitle('taux de réussite', data.success_rate + '%');
+                    updateKpiByTitle('diplômes', data.diplomas_delivered);
+                } catch (e) {
+                    console.warn('Impossible de charger les stats:', e);
+                }
+            }
+            loadDashboardStats();
+
+
             console.log('✅ Dashboard CEJEC 100% responsive initialisé');
             console.log('📊 Graphiques Chart.js responsives');
             console.log('📅 Calendrier interactif - Redirection vers incubateur_calendrier.html');
@@ -566,3 +533,4 @@
             console.log('🔗 Titre cliquable avec href="incubateur_calendrier.html"');
 
         });
+

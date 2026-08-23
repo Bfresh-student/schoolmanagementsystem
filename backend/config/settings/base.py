@@ -61,7 +61,12 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.ai_insights',
     'apps.sync',
+    'apps.dashboard',
 ]
+
+# ── CORS (allow the live-server frontend to call the API) ──────────────────
+CORS_ALLOW_ALL_ORIGINS = True          # dev only — restrict in production
+CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -102,3 +107,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+

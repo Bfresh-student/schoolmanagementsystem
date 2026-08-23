@@ -1,18 +1,63 @@
-        // ==================== KONFIGIRASYON PDF.JS ====================
+// Ensure global API objects are referenced
+
+// const getAccessToken removed (already declared globally)
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // ==================== DONE ====================
-        let employees=[{id:'EMP-2024-001',prenom:'Jean-Marc',nom:'Dubois',sexe:'Homme',tel:'+509 44 55 66 77',email:'jeanmarc@cejec.edu.ht',fonction:'Administrateur',dept:'Direction Générale',embauche:'2020-01-15',statut:'Actif',adresse:'Port-au-Prince',salaire:95000,prime:15000,cours:[],diplomes:['Licence en Gestion','Master en Administration']},{id:'EMP-2024-002',prenom:'Marie',nom:'Louis',sexe:'Femme',tel:'+509 33 22 11 00',email:'marie@cejec.edu.ht',fonction:'Secrétaire',dept:'Administration',embauche:'2021-03-10',statut:'Actif',adresse:'Pétion-Ville',salaire:65000,prime:8000,cours:[],diplomes:['BTS Secrétariat']},{id:'EMP-2024-003',prenom:'Carline',nom:'Étienne',sexe:'Femme',tel:'+509 22 33 44 55',email:'carline@cejec.edu.ht',fonction:'Comptable',dept:'Comptabilité',embauche:'2021-06-01',statut:'Actif',adresse:'Delmas',salaire:70000,prime:10000,cours:[],diplomes:['Licence Comptabilité']},{id:'EMP-2024-004',prenom:'Jacques',nom:'Mentor',sexe:'Homme',tel:'+509 38 00 11 22',email:'jacques@cejec.edu.ht',fonction:'Professeur',dept:'Professeurs',embauche:'2019-09-01',statut:'Actif',adresse:'Cap-Haïtien',salaire:75000,prime:12000,cours:['Entrepreneuriat 101','Marketing Digital'],diplomes:['Master en Entrepreneuriat']},{id:'EMP-2024-005',prenom:'Rose',nom:'Michel',sexe:'Femme',tel:'+509 39 88 77 66',email:'rose@cejec.edu.ht',fonction:'Professeur',dept:'Professeurs',embauche:'2020-09-01',statut:'Actif',adresse:'Port-au-Prince',salaire:72000,prime:10000,cours:['Commerce International','Finance'],diplomes:['MBA Finance']},{id:'EMP-2024-006',prenom:'Jean',nom:'Baptiste',sexe:'Homme',tel:'+509 37 66 55 44',email:'jean.baptiste@cejec.edu.ht',fonction:'Professeur',dept:'Professeurs',embauche:'2021-09-01',statut:'Actif',adresse:'Jacmel',salaire:70000,prime:9000,cours:['Gestion de Projet','Leadership'],diplomes:['Master en Management']},{id:'EMP-2024-007',prenom:'Marc',nom:'Arthur',sexe:'Homme',tel:'+509 40 11 22 33',email:'marc.arthur@cejec.edu.ht',fonction:'Directeur',dept:'Direction Générale',embauche:'2018-01-01',statut:'Actif',adresse:'Port-au-Prince',salaire:120000,prime:25000,cours:[],diplomes:['Doctorat en Éducation']},{id:'EMP-2024-008',prenom:'Sophie',nom:'Laurent',sexe:'Femme',tel:'+509 41 22 33 44',email:'sophie@cejec.edu.ht',fonction:'Coordinatrice',dept:'Coordination Générale',embauche:'2022-01-15',statut:'Actif',adresse:'Port-au-Prince',salaire:80000,prime:12000,cours:[],diplomes:['Master Coordination']},{id:'EMP-2024-009',prenom:'Pierre',nom:'Antoine',sexe:'Homme',tel:'+509 42 33 44 55',email:'pierre@cejec.edu.ht',fonction:'Bibliothécaire',dept:'Bibliothèque',embauche:'2022-06-01',statut:'Actif',adresse:'Port-au-Prince',salaire:55000,prime:5000,cours:[],diplomes:['Licence Bibliothéconomie']},{id:'EMP-2024-010',prenom:'Nathalie',nom:'Pierre',sexe:'Femme',tel:'+509 43 44 55 66',email:'nathalie@cejec.edu.ht',fonction:'Agent Communication',dept:'Communication',embauche:'2023-01-10',statut:'Actif',adresse:'Pétion-Ville',salaire:60000,prime:7000,cours:[],diplomes:['Licence Communication']},{id:'EMP-2024-011',prenom:'André',nom:'Simon',sexe:'Homme',tel:'+509 44 55 66 88',email:'andre@cejec.edu.ht',fonction:'Agent',dept:'Administration',embauche:'2023-06-15',statut:'Suspendu',adresse:'Delmas',salaire:45000,prime:3000,cours:[],diplomes:['BTS Administration']},{id:'EMP-2024-012',prenom:'Isabelle',nom:'Martin',sexe:'Femme',tel:'+509 45 66 77 99',email:'isabelle@cejec.edu.ht',fonction:'Professeur',dept:'Professeurs',embauche:'2023-09-01',statut:'Actif',adresse:'Port-au-Prince',salaire:68000,prime:8000,cours:['Informatique','Statistiques'],diplomes:['Master Informatique']}];
-        let congesData=[{id:1,employe:'André Simon',type:'Congé maladie',debut:'10/06/2026',fin:'12/06/2026',jours:3,motif:'Grippe',statut:'En attente'},{id:2,employe:'Marie Louis',type:'Congé annuel',debut:'20/06/2026',fin:'27/06/2026',jours:7,motif:'Vacances',statut:'Approuvé'}];
-        let evaluationsData=[{employe:'Jean-Marc Dubois',perf:92,punct:95,disc:100,comm:88,score:93.75,date:'15/01/2026',commentaire:'Excellent leadership'},{employe:'Marie Louis',perf:88,punct:90,disc:95,comm:85,score:89.5,date:'20/02/2026',commentaire:'Très bonne organisation'},{employe:'Jacques Mentor',perf:90,punct:88,disc:92,comm:90,score:90,date:'10/03/2026',commentaire:'Excellent pédagogue'}];
+        // ==================== DONNÉES STATIQUES LOCALES ====================
+        // Les employees locaux couvrent admin/secrétaire/comptable/etc.
+        // Les Teachers (professeurs) sont chargés depuis l'API.
+        let defaultEmployees=[{id:'EMP-2024-001',prenom:'Jean-Marc',nom:'Dubois',sexe:'Homme',tel:'+509 44 55 66 77',email:'jeanmarc@cejec.edu.ht',fonction:'Administrateur',dept:'Direction Générale',embauche:'2020-01-15',statut:'Actif',adresse:'Port-au-Prince',salaire:95000,prime:15000,cours:[],diplomes:['Licence en Gestion','Master en Administration']},{id:'EMP-2024-002',prenom:'Marie',nom:'Louis',sexe:'Femme',tel:'+509 33 22 11 00',email:'marie@cejec.edu.ht',fonction:'Secrétaire',dept:'Administration',embauche:'2021-03-10',statut:'Actif',adresse:'Pétion-Ville',salaire:65000,prime:8000,cours:[],diplomes:['BTS Secrétariat']},{id:'EMP-2024-003',prenom:'Carline',nom:'Étienne',sexe:'Femme',tel:'+509 22 33 44 55',email:'carline@cejec.edu.ht',fonction:'Comptable',dept:'Comptabilité',embauche:'2021-06-01',statut:'Actif',adresse:'Delmas',salaire:70000,prime:10000,cours:[],diplomes:['Licence Comptabilité']},{id:'EMP-2024-007',prenom:'Marc',nom:'Arthur',sexe:'Homme',tel:'+509 40 11 22 33',email:'marc.arthur@cejec.edu.ht',fonction:'Directeur',dept:'Direction Générale',embauche:'2018-01-01',statut:'Actif',adresse:'Port-au-Prince',salaire:120000,prime:25000,cours:[],diplomes:['Doctorat en Éducation']},{id:'EMP-2024-008',prenom:'Sophie',nom:'Laurent',sexe:'Femme',tel:'+509 41 22 33 44',email:'sophie@cejec.edu.ht',fonction:'Coordinatrice',dept:'Coordination Générale',embauche:'2022-01-15',statut:'Actif',adresse:'Port-au-Prince',salaire:80000,prime:12000,cours:[],diplomes:['Master Coordination']},{id:'EMP-2024-009',prenom:'Pierre',nom:'Antoine',sexe:'Homme',tel:'+509 42 33 44 55',email:'pierre@cejec.edu.ht',fonction:'Bibliothécaire',dept:'Bibliothèque',embauche:'2022-06-01',statut:'Actif',adresse:'Port-au-Prince',salaire:55000,prime:5000,cours:[],diplomes:['Licence Bibliothéconomie']},{id:'EMP-2024-010',prenom:'Nathalie',nom:'Pierre',sexe:'Femme',tel:'+509 43 44 55 66',email:'nathalie@cejec.edu.ht',fonction:'Agent Communication',dept:'Communication',embauche:'2023-01-10',statut:'Actif',adresse:'Pétion-Ville',salaire:60000,prime:7000,cours:[],diplomes:['Licence Communication']},{id:'EMP-2024-011',prenom:'André',nom:'Simon',sexe:'Homme',tel:'+509 44 55 66 88',email:'andre@cejec.edu.ht',fonction:'Agent',dept:'Administration',embauche:'2023-06-15',statut:'Suspendu',adresse:'Delmas',salaire:45000,prime:3000,cours:[],diplomes:['BTS Administration']}];
+        
+        // Initialiser avec localStorage ou les données par défaut (sans les professeurs hardcodés)
+        let localEmployees = JSON.parse(localStorage.getItem('cejec_employees_rh'));
+        if (!localEmployees) {
+            localEmployees = defaultEmployees;
+            localStorage.setItem('cejec_employees_rh', JSON.stringify(localEmployees));
+        }
+        
+        let employees = [...localEmployees];
+
+        // ==================== ÉTAT API (rempli au chargement) ====================
+        let teachersFromAPI = [];        // Teachers chargés depuis /api/v1/teachers/
+        let congesData = [];             // Congés depuis /api/v1/hr/leaves/
+        let salaireFromAPI = [];         // Salaires depuis /api/v1/hr/salaries/
+        let evaluationsData = [];        // Évaluations depuis /api/v1/hr/evaluations/
+        let documentsFromAPI = [];       // Documents depuis /api/v1/hr/documents/
+        let leaveTypesFromAPI = [];      // Types de congés
+        let _apiReady = false;           // true après le premier chargement API
+
+        // Données locales de secours (candidats, présences, documents locaux)
         let candidatsData=[{prenom:'Pierre',nom:'Dubois',tel:'+509 44 11 22 33',email:'pierre@email.com',poste:'Professeur Marketing',cv:'Reçu',statut:'Entretien',dateCandidature:'01/06/2026',dateEntretien:'',heureEntretien:'',interviewer:'',notes:'Bon profil, à suivre',cvFileName:'CV_Pierre_Dubois.pdf'},{prenom:'Mireille',nom:'Dumont',tel:'+509 33 22 11 00',email:'mireille@email.com',poste:'Secrétaire',cv:'Reçu',statut:'En attente',dateCandidature:'05/06/2026',dateEntretien:'',heureEntretien:'',interviewer:'',notes:'',cvFileName:'CV_Mireille_Dumont.pdf'}];
-        let documentsData=[{nom:'CV_JeanMarc_Dubois.pdf',employe:'Jean-Marc Dubois',type:'CV',date:'15/01/2020',taille:'245 KB'},{nom:'Contrat_Marie_Louis.pdf',employe:'Marie Louis',type:'Contrat',date:'10/03/2021',taille:'1.2 MB'},{nom:'Diplome_Jacques_Mentor.pdf',employe:'Jacques Mentor',type:'Diplôme',date:'01/09/2019',taille:'890 KB'},{nom:'CIN_Rose_Michel.pdf',employe:'Rose Michel',type:'Pièce identité',date:'01/09/2020',taille:'340 KB'},{nom:'CV_Pierre_Dubois.pdf',employe:'Pierre Dubois (Candidat)',type:'CV',date:'01/06/2026',taille:'180 KB'},{nom:'CV_Mireille_Dumont.pdf',employe:'Mireille Dumont (Candidat)',type:'CV',date:'05/06/2026',taille:'210 KB'}];
+        // documentsData est désormais un alias vers documentsFromAPI (rempli par l'API ou fallback)
+        let documentsData = [];
         let presencesData=[];
         let editingId=null,currentPage='employes',selectedFicheEmp=null,selectedCoursProfId=null,editingCandidatIndex=null; let editingEvalIndex = null; let selectedProfilIndex = null;
         let pdfDoc=null,pdfCurrentPage=1,pdfTotalPages=0;
         const matriculePrefix='EMP-'+new Date().getFullYear()+'-';
 
+
         // ==================== FONKSYON ITILITÈ ====================
+        // Auto‑login fallback for development (admin credentials)
+        async function ensureAuth() {
+            // Use global AuthAPI if available
+            const api = window.AuthAPI;
+            if (!api) {
+                console.error('AuthAPI not available');
+                return;
+            }
+            // Check for token in localStorage using the configured key
+            const token = window.localStorage.getItem('authToken');
+            if (!token) {
+                try {
+                    // Replace with valid admin credentials in your environment
+                    await api.login('admin@cejec.edu.ht', 'admin123');
+                    console.log('🔐 Auto‑login successful');
+                } catch (e) {
+                    console.error('❌ Auto‑login failed', e);
+                }
+            }
+        }
+
         function getProfs(){return employees.filter(e=>e.fonction==='Professeur')}
         function getInitials(e){return(e.prenom[0]+e.nom[0]).toUpperCase()}
         function getAvatarColor(i){const c=['#0A4D8C','#D62828','#10b981','#f59e0b','#8b5cf6','#ec4899','#6366f1','#14b8a6','#e11d48','#0891b2','#7c3aed','#059669'];return c[i%c.length]}
@@ -21,6 +66,70 @@
         function getDocIcon(nom){const ext=nom.split('.').pop().toLowerCase();if(ext==='pdf')return'fa-file-pdf';if(ext==='doc'||ext==='docx')return'fa-file-word';if(ext==='jpg'||ext==='jpeg'||ext==='png')return'fa-file-image';if(ext==='xls'||ext==='xlsx')return'fa-file-excel';return'fa-file-alt'}
         function getDocColor(nom){const ext=nom.split('.').pop().toLowerCase();if(ext==='pdf')return'var(--red)';if(ext==='doc'||ext==='docx')return'#3b82f6';if(ext==='jpg'||ext==='jpeg'||ext==='png')return'var(--purple)';if(ext==='xls'||ext==='xlsx')return'var(--success)';return'var(--muted)'}
         function getDocTypeClass(type){if(type==='CV')return'pill-success';if(type==='Contrat')return'pill-info';if(type==='Diplôme')return'pill-purple';if(type==='Pièce identité')return'pill-warning';return'pill-muted'}
+
+        function findEmployeeByDisplayName(name) {
+            const target = (name || '').trim().toLowerCase();
+            return employees.find(e => `${e.prenom} ${e.nom}`.trim().toLowerCase() === target);
+        }
+
+        function resolveHrEmployeeId(displayName) {
+            const emp = findEmployeeByDisplayName(displayName);
+            return emp?._hrEmployeeId || null;
+        }
+
+        function _mapAttendanceStatusToAPI(label) {
+            const map = { 'Présent': 'present', 'Retard': 'late', 'Absent': 'absent', 'Congé': 'excused' };
+            return map[label] || 'present';
+        }
+
+        function _mapAttendanceStatusFromAPI(status) {
+            const map = { present: 'Présent', late: 'Retard', absent: 'Absent', excused: 'Congé' };
+            return map[status] || 'Présent';
+        }
+
+        function mapAttendanceFromAPI(row) {
+            const name = row.employee_name || '';
+            const cleanName = name.includes('(') ? name.split('(')[0].trim() : name;
+            return {
+                _apiId: row.id,
+                _employeeId: row.employee,
+                employe: cleanName,
+                date: row.date,
+                entree: row.check_in_time ? String(row.check_in_time).slice(0, 5) : '—',
+                sortie: row.check_out_time ? String(row.check_out_time).slice(0, 5) : '—',
+                statut: _mapAttendanceStatusFromAPI(row.status),
+                notes: row.notes || ''
+            };
+        }
+
+        function _mapCandidateStatusFromAPI(status) {
+            const map = { pending: 'En attente', interview: 'Entretien', selected: 'Accepté', rejected: 'Refusé', hired: 'Embauché' };
+            return map[status] || status;
+        }
+
+        function _mapCandidateStatusToAPI(label) {
+            const map = { 'En attente': 'pending', 'Entretien': 'interview', 'Accepté': 'selected', 'Refusé': 'rejected', 'Embauché': 'hired' };
+            return map[label] || 'pending';
+        }
+
+        function mapCandidateFromAPI(c) {
+            return {
+                _apiId: c.id,
+                prenom: c.first_name,
+                nom: c.last_name,
+                tel: c.phone || '',
+                email: c.email || '',
+                poste: c.position || '',
+                cv: c.cv_file ? 'Reçu' : 'En attente',
+                statut: _mapCandidateStatusFromAPI(c.status),
+                dateCandidature: c.application_date ? new Date(c.application_date).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
+                dateEntretien: c.interview_date ? new Date(c.interview_date).toLocaleDateString('fr-FR') : '',
+                heureEntretien: c.interview_time ? String(c.interview_time).slice(0, 5) : '',
+                interviewer: c.interviewer || '',
+                notes: c.notes || '',
+                cvFileName: c.cv_file ? String(c.cv_file).split('/').pop() : ''
+            };
+        }
 
         // ==================== GESTYON UPLOAD FICHIER (NOUVO SISTÈM) ====================
         
@@ -368,9 +477,10 @@ async function generatePreviewPDF(docName) {
             }
         }
 
-        function uploadDocument() {
+        async function uploadDocument() {
             const emp = document.getElementById('docEmp').value;
             const type = document.getElementById('docType').value;
+            const desc = document.getElementById('docDesc')?.value || '';
             
             if (!emp) {
                 showToast('⚠️ Veuillez sélectionner un employé', 'error');
@@ -381,18 +491,61 @@ async function generatePreviewPDF(docName) {
             if (window._tempDocFile) {
                 fileName = window._tempDocFile.name;
             } else {
-                fileName = `${type}_${emp.replace(' ', '_')}_${Date.now()}.pdf`;
+                fileName = `${type}_${emp.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
             }
-            
-            documentsData.push({
+
+            // Trouver la fiche RH correspondante
+            const hrEmployee = findEmployeeByDisplayName(emp);
+
+            // Mapper le type vers la valeur API
+            const typeMap = { 'CV': 'cv', 'Contrat': 'other', 'Diplôme': 'diploma', 'Pièce identité': 'id_card', 'Certificat': 'certification', 'Autre': 'other' };
+            const apiDocType = typeMap[type] || 'other';
+
+            if (hrEmployee?._hrEmployeeId && window._tempDocFile) {
+                // Upload multipart vers l'API
+                const formData = new FormData();
+                formData.append('employee', hrEmployee._hrEmployeeId);
+                formData.append('document_type', apiDocType);
+                formData.append('filename', fileName);
+                formData.append('file', window._tempDocFile);
+                if (desc) formData.append('description', desc);
+                try {
+                    const created = await HRAPI.createDocument(formData);
+                    documentsData.unshift({
+                        _apiId: created.id,
+                        nom: created.filename || fileName,
+                        employe: emp,
+                        type,
+                        date: new Date().toLocaleDateString('fr-FR'),
+                        taille: formatFileSize(window._tempDocFile.size),
+                        fileUrl: created.file || null
+                    });
+                    _resetDocUpload();
+                    closeModal('uploadDocModal');
+                    document.getElementById('mainContent').innerHTML = renderDocuments();
+                    showToast('📤 Document téléversé dans la base', 'success');
+                    return;
+                } catch (err) {
+                    console.warn('[RH] createDocument échoué, fallback local:', err);
+                }
+            }
+
+            // Fallback local
+            documentsData.unshift({
+                _apiId: null,
                 nom: fileName,
                 employe: emp,
-                type: type,
+                type,
                 date: new Date().toLocaleDateString('fr-FR'),
                 taille: window._tempDocFile ? formatFileSize(window._tempDocFile.size) : `${Math.floor(Math.random() * 500) + 50} KB`
             });
-            
-            // Reset zòn upload
+            _resetDocUpload();
+            closeModal('uploadDocModal');
+            document.getElementById('mainContent').innerHTML = renderDocuments();
+            showToast('📤 Document ajouté (mode local)', 'info');
+        }
+
+        function _resetDocUpload() {
             const zone = document.getElementById('docUploadZone');
             const nameDisplay = document.getElementById('docFileNameDisplay');
             const input = document.getElementById('docFileInput');
@@ -400,10 +553,6 @@ async function generatePreviewPDF(docName) {
             if (nameDisplay) nameDisplay.style.display = 'none';
             if (input) input.value = '';
             window._tempDocFile = null;
-            
-            closeModal('uploadDocModal');
-            renderPage('documents');
-            showToast('📤 Document téléversé avec succès', 'success');
         }
 
         // ==================== RANDI PAJ YO ====================
@@ -416,36 +565,63 @@ async function generatePreviewPDF(docName) {
             });
         });
 
+        /** Affiche un spinner pendant le chargement d'un onglet */
+        function showTabSpinner() {
+            document.getElementById('mainContent').innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;min-height:280px;flex-direction:column;gap:16px">
+                <div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+                <span style="color:var(--muted);font-size:0.95rem">Chargement des données...</span>
+            </div>
+            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+        }
+
         function renderPage(page) {
             const mc = document.getElementById('mainContent');
             switch (page) {
                 case 'employes': mc.innerHTML = renderEmployes(); break;
-                case 'professeurs': mc.innerHTML = renderProfesseurs(); break;
-                case 'presences': initPresences(); mc.innerHTML = renderPresences(); break;
-                case 'conges': mc.innerHTML = renderConges(); break;
-                case 'salaires': mc.innerHTML = renderSalaires(); break;
+                case 'professeurs': loadAndRenderProfesseurs(); break;
+                case 'presences': loadAndRenderPresences(); break;
+                case 'conges': loadAndRenderConges(); break;
+                case 'salaires': loadAndRenderSalaires(); break;
                 case 'fichepaie': mc.innerHTML = renderFichePaie(); break;
-                case 'recrutement': mc.innerHTML = renderRecrutement(); break;
-                case 'documents': mc.innerHTML = renderDocuments(); break;
-                case 'evaluations': mc.innerHTML = renderEvaluations(); break;
+                case 'recrutement': loadAndRenderRecrutement(); break;
+                case 'documents': loadAndRenderDocuments(); break;
+                case 'evaluations': loadAndRenderEvaluations(); break;
                 default: mc.innerHTML = renderEmployes();
             }
         }
 
         function initPresences() {
-            if (presencesData.length === 0) {
-                const today = new Date().toISOString().split('T')[0];
-                employees.forEach((e, i) => {
+            const today = new Date().toISOString().split('T')[0];
+            employees.forEach(e => {
+                const nom = e.prenom + ' ' + e.nom;
+                if (!presencesData.some(p => p.employe === nom && p.date === today)) {
                     presencesData.push({
-                        employe: e.prenom + ' ' + e.nom,
+                        employe: nom,
                         date: today,
-                        entree: i === 3 ? '09:15' : '08:00',
-                        sortie: '16:00',
-                        statut: i === 3 ? 'Retard' : 'Présent',
-                        notes: ''
+                        entree: '—',
+                        sortie: '—',
+                        statut: 'Absent',
+                        notes: '',
+                        _apiId: null,
+                        _employeeId: e._hrEmployeeId || null
                     });
-                });
+                }
+            });
+        }
+
+        async function loadAndRenderPresences() {
+            showTabSpinner();
+            try {
+                await ensureAuth();
+                const raw = await HRAPI.attendances();
+                presencesData = raw.map(mapAttendanceFromAPI);
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les présences:', e);
+                presencesData = [];
             }
+            initPresences();
+            document.getElementById('mainContent').innerHTML = renderPresences();
         }
 
         function renderEmployes() {
@@ -525,24 +701,45 @@ async function generatePreviewPDF(docName) {
             openModal('addEmpModal');
         }
 
-        function deleteEmp(i) {
+        // --- CRUD via backend API ---
+        async function deleteEmpLegacy(i) {
+            // Ensure we have a valid auth token
+            await ensureAuth();
             if (confirm(`⚠️ Supprimer ${employees[i].prenom} ${employees[i].nom} ?`)) {
                 const nom = employees[i].prenom + ' ' + employees[i].nom;
-                employees.splice(i, 1);
-                presencesData = presencesData.filter(p => p.employe !== nom);
-                renderPage('employes');
-                updateBadges();
-                showToast(`🗑️ ${nom} supprimé`, 'error');
+                const idToDelete = employees[i].id;
+                try {
+                    await HRAPI.deleteEmployee(idToDelete);
+                    // Remove from in‑memory arrays
+                    employees.splice(i, 1);
+                    localEmployees = localEmployees.filter(e => e.id !== idToDelete);
+                    localStorage.setItem('cejec_employees_rh', JSON.stringify(localEmployees));
+                    presencesData = presencesData.filter(p => p.employe !== nom);
+                    renderPage('employes');
+                    updateBadges();
+                    showToast(`🗑️ ${nom} supprimé (API)`, 'error');
+                } catch (err) {
+                    console.warn('[RH] deleteEmployee failed, aborting operation', err);
+                    showToast(`❌ Erreur lors de la suppression de ${nom}`, 'error');
+                }
             }
         }
 
-        function saveEmployee() {
+        // Wrapper for delete button to maintain backward compatibility
+        function deleteEmp(i) {
+            deleteEmpLegacy(i);
+        }
+
+        // Save (create or update) employee via backend API with fallback to local storage
+        async function saveEmployeeLocal() {
+            // Ensure we have a valid token before any API call
+            await ensureAuth();
             const prenom = document.getElementById('empPrenom').value.trim();
             const nom = document.getElementById('empNom').value.trim();
             if (!prenom || !nom) { showToast('⚠️ Prénom et nom obligatoires', 'error'); return; }
-            const data = {
-                id: editingId !== null ? employees[editingId].id : matriculePrefix + String(employees.length + 1).padStart(3, '0'),
-                prenom, nom,
+            const payload = {
+                prenom,
+                nom,
                 sexe: document.getElementById('empSexe').value,
                 tel: document.getElementById('empTel').value,
                 email: document.getElementById('empEmail').value,
@@ -556,12 +753,31 @@ async function generatePreviewPDF(docName) {
                 cours: editingId !== null ? employees[editingId].cours : [],
                 diplomes: editingId !== null ? employees[editingId].diplomes : []
             };
-            if (editingId !== null) {
-                employees[editingId] = data;
-                showToast(`✅ ${prenom} ${nom} modifié`, 'success');
-            } else {
-                employees.push(data);
-                showToast(`✅ ${prenom} ${nom} ajouté — ${data.id}`, 'success');
+            try {
+                let result;
+                if (editingId !== null) {
+                    const id = employees[editingId].id;
+                    result = await HRAPI.updateEmployee(id, payload);
+                } else {
+                    result = await HRAPI.createEmployee(payload);
+                }
+                // The API returns the created/updated object (including its id)
+                const saved = result || payload; // fallback if API returns nothing
+                if (editingId !== null) {
+                    employees[editingId] = saved;
+                    showToast(`✅ ${prenom} ${nom} modifié (API)`, 'success');
+                } else {
+                    employees.push(saved);
+                    showToast(`✅ ${prenom} ${nom} ajouté (API) — ${saved.id}`, 'success');
+                }
+                // Sync local cache
+                const localIdx = localEmployees.findIndex(e => e.id === saved.id);
+                if (localIdx !== -1) localEmployees[localIdx] = saved; else localEmployees.push(saved);
+                localStorage.setItem('cejec_employees_rh', JSON.stringify(localEmployees));
+            } catch (apiErr) {
+                console.warn('[RH] Employee save failed, aborting operation', apiErr);
+                showToast('❌ Erreur lors de l\'enregistrement de l\'employé', 'error');
+                return;
             }
             closeModal('addEmpModal');
             editingId = null;
@@ -576,27 +792,65 @@ async function generatePreviewPDF(docName) {
 
         // ==================== RANDI LÒT PAJ YO (VÈSYON KONTRAKTE) ====================
         
+        /** Charge les teachers depuis l'API puis rend l'onglet */
+        async function loadAndRenderProfesseurs() {
+            showTabSpinner();
+            try {
+                teachersFromAPI = await HRAPI.teachers();
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les teachers:', e);
+                teachersFromAPI = [];
+            }
+            document.getElementById('mainContent').innerHTML = renderProfesseurs();
+        }
+
         function renderProfesseurs() {
-            const profs = getProfs();
+            // Priorité aux données API, fallback sur employees locaux
+            let profs;
+            if (teachersFromAPI.length > 0) {
+                profs = teachersFromAPI.map(t => ({
+                    id: 'T-' + t.id,
+                    _apiId: t.id,
+                    prenom: t.first_name || t.user?.first_name || '',
+                    nom: t.last_name || t.user?.last_name || '',
+                    email: t.email || t.user?.email || '',
+                    tel: t.phone || t.user?.phone || '—',
+                    fonction: 'Professeur',
+                    dept: 'Professeurs',
+                    statut: t.is_active !== false ? 'Actif' : 'Inactif',
+                    embauche: t.hire_date || t.created_at?.slice(0, 10) || '—',
+                    cours: t.courses?.map(c => c.name || c) || [],
+                    diplomes: [],
+                    salaire: 0, prime: 0,
+                    _raw: t
+                }));
+            } else {
+                profs = getProfs();
+            }
+
+            const source = teachersFromAPI.length > 0
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API connectée</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Données locales</span>`;
+
             let rows = profs.map((p, i) => {
                 const empIndex = employees.indexOf(p);
-                return `<tr><td><div class="emp-cell"><div class="avatar-sm" style="background:${getColorFromString(p.nom)}">${getInitials(p)}</div><div class="emp-name">${p.prenom} ${p.nom}</div></div></td>
-                <td>${p.cours?.length?p.cours.map(c=>`<span class="pill pill-info" style="margin:2px">${c}</span>`).join(' '):'<span class="pill pill-muted">Aucun</span>'}</td>
-                <td>Promotion 2026</td><td>Lun-Ven 8h-16h</td>
-                <td><span class="pill ${p.statut==='Actif'?'pill-success':'pill-danger'}">${p.statut}</span></td>
-                <td><div class="btn-group">
-                    <button class="btn btn-sm btn-outline" onclick="openCoursModal('${p.id}')"><i class="fas fa-plus-circle"></i> Cours</button>
-                    <button class="btn btn-sm btn-outline btn-icon" onclick="voirEmploiTemps('${p.id}')"><i class="fas fa-calendar-alt"></i></button>
-                    <button class="btn btn-sm btn-outline btn-icon" onclick="viewProfil(${empIndex})"><i class="fas fa-eye"></i></button>
-                </div></td></tr>`;
+                return `<tr>
+                    <td><div class="emp-cell"><div class="avatar-sm" style="background:${getColorFromString(p.nom)}">${getInitials(p)}</div><div class="emp-name">${p.prenom} ${p.nom}</div></div></td>
+                    <td>${p.cours?.length ? p.cours.map(c=>`<span class="pill pill-info" style="margin:2px">${c}</span>`).join(' ') : '<span class="pill pill-muted">Aucun</span>'}</td>
+                    <td>Promotion 2026</td><td>Lun-Ven 8h-16h</td>
+                    <td><span class="pill ${p.statut==='Actif'?'pill-success':'pill-danger'}">${p.statut}</span></td>
+                    <td><div class="btn-group">
+                        ${empIndex >= 0 ? `<button class="btn btn-sm btn-outline btn-icon" onclick="viewProfil(${empIndex})"><i class="fas fa-eye"></i></button>` : ''}
+                    </div></td></tr>`;
             }).join('');
+
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>Professeurs</span><h2>${profs.length}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-chalkboard-teacher"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Cours</span><h2>${profs.reduce((s,p)=>s+(p.cours?.length||0),0)}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-book"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Présence</span><h2>92%</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-chart-line"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-chalkboard-teacher"></i> Professeurs</h2></div>
-            <div class="table-wrap"><table><thead><tr><th>Professeur</th><th>Cours</th><th>Promotion</th><th>Horaire</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            <div class="card"><div class="card-header"><h2><i class="fas fa-chalkboard-teacher"></i> Professeurs ${source}</h2></div>
+            <div class="table-wrap"><table><thead><tr><th>Professeur</th><th>Cours</th><th>Promotion</th><th>Horaire</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Aucun professeur trouvé</td></tr>'}</tbody></table></div></div>`;
         }
 
         function openCoursModal(profId) {
@@ -717,21 +971,63 @@ async function generatePreviewPDF(docName) {
             openModal('pointageModal');
         }
 
-        function enregistrerPointage() {
+        async function enregistrerPointage() {
+            await ensureAuth();
             const empIndex = parseInt(document.getElementById('pointageEmpIndex').value);
             if (empIndex < 0 || empIndex >= employees.length) { showToast('⚠️ Employé invalide', 'error'); return; }
             const e = employees[empIndex];
             const nomComplet = e.prenom + ' ' + e.nom;
             const date = document.getElementById('pointageDate').value;
+            const entree = document.getElementById('pointageEntree').value;
+            const sortie = document.getElementById('pointageSortie').value;
+            const statut = document.getElementById('pointageStatut').value;
+            const notes = document.getElementById('pointageNotes').value;
+            const employeeId = e._hrEmployeeId;
             const existingIndex = presencesData.findIndex(p => p.employe === nomComplet && p.date === date);
+            const existing = existingIndex >= 0 ? presencesData[existingIndex] : null;
+
             const data = {
                 employe: nomComplet,
-                date: date,
-                entree: document.getElementById('pointageEntree').value,
-                sortie: document.getElementById('pointageSortie').value,
-                statut: document.getElementById('pointageStatut').value,
-                notes: document.getElementById('pointageNotes').value
+                date,
+                entree,
+                sortie,
+                statut,
+                notes,
+                _apiId: existing?._apiId || null,
+                _employeeId: employeeId || existing?._employeeId || null
             };
+
+            if (employeeId) {
+                try {
+                    const body = {
+                        employee: employeeId,
+                        date,
+                        check_in_time: entree || null,
+                        check_out_time: sortie || null,
+                        status: _mapAttendanceStatusToAPI(statut),
+                        notes
+                    };
+                    let saved;
+                    if (existing?._apiId) {
+                        saved = await HRAPI.updateAttendance(existing._apiId, body);
+                    } else {
+                        saved = await HRAPI.createAttendance(body);
+                    }
+                    data._apiId = saved.id;
+                    data._employeeId = saved.employee;
+                    data.entree = saved.check_in_time ? String(saved.check_in_time).slice(0, 5) : entree;
+                    data.sortie = saved.check_out_time ? String(saved.check_out_time).slice(0, 5) : sortie;
+                    data.statut = _mapAttendanceStatusFromAPI(saved.status);
+                } catch (err) {
+                    console.warn('[RH] enregistrerPointage API échoué:', err);
+                    showToast('❌ Enregistrement présence impossible', 'error');
+                    return;
+                }
+            } else {
+                showToast('⚠️ Fiche RH introuvable pour cet employé', 'error');
+                return;
+            }
+
             if (existingIndex >= 0) { presencesData[existingIndex] = data; }
             else { presencesData.push(data); }
             closeModal('pointageModal');
@@ -739,51 +1035,148 @@ async function generatePreviewPDF(docName) {
             showToast(`✅ Présence enregistrée`, 'success');
         }
 
+        /** Charge les congés depuis l'API puis rend l'onglet */
+        async function loadAndRenderConges() {
+            showTabSpinner();
+            try {
+                const raw = await HRAPI.leaves();
+                // Normaliser les données API vers la forme locale
+                congesData = raw.map(l => ({
+                    id: l.id,
+                    _apiId: l.id,
+                    employe: l.employee_name || l.teacher_name || 'Inconnu',
+                    type: l.leave_type_name || l.leave_type || 'Congé',
+                    debut: l.start_date ? new Date(l.start_date).toLocaleDateString('fr-FR') : '—',
+                    fin: l.end_date ? new Date(l.end_date).toLocaleDateString('fr-FR') : '—',
+                    jours: l.days_used || 0,
+                    motif: l.reason || '',
+                    statut: _mapLeaveStatus(l.status)
+                }));
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les congés:', e);
+                // Garder congesData tel quel (peut être vide ou précédemment rempli)
+            }
+            document.getElementById('mainContent').innerHTML = renderConges();
+        }
+
+        function _mapLeaveStatus(s) {
+            if (s === 'approved') return 'Approuvé';
+            if (s === 'rejected') return 'Refusé';
+            if (s === 'cancelled') return 'Annulé';
+            return 'En attente';
+        }
+
         function renderConges() {
+            const source = _apiReady
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
             let rows = congesData.map(c => `<tr><td class="emp-name">${c.employe}</td>
                 <td><span class="pill ${c.type.includes('maladie')?'pill-danger':c.type.includes('annuel')?'pill-info':'pill-warning'}">${c.type}</span></td>
                 <td>${c.debut}</td><td>${c.fin}</td><td>${c.jours}</td><td>${c.motif}</td>
                 <td><span class="pill ${c.statut==='Approuvé'?'pill-success':c.statut==='Refusé'?'pill-danger':'pill-warning'}">${c.statut}</span></td>
-                <td><div class="btn-group">${c.statut==='En attente'?`<button class="btn btn-sm btn-outline" onclick="approuverConge(${c.id})">✓</button><button class="btn btn-sm btn-danger btn-icon" onclick="refuserConge(${c.id})"><i class="fas fa-times"></i></button>`:'—'}
+                <td><div class="btn-group">${c.statut==='En attente'?`<button class="btn btn-sm btn-outline" onclick="approuverConge(${c._apiId||c.id})">✓</button><button class="btn btn-sm btn-danger btn-icon" onclick="refuserConge(${c._apiId||c.id})"><i class="fas fa-times"></i></button>`:''}
                 <button class="btn btn-sm btn-outline btn-icon" onclick="voirHistConge('${c.employe}')"><i class="fas fa-history"></i></button></div></td></tr>`).join('');
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>En attente</span><h2>${congesData.filter(c=>c.statut==='En attente').length}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-hourglass-half"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Approuvés</span><h2>${congesData.filter(c=>c.statut==='Approuvé').length}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Total Jours</span><h2>${congesData.reduce((s,c)=>s+c.jours,0)}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-calendar-day"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Total Jours</span><h2>${congesData.reduce((s,c)=>s+(c.jours||0),0)}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-calendar-day"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-umbrella-beach"></i> Congés</h2><button class="btn btn-primary btn-sm" onclick="openCongeModal()"><i class="fas fa-plus"></i> Nouvelle Demande</button></div>
-            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Type</th><th>Début</th><th>Fin</th><th>Jours</th><th>Motif</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            <div class="card"><div class="card-header"><h2><i class="fas fa-umbrella-beach"></i> Congés ${source}</h2><button class="btn btn-primary btn-sm" onclick="openCongeModal()"><i class="fas fa-plus"></i> Nouvelle Demande</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Type</th><th>Début</th><th>Fin</th><th>Jours</th><th>Motif</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:var(--muted)">Aucun congé enregistré</td></tr>'}</tbody></table></div></div>`;
         }
 
         function openCongeModal() {
-            document.getElementById('congeEmp').innerHTML = employees.map(e => `<option>${e.prenom} ${e.nom}</option>`).join('');
+            const allNames = employees.map(e => e.prenom + ' ' + e.nom)
+                .concat(teachersFromAPI.map(t => (t.first_name || '') + ' ' + (t.last_name || '')).filter(n => n.trim()));
+            document.getElementById('congeEmp').innerHTML = [...new Set(allNames)].map(n => `<option>${n}</option>`).join('');
             openModal('addCongeModal');
         }
 
-        function soumettreConge() {
+        async function soumettreConge() {
             const emp = document.getElementById('congeEmp').value;
             const debut = document.getElementById('congeDebut').value;
             const fin = document.getElementById('congeFin').value;
             if (!emp || !debut || !fin) { showToast('⚠️ Champs requis', 'error'); return; }
             const d1 = new Date(debut), d2 = new Date(fin);
             const jours = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+            const typeConge = document.getElementById('congeType').value;
+            const motif = document.getElementById('congeMotif').value;
+
+            const employeeId = resolveHrEmployeeId(emp);
+            const leaveType = leaveTypesFromAPI.find(lt =>
+                typeConge.toLowerCase().includes((lt.name || '').toLowerCase())
+            ) || leaveTypesFromAPI[0];
+
+            if (employeeId && leaveType) {
+                try {
+                    const body = {
+                        employee: employeeId,
+                        leave_type: leaveType.id,
+                        start_date: debut,
+                        end_date: fin,
+                        days_used: jours,
+                        reason: motif
+                    };
+                    await HRAPI.createLeave(body);
+                    closeModal('addCongeModal');
+                    await loadAndRenderConges();
+                    showToast(`✅ Demande soumise (${jours} jours) — Enregistrée dans la base`, 'success');
+                    return;
+                } catch (err) {
+                    console.warn('[RH] createLeave échoué, fallback local:', err);
+                }
+            }
+
+            // Fallback local si API indisponible ou teacher non trouvé
             congesData.push({
-                id: congesData.length + 1,
+                id: Date.now(),
+                _apiId: null,
                 employe: emp,
-                type: document.getElementById('congeType').value,
+                type: typeConge,
                 debut: new Date(debut).toLocaleDateString('fr-FR'),
                 fin: new Date(fin).toLocaleDateString('fr-FR'),
-                jours: jours,
-                motif: document.getElementById('congeMotif').value,
+                jours,
+                motif,
                 statut: 'En attente'
             });
             closeModal('addCongeModal');
-            renderPage('conges');
-            showToast(`✅ Demande soumise (${jours} jours)`, 'success');
+            document.getElementById('mainContent').innerHTML = renderConges();
+            showToast(`✅ Demande soumise (${jours} jours) — Mode local`, 'info');
         }
 
-        function approuverConge(id) { const c = congesData.find(c => c.id === id); if (c) { c.statut = 'Approuvé'; renderPage('conges'); showToast('✅ Congé approuvé', 'success'); } }
-        function refuserConge(id) { const c = congesData.find(c => c.id === id); if (c) { c.statut = 'Refusé'; renderPage('conges'); showToast('❌ Congé refusé', 'error'); } }
+        async function approuverConge(id) {
+            const c = congesData.find(c => (c._apiId || c.id) === id);
+            if (!c) return;
+            if (c._apiId) {
+                try {
+                    await HRAPI.approveLeave(c._apiId);
+                    c.statut = 'Approuvé';
+                    document.getElementById('mainContent').innerHTML = renderConges();
+                    showToast('✅ Congé approuvé — Sauvegardé dans la base', 'success');
+                    return;
+                } catch (err) { console.warn('[RH] approveLeave échoué:', err); }
+            }
+            c.statut = 'Approuvé';
+            document.getElementById('mainContent').innerHTML = renderConges();
+            showToast('✅ Congé approuvé', 'success');
+        }
+
+        async function refuserConge(id) {
+            const c = congesData.find(c => (c._apiId || c.id) === id);
+            if (!c) return;
+            if (c._apiId) {
+                try {
+                    await HRAPI.rejectLeave(c._apiId);
+                    c.statut = 'Refusé';
+                    document.getElementById('mainContent').innerHTML = renderConges();
+                    showToast('❌ Congé refusé — Sauvegardé dans la base', 'error');
+                    return;
+                } catch (err) { console.warn('[RH] rejectLeave échoué:', err); }
+            }
+            c.statut = 'Refusé';
+            document.getElementById('mainContent').innerHTML = renderConges();
+            showToast('❌ Congé refusé', 'error');
+        }
 
         function voirHistConge(employe) {
             document.getElementById('histCongeTitle').innerHTML = `<i class="fas fa-history"></i> Historique Congés - ${employe}`;
@@ -797,23 +1190,66 @@ async function generatePreviewPDF(docName) {
             openModal('histCongeModal');
         }
 
+        /** Charge les salaires depuis l'API puis rend l'onglet */
+        async function loadAndRenderSalaires() {
+            showTabSpinner();
+            try {
+                salaireFromAPI = await HRAPI.salaries();
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les salaires:', e);
+                salaireFromAPI = [];
+            }
+            document.getElementById('mainContent').innerHTML = renderSalaires();
+        }
+
         function renderSalaires() {
-            let rows = employees.map(e => {
-                const base = e.salaire || 50000, prime = e.prime || 5000, ded = Math.round(base * 0.08), net = base + prime - ded;
-                return `<tr><td><div class="emp-name">${e.prenom} ${e.nom}</div><div class="emp-detail">${e.fonction}</div></td><td>${base.toLocaleString()} HTG</td><td style="color:var(--success)">+${prime.toLocaleString()} HTG</td><td style="color:var(--red)">-${ded.toLocaleString()} HTG</td><td style="font-weight:800;color:var(--blue)">${net.toLocaleString()} HTG</td><td><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="genererFiche('${e.id}')"><i class="fas fa-receipt"></i> Fiche</button><button class="btn btn-sm btn-outline btn-icon" onclick="voirHistSalaire(${employees.indexOf(e)})"><i class="fas fa-history"></i></button></div></td></tr>`;
-            }).join('');
-            const totalMasse = employees.reduce((s, e) => { const b = e.salaire || 50000, p = e.prime || 5000; return s + b + p - Math.round(b * 0.08); }, 0);
+            // Si l'API a retourné des salaires, on les affiche en priorité
+            let rows, totalBrut = 0, totalNet = 0;
+            const source = salaireFromAPI.length > 0
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
+
+            if (salaireFromAPI.length > 0) {
+                rows = salaireFromAPI.map(s => {
+                    const base = parseFloat(s.base_salary) || 0;
+                    const bonuses = parseFloat(s.bonuses) || 0;
+                    const ded = parseFloat(s.deductions) || Math.round(base * 0.08);
+                    const net = parseFloat(s.net_salary) || (base + bonuses - ded);
+                    totalBrut += base + bonuses;
+                    totalNet += net;
+                    const isPaid = s.status === 'paid';
+                    return `<tr>
+                        <td><div class="emp-name">${s.employee_name || s.teacher_name || 'Inconnu'}</div><div class="emp-detail">${s.status || '—'}</div></td>
+                        <td>${base.toLocaleString()} HTG</td>
+                        <td style="color:var(--success)">+${bonuses.toLocaleString()} HTG</td>
+                        <td style="color:var(--red)">-${ded.toLocaleString()} HTG</td>
+                        <td style="font-weight:800;color:var(--blue)">${net.toLocaleString()} HTG</td>
+                        <td><span class="pill ${isPaid?'pill-success':'pill-warning'}">${isPaid?'Payé':'En attente'}</span></td>
+                        <td><div class="btn-group">
+                            <button class="btn btn-sm btn-outline" onclick="genererFicheAPI(${s.id})"><i class="fas fa-receipt"></i> Fiche</button>
+                            ${!isPaid ? `<button class="btn btn-sm btn-success" onclick="marquerPaye(${s.id})"><i class="fas fa-check"></i> Payé</button>` : ''}
+                        </div></td></tr>`;
+                }).join('');
+            } else {
+                rows = employees.map(e => {
+                    const base = e.salaire || 50000, prime = e.prime || 5000, ded = Math.round(base * 0.08), net = base + prime - ded;
+                    totalBrut += base + prime; totalNet += net;
+                    return `<tr><td><div class="emp-name">${e.prenom} ${e.nom}</div><div class="emp-detail">${e.fonction}</div></td><td>${base.toLocaleString()} HTG</td><td style="color:var(--success)">+${prime.toLocaleString()} HTG</td><td style="color:var(--red)">-${ded.toLocaleString()} HTG</td><td style="font-weight:800;color:var(--blue)">${net.toLocaleString()} HTG</td><td><span class="pill pill-warning">Local</span></td><td><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="genererFiche('${e.id}')"><i class="fas fa-receipt"></i> Fiche</button><button class="btn btn-sm btn-outline btn-icon" onclick="voirHistSalaire(${employees.indexOf(e)})"><i class="fas fa-history"></i></button></div></td></tr>`;
+                }).join('');
+            }
+
+            const colCount = salaireFromAPI.length > 0 ? 7 : 6;
             return `<div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-                <div class="stat-card"><div class="stat-info"><span>Masse brute</span><h2>${(employees.reduce((s,e)=>(e.salaire||50000)+(e.prime||5000),0)).toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-money-bill-wave"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Net total</span><h2>${totalMasse.toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-wallet"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Employés</span><h2>${employees.length}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-users"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Masse brute</span><h2>${totalBrut.toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-money-bill-wave"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Net total</span><h2>${totalNet.toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-wallet"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>${salaireFromAPI.length > 0 ? 'Fiches' : 'Employés'}</span><h2>${salaireFromAPI.length > 0 ? salaireFromAPI.length : employees.length}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-users"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-money-bill-wave"></i> Salaires</h2><div class="btn-group">
+            <div class="card"><div class="card-header"><h2><i class="fas fa-money-bill-wave"></i> Salaires ${source}</h2><div class="btn-group">
                 <button class="btn btn-sm btn-outline" onclick="exportSalairesCSV()"><i class="fas fa-file-excel"></i> Excel</button>
                 <button class="btn btn-sm btn-outline" onclick="exportSalairesPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
                 <button class="btn btn-sm btn-primary" onclick="calculerPayroll()"><i class="fas fa-calculator"></i> Calculer</button>
             </div></div>
-            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Base</th><th>Prime</th><th>Déductions</th><th>Net</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Base</th><th>Prime/Bonus</th><th>Déductions</th><th>Net</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows || '<tr><td colspan="'+colCount+'" style="text-align:center;color:var(--muted)">Aucun salaire trouvé</td></tr>'}</tbody></table></div></div>`;
         }
 
         function genererFiche(id) {
@@ -821,7 +1257,27 @@ async function generatePreviewPDF(docName) {
             if (selectedFicheEmp) showFichePaieModal(selectedFicheEmp);
         }
 
-        function calculerPayroll() { showToast('✅ Payroll calculé', 'success'); renderPage('salaires'); }
+        function genererFicheAPI(salaryId) {
+            const s = salaireFromAPI.find(s => s.id === salaryId);
+            if (!s) return;
+            const empName = s.employee_name || s.teacher_name;
+            const empLocal = { prenom: empName?.split(' ')[0] || 'Employé', nom: empName?.split(' ').slice(1).join(' ') || '', id: 'S-' + s.id, salaire: parseFloat(s.base_salary) || 0, prime: parseFloat(s.bonuses) || 0 };
+            selectedFicheEmp = empLocal;
+            showFichePaieModal(empLocal);
+        }
+
+        async function marquerPaye(salaryId) {
+            try {
+                await HRAPI.markSalaryPaid(salaryId, { payment_date: new Date().toISOString().slice(0, 10) });
+                showToast('✅ Salaire marqué comme payé', 'success');
+                await loadAndRenderSalaires();
+            } catch (err) {
+                console.error('[RH] markSalaryPaid échoué:', err);
+                showToast('❌ Erreur lors de la mise à jour', 'error');
+            }
+        }
+
+        function calculerPayroll() { showToast('✅ Payroll calculé', 'success'); loadAndRenderSalaires(); }
 
         function exportSalairesCSV() {
             let csv = 'Matricule,Employé,Fonction,Salaire Base,Prime,Déductions,Net\n';
@@ -926,6 +1382,9 @@ async function generatePreviewPDF(docName) {
         }
 
         function renderRecrutement() {
+            const source = _apiReady
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
             let rows = candidatsData.map((c, i) => `<tr><td><div class="emp-name">${c.prenom} ${c.nom}</div><div class="emp-detail">${c.dateCandidature}</div></td><td>${c.poste}</td><td>${c.tel}</td><td>${c.email}</td>
                 <td><span class="pill ${c.cv==='Reçu'?'pill-success':'pill-muted'}">${c.cv}</span></td>
                 <td><span class="pill ${c.statut==='Entretien'?'pill-info':c.statut==='Accepté'?'pill-success':c.statut==='Refusé'?'pill-danger':'pill-warning'}">${c.statut}</span></td>
@@ -941,8 +1400,20 @@ async function generatePreviewPDF(docName) {
                 <div class="stat-card"><div class="stat-info"><span>Entretiens</span><h2>${candidatsData.filter(c=>c.statut==='Entretien').length}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-calendar-check"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Acceptés</span><h2>${candidatsData.filter(c=>c.statut==='Accepté').length}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-briefcase"></i> Recrutement</h2><button class="btn btn-primary btn-sm" onclick="openModal('addCandidatModal')"><i class="fas fa-plus"></i> Ajouter</button></div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-briefcase"></i> Recrutement ${source}</h2><button class="btn btn-primary btn-sm" onclick="openModal('addCandidatModal')"><i class="fas fa-plus"></i> Ajouter</button></div>
             <div class="table-wrap"><table><thead><tr><th>Candidat</th><th>Poste</th><th>Tél</th><th>Email</th><th>CV</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+        }
+
+        async function loadAndRenderRecrutement() {
+            showTabSpinner();
+            try {
+                await ensureAuth();
+                const raw = await HRAPI.candidates();
+                candidatsData = raw.map(mapCandidateFromAPI);
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les candidats:', e);
+            }
+            document.getElementById('mainContent').innerHTML = renderRecrutement();
         }
 
         function voirCandidat(i) {
@@ -979,44 +1450,60 @@ async function generatePreviewPDF(docName) {
             openModal('addCandidatModal');
         }
 
-        function saveCandidat() {
+        async function saveCandidat() {
+            await ensureAuth();
             const p = document.getElementById('candPrenom').value.trim();
             const n = document.getElementById('candNom').value.trim();
             if (!p || !n) { showToast('⚠️ Prénom et nom requis', 'error'); return; }
-            const data = {
-                prenom: p, nom: n,
-                tel: document.getElementById('candTel').value,
-                email: document.getElementById('candEmail').value,
-                poste: document.getElementById('candPoste').value,
-                cv: window._tempCVFile ? 'Reçu' : (editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].cv : 'En attente'),
-                statut: editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].statut : 'En attente',
-                dateCandidature: document.getElementById('candDate').value ? new Date(document.getElementById('candDate').value).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
-                dateEntretien: editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].dateEntretien : '',
-                heureEntretien: editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].heureEntretien : '',
-                interviewer: editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].interviewer : '',
-                notes: document.getElementById('candNotes').value,
-                cvFileName: window._tempCVFileName || (editingCandidatIndex !== null ? candidatsData[editingCandidatIndex].cvFileName : '')
-            };
-            if (editingCandidatIndex !== null) {
-                candidatsData[editingCandidatIndex] = data;
-                showToast(`✅ ${p} ${n} modifié`, 'success');
+            const applicationDate = document.getElementById('candDate').value || new Date().toISOString().slice(0, 10);
+            const existing = editingCandidatIndex !== null ? candidatsData[editingCandidatIndex] : null;
+            const formData = new FormData();
+            formData.append('first_name', p);
+            formData.append('last_name', n);
+            formData.append('phone', document.getElementById('candTel').value);
+            formData.append('email', document.getElementById('candEmail').value);
+            formData.append('position', document.getElementById('candPoste').value);
+            formData.append('application_date', applicationDate);
+            formData.append('notes', document.getElementById('candNotes').value);
+            if (existing?.statut) formData.append('status', _mapCandidateStatusToAPI(existing.statut));
+            if (window._tempCVFile) formData.append('cv_file', window._tempCVFile);
+
+            try {
+                if (existing?._apiId) {
+                    await HRAPI.updateCandidate(existing._apiId, formData);
+                    showToast(`✅ ${p} ${n} modifié`, 'success');
+                } else {
+                    await HRAPI.createCandidate(formData);
+                    showToast(`✅ ${p} ${n} ajouté`, 'success');
+                }
                 editingCandidatIndex = null;
-            } else {
-                candidatsData.push(data);
-                showToast(`✅ ${p} ${n} ajouté`, 'success');
+                closeModal('addCandidatModal');
+                resetCVUpload();
+                await loadAndRenderRecrutement();
+            } catch (err) {
+                console.error('[RH] saveCandidat échoué:', err);
+                showToast('❌ Enregistrement candidat impossible', 'error');
             }
-            if (window._tempCVFile) {
-                documentsData.push({
-                    nom: window._tempCVFileName || `CV_${p}_${n}.pdf`,
-                    employe: p + ' ' + n + ' (Candidat)',
-                    type: 'CV',
-                    date: new Date().toLocaleDateString('fr-FR'),
-                    taille: formatFileSize(window._tempCVFile.size)
-                });
+        }
+
+        async function _updateCandidateStatus(index, statusApi, toastMsg, toastType = 'success') {
+            const c = candidatsData[index];
+            if (!c?._apiId) {
+                showToast('⚠️ Candidat non synchronisé avec l\'API', 'error');
+                return false;
             }
-            closeModal('addCandidatModal');
-            resetCVUpload();
-            renderPage('recrutement');
+            const formData = new FormData();
+            formData.append('status', statusApi);
+            try {
+                await HRAPI.updateCandidate(c._apiId, formData);
+                showToast(toastMsg, toastType);
+                await loadAndRenderRecrutement();
+                return true;
+            } catch (err) {
+                console.error('[RH] Mise à jour candidat échouée:', err);
+                showToast('❌ Mise à jour impossible', 'error');
+                return false;
+            }
         }
 
         function programmerEntretien(i) {
@@ -1031,57 +1518,180 @@ async function generatePreviewPDF(docName) {
             openModal('entretienModal');
         }
 
-        function confirmerEntretien() {
+        async function confirmerEntretien() {
             const i = parseInt(document.getElementById('entretienCandidatIndex').value);
             const date = document.getElementById('entretienDate').value;
             const heure = document.getElementById('entretienHeure').value;
             const interviewer = document.getElementById('entretienInterviewer').value;
+            const notes = document.getElementById('entretienNotes')?.value || '';
             if (!date) { showToast('⚠️ Sélectionnez une date', 'error'); return; }
             if (!interviewer) { showToast('⚠️ Sélectionnez un intervieweur', 'error'); return; }
-            candidatsData[i].statut = 'Entretien';
-            candidatsData[i].dateEntretien = new Date(date).toLocaleDateString('fr-FR');
-            candidatsData[i].heureEntretien = heure;
-            candidatsData[i].interviewer = interviewer;
-            closeModal('entretienModal');
-            renderPage('recrutement');
-            showToast(`📅 Entretien programmé`, 'success');
+            const c = candidatsData[i];
+            if (!c?._apiId) { showToast('⚠️ Candidat non synchronisé', 'error'); return; }
+            const formData = new FormData();
+            formData.append('status', 'interview');
+            formData.append('interview_date', date);
+            formData.append('interview_time', heure);
+            formData.append('interviewer', interviewer);
+            if (notes) formData.append('notes', notes);
+            try {
+                await HRAPI.updateCandidate(c._apiId, formData);
+                closeModal('entretienModal');
+                await loadAndRenderRecrutement();
+                showToast(`📅 Entretien programmé`, 'success');
+            } catch (err) {
+                console.error('[RH] confirmerEntretien échoué:', err);
+                showToast('❌ Programmation impossible', 'error');
+            }
         }
 
-        function accepterCandidat(i) {
+        async function accepterCandidat(i) {
             if (confirm(`✅ Accepter ${candidatsData[i].prenom} ${candidatsData[i].nom} ?`)) {
-                candidatsData[i].statut = 'Accepté';
-                renderPage('recrutement');
-                showToast('✅ Candidat accepté', 'success');
+                await _updateCandidateStatus(i, 'selected', '✅ Candidat accepté', 'success');
             }
         }
 
-        function refuserCandidat(i) {
+        async function refuserCandidat(i) {
             if (confirm(`❌ Refuser ${candidatsData[i].prenom} ${candidatsData[i].nom} ?`)) {
-                candidatsData[i].statut = 'Refusé';
-                renderPage('recrutement');
-                showToast('❌ Candidat refusé', 'error');
+                await _updateCandidateStatus(i, 'rejected', '❌ Candidat refusé', 'error');
             }
+        }
+
+        /** Charge les documents depuis l'API puis rend l'onglet */
+        async function loadAndRenderDocuments() {
+            showTabSpinner();
+            try {
+                const raw = await HRAPI.documents();
+                documentsFromAPI = raw.map(d => ({
+                    _apiId: d.id,
+                    nom: d.filename || `doc_${d.id}`,
+                    employe: d.employee_name || d.teacher_name || 'Inconnu',
+                    type: _mapDocType(d.document_type),
+                    date: d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '—',
+                    taille: '—',
+                    fileUrl: d.file || null
+                }));
+                documentsData = documentsFromAPI;
+                _apiReady = true;
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les documents:', e);
+                // Garder les données locales si dispo
+                if (documentsData.length === 0) {
+                    documentsData = [
+                        {_apiId:null,nom:'CV_JeanMarc_Dubois.pdf',employe:'Jean-Marc Dubois',type:'CV',date:'15/01/2020',taille:'245 KB'},
+                        {_apiId:null,nom:'Contrat_Marie_Louis.pdf',employe:'Marie Louis',type:'Contrat',date:'10/03/2021',taille:'1.2 MB'},
+                        {_apiId:null,nom:'Diplome_Jacques_Mentor.pdf',employe:'Jacques Mentor',type:'Diplôme',date:'01/09/2019',taille:'890 KB'}
+                    ];
+                }
+            }
+            document.getElementById('mainContent').innerHTML = renderDocuments();
+        }
+
+        function _mapDocType(t) {
+            if (!t) return 'Autre';
+            if (t === 'cv') return 'CV';
+            if (t === 'diploma') return 'Diplôme';
+            if (t === 'id_card') return 'Pièce identité';
+            if (t === 'certification') return 'Certificat';
+            return t.charAt(0).toUpperCase() + t.slice(1);
         }
 
         function renderDocuments() {
-            let rows = documentsData.map(d => `<tr>
+            const source = _apiReady
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
+            let rows = documentsData.map((d, idx) => `<tr>
                 <td><div style="display:flex;align-items:center;gap:10px"><i class="fas ${getDocIcon(d.nom)}" style="color:${getDocColor(d.nom)};font-size:1.2rem"></i><div><div class="emp-name">${d.nom}</div><div class="emp-detail">${d.type} · ${d.taille}</div></div></div></td>
                 <td>${d.employe}</td><td><span class="pill ${getDocTypeClass(d.type)}">${d.type}</span></td><td>${d.date}</td><td>${d.taille}</td>
                 <td><div class="btn-group">
                     <button class="btn btn-sm btn-outline btn-icon" title="Voir" onclick="voirDoc('${d.nom}')"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-sm btn-outline" onclick="telechargerDoc('${d.nom}')"><i class="fas fa-download"></i> Télécharger</button>
-                    <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="supprimerDoc('${d.nom}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-outline" onclick="telechargerDocAPI(${idx})"><i class="fas fa-download"></i> Télécharger</button>
+                    <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="supprimerDocAPI(${idx})"><i class="fas fa-trash"></i></button>
                 </div></td></tr>`).join('');
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>Documents</span><h2>${documentsData.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-folder-open"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>CV Candidats</span><h2>${documentsData.filter(d=>d.employe.includes('(Candidat)')).length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-user-tie"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Docs Employés</span><h2>${documentsData.filter(d=>!d.employe.includes('(Candidat)')).length}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-building"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>CV Candidats</span><h2>${documentsData.filter(d=>d.employe&&d.employe.includes('(Candidat)')).length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-user-tie"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Docs Employés</span><h2>${documentsData.filter(d=>!d.employe?.includes('(Candidat)')).length}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-building"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-folder-open"></i> Documents</h2><button class="btn btn-sm btn-primary" onclick="openModal('uploadDocModal')"><i class="fas fa-upload"></i> Téléverser</button></div>
-            <div class="table-wrap"><table><thead><tr><th><i class="fas fa-file"></i> Document</th><th><i class="fas fa-user"></i> Propriétaire</th><th><i class="fas fa-tag"></i> Type</th><th><i class="fas fa-calendar"></i> Date</th><th><i class="fas fa-weight-hanging"></i> Taille</th><th><i class="fas fa-cog"></i> Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            <div class="card"><div class="card-header"><h2><i class="fas fa-folder-open"></i> Documents ${source}</h2><button class="btn btn-sm btn-primary" onclick="openModal('uploadDocModal')"><i class="fas fa-upload"></i> Téléverser</button></div>
+            <div class="table-wrap"><table><thead><tr><th><i class="fas fa-file"></i> Document</th><th><i class="fas fa-user"></i> Propriétaire</th><th><i class="fas fa-tag"></i> Type</th><th><i class="fas fa-calendar"></i> Date</th><th><i class="fas fa-weight-hanging"></i> Taille</th><th><i class="fas fa-cog"></i> Actions</th></tr></thead><tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Aucun document trouvé</td></tr>'}</tbody></table></div></div>`;
+        }
+
+        function telechargerDocAPI(idx) {
+            const d = documentsData[idx];
+            if (!d) return;
+            if (d.fileUrl) {
+                const a = document.createElement('a');
+                a.href = d.fileUrl.startsWith('http') ? d.fileUrl : API_CONFIG.BASE_URL.replace('/api/v1','') + d.fileUrl;
+                a.download = d.nom;
+                a.target = '_blank';
+                a.click();
+                showToast(`📥 Téléchargement de "${d.nom}" en cours...`, 'info');
+            } else {
+                telechargerDoc(d.nom);
+            }
+        }
+
+        async function supprimerDocAPI(idx) {
+            const d = documentsData[idx];
+            if (!d) return;
+            if (!confirm(`⚠️ Supprimer définitivement "${d.nom}" ?`)) return;
+            if (d._apiId) {
+                try {
+                    await HRAPI.deleteDocument(d._apiId);
+                    documentsData.splice(idx, 1);
+                    document.getElementById('mainContent').innerHTML = renderDocuments();
+                    showToast(`🗑️ ${d.nom} supprimé de la base`, 'error');
+                    return;
+                } catch (err) {
+                    console.warn('[RH] deleteDocument échoué:', err);
+                    showToast('❌ Erreur suppression document', 'error');
+                    return;
+                }
+            }
+            documentsData.splice(idx, 1);
+            document.getElementById('mainContent').innerHTML = renderDocuments();
+            showToast(`🗑️ ${d.nom} supprimé`, 'error');
+        }
+
+        /** Charge les évaluations depuis l'API puis rend l'onglet */
+        async function loadAndRenderEvaluations() {
+            showTabSpinner();
+            try {
+                const raw = await HRAPI.evaluations();
+                // Normaliser vers la forme locale (perf/punct/disc/comm/score)
+                evaluationsData = raw.map(ev => {
+                    const scores = ev.criteria_scores || {};
+                    const perf = scores.performance ?? ev.rating ?? 0;
+                    const punct = scores.ponctualite ?? scores.punctuality ?? perf;
+                    const disc = scores.discipline ?? perf;
+                    const comm = scores.communication ?? perf;
+                    const score = Math.round((perf + punct + disc + comm) / 4);
+                    return {
+                        _apiId: ev.id,
+                        employe: ev.employee_name || ev.teacher_name || 'Inconnu',
+                        perf, punct, disc, comm, score,
+                        date: ev.evaluation_date ? new Date(ev.evaluation_date).toLocaleDateString('fr-FR') : '—',
+                        commentaire: ev.strengths || ev.areas_for_improvement || '',
+                        _raw: ev
+                    };
+                });
+                _apiReady = true;
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les évaluations:', e);
+                evaluationsData = evaluationsData.length ? evaluationsData : [
+                    {_apiId:null,employe:'Jean-Marc Dubois',perf:92,punct:95,disc:100,comm:88,score:94,date:'15/01/2026',commentaire:'Excellent leadership'},
+                    {_apiId:null,employe:'Marie Louis',perf:88,punct:90,disc:95,comm:85,score:90,date:'20/02/2026',commentaire:'Très bonne organisation'},
+                    {_apiId:null,employe:'Jacques Mentor',perf:90,punct:88,disc:92,comm:90,score:90,date:'10/03/2026',commentaire:'Excellent pédagogue'}
+                ];
+            }
+            document.getElementById('mainContent').innerHTML = renderEvaluations();
         }
 
         function renderEvaluations() {
+            const source = _apiReady
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
             let rows = evaluationsData.map((ev, i) => `<tr><td class="emp-name">${ev.employe}</td><td>${ev.date}</td>
                 <td><div>${ev.perf}%<div class="perf-bar"><div class="perf-fill" style="width:${ev.perf}%"></div></div></div></td>
                 <td><div>${ev.punct}%<div class="perf-bar"><div class="perf-fill" style="width:${ev.punct}%"></div></div></div></td>
@@ -1097,7 +1707,7 @@ async function generatePreviewPDF(docName) {
                 <div class="stat-card"><div class="stat-info"><span>Score moyen</span><h2>${evaluationsData.length?Math.round(evaluationsData.reduce((s,e)=>s+e.score,0)/evaluationsData.length):0}%</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-chart-bar"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Meilleur</span><h2>${evaluationsData.length?Math.max(...evaluationsData.map(e=>e.score)):0}%</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-trophy"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-star"></i> Évaluations</h2><button class="btn btn-primary btn-sm" onclick="openEvalModal()"><i class="fas fa-plus"></i> Nouvelle</button></div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-star"></i> Évaluations ${source}</h2><button class="btn btn-primary btn-sm" onclick="openEvalModal()"><i class="fas fa-plus"></i> Nouvelle</button></div>
             <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Date</th><th>Perf</th><th>Punct</th><th>Disc</th><th>Comm</th><th>Score</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
         }
 
@@ -1136,28 +1746,65 @@ async function generatePreviewPDF(docName) {
             }
         }
 
-        function saveEvaluation() {
+        async function saveEvaluation() {
             const emp = document.getElementById('evalEmp').value;
             const perf = parseInt(document.getElementById('evalPerf').value) || 0;
             const punct = parseInt(document.getElementById('evalPunct').value) || 0;
             const disc = parseInt(document.getElementById('evalDisc').value) || 0;
             const comm = parseInt(document.getElementById('evalComm').value) || 0;
             const score = Math.round((perf + punct + disc + comm) / 4);
+            const commentaire = document.getElementById('evalComments').value;
+
+            // Chercher le teacher API
+            const teacher = teachersFromAPI.find(t =>
+                ((t.first_name || '') + ' ' + (t.last_name || '')).trim() === emp.trim()
+            );
+
+            const existing = editingEvalIndex !== null ? evaluationsData[editingEvalIndex] : null;
+
+            if (teacher) {
+                try {
+                    const body = {
+                        teacher: teacher.id,
+                        evaluation_date: new Date().toISOString().slice(0, 10),
+                        rating: score,
+                        criteria_scores: { performance: perf, ponctualite: punct, discipline: disc, communication: comm },
+                        strengths: commentaire,
+                        evaluation_type: 'ad_hoc'
+                    };
+                    if (existing?._apiId) {
+                        await HRAPI.updateEvaluation(existing._apiId, body);
+                        showToast(`✅ Évaluation de ${emp} modifiée — Score: ${score}%`, 'success');
+                    } else {
+                        await HRAPI.createEvaluation(body);
+                        showToast(`✅ ${emp} — Score: ${score}% — Sauvegardé`, 'success');
+                    }
+                    editingEvalIndex = null;
+                    closeModal('addEvalModal');
+                    await loadAndRenderEvaluations();
+                    return;
+                } catch (err) {
+                    console.warn('[RH] saveEvaluation API échoué, fallback local:', err);
+                }
+            }
+
+            // Fallback local
             const data = {
+                _apiId: existing?._apiId || null,
                 employe: emp, perf, punct, disc, comm, score,
-                date: editingEvalIndex !== null ? evaluationsData[editingEvalIndex].date : new Date().toLocaleDateString('fr-FR'),
-                commentaire: document.getElementById('evalComments').value
+                date: existing ? existing.date : new Date().toLocaleDateString('fr-FR'),
+                commentaire
             };
             if (editingEvalIndex !== null) {
                 evaluationsData[editingEvalIndex] = data;
                 showToast(`✅ Évaluation de ${emp} modifiée — Score: ${score}%`, 'success');
             } else {
                 evaluationsData.push(data);
-                showToast(`✅ ${emp} — Score: ${score}%`, 'success');
+                showToast(`✅ ${emp} — Score: ${score}%`, 'info');
             }
             editingEvalIndex = null;
             closeModal('addEvalModal');
-            renderPage('evaluations');
+            document.getElementById('mainContent').innerHTML = renderEvaluations();
         }
 
         // ==================== EKSPÒTASYON ====================
@@ -1462,10 +2109,175 @@ async function generatePreviewPDF(docName) {
         document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); }));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
 
-        function refreshAll() { initPresences(); renderPage(currentPage); updateBadges(); showToast('🔄 Actualisé', 'info'); }
+        async function refreshAll() {
+            showToast('🔄 Actualisation en cours...', 'info');
+            // Recharger toutes les données API
+            try { leaveTypesFromAPI = await HRAPI.leaveTypes(); } catch(e) {}
+            await syncAllEmployees();
+            renderPage(currentPage);
+            updateBadges();
+            showToast('🔄 Données actualisées', 'success');
+        }
 
         // ==================== DEMARAJ APLIKASYON ====================
-        initPresences();
-        renderPage('employes');
-        updateBadges();
-        console.log('✅ Module RH CEJEC prêt !');
+        async function syncAllEmployees() {
+            let apiProfs = [];
+            let apiStaff = [];
+            
+            try {
+                teachersFromAPI = await HRAPI.teachers();
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les professeurs:', e.message);
+                teachersFromAPI = [];
+            }
+
+            try {
+                const staff = await HRAPI.employees();
+                apiStaff = staff.map(mapEmployeeFromAPI);
+            } catch (e) {
+                console.warn('[RH] Personnel administratif non disponible:', e.message);
+            }
+
+            const staffByEmail = {};
+            apiStaff.forEach(s => {
+                if (s.email && s.email !== 'N/A') staffByEmail[s.email.toLowerCase()] = s;
+            });
+
+            if (teachersFromAPI.length > 0) {
+                apiProfs = teachersFromAPI.map(t => {
+                    const usr = t.user || {};
+                    const specialty = t.primary_specialty ? [t.primary_specialty.subject] : [];
+                    const hrMatch = staffByEmail[(usr.email || '').toLowerCase()]
+                        || apiStaff.find(s => s.fonction === 'Professeur' && s.id === t.teacher_id);
+                    const hrEmployeeId = hrMatch?._hrEmployeeId || null;
+                    return {
+                        _apiId: t.id,
+                        _userId: usr.id,
+                        _hrEmployeeId: hrEmployeeId,
+                        id: hrMatch?.id || `PROF-${t.id}`,
+                        prenom: usr.first_name || 'Inconnu',
+                        nom: usr.last_name || '',
+                        sexe: 'N/A',
+                        tel: usr.phone || 'N/A',
+                        email: usr.email || 'N/A',
+                        fonction: 'Professeur',
+                        dept: 'Professeurs',
+                        embauche: t.hire_date || 'N/A',
+                        statut: t.is_active !== false ? 'Actif' : 'Suspendu',
+                        salaire: parseFloat(t.base_salary || t.monthly_salary) || 0,
+                        prime: 0,
+                        cours: specialty,
+                        diplomes: [t.qualification || '']
+                    };
+                });
+            }
+
+            const profHrIds = new Set(apiProfs.map(p => p._hrEmployeeId).filter(Boolean));
+            const staffOnly = apiStaff.filter(s => s.fonction !== 'Professeur' && !profHrIds.has(s._hrEmployeeId));
+            employees = [...staffOnly, ...apiProfs];
+        }
+
+        function mapEmployeeFromAPI(employee) {
+            const statuses = { active: 'Actif', suspended: 'Suspendu', inactive: 'Congé', terminated: 'Terminé' };
+            return {
+                _hrEmployeeId: employee.id,
+                id: employee.employee_number,
+                prenom: employee.first_name,
+                nom: employee.last_name,
+                sexe: employee.gender || 'N/A',
+                tel: employee.phone || 'N/A',
+                email: employee.email || 'N/A',
+                fonction: employee.job_title,
+                dept: employee.department,
+                embauche: employee.hire_date,
+                statut: statuses[employee.status] || employee.status,
+                adresse: employee.address || '',
+                salaire: parseFloat(employee.monthly_salary) || 0,
+                prime: parseFloat(employee.monthly_bonus) || 0,
+                cours: [], diplomes: []
+            };
+        }
+
+        async function deleteEmp(i) {
+            const employee = employees[i];
+            if (!employee || !confirm(`⚠️ Supprimer ${employee.prenom} ${employee.nom} ?`)) return;
+            try {
+                // Only delete HR employee records; user accounts are managed elsewhere
+                if (employee._hrEmployeeId) {
+                    await HRAPI.deleteEmployee(employee._hrEmployeeId);
+                } else {
+                    console.warn('[RH] Delete operation skipped for non‑HR employee', employee);
+                }
+                // Skipping AuthAPI.deleteUser; user accounts are managed elsewhere
+                
+
+                await syncAllEmployees();
+                renderPage('employes'); updateBadges();
+                showToast(`🗑️ ${employee.prenom} ${employee.nom} supprimé`, 'success');
+            } catch (err) {
+                console.error('[RH] deleteEmployee échoué:', err);
+                showToast('❌ Suppression impossible', 'error');
+            }
+        }
+
+        async function saveEmployee() {
+            const prenom = document.getElementById('empPrenom').value.trim();
+            const nom = document.getElementById('empNom').value.trim();
+            if (!prenom || !nom) { showToast('⚠️ Prénom et nom obligatoires', 'error'); return; }
+            
+            const current = editingId !== null ? employees[editingId] : null;
+            const isProfesseur = document.getElementById('empFonction').value === 'Professeur';
+            const statuses = { Actif: 'active', Suspendu: 'suspended', 'Congé': 'inactive', Terminé: 'terminated' };
+
+            try {
+
+
+                    const body = {
+                        employee_number: current?.id || `${matriculePrefix}${Date.now().toString().slice(-6)}`,
+                        first_name: prenom, last_name: nom,
+                        gender: document.getElementById('empSexe').value,
+                        phone: document.getElementById('empTel').value,
+                        email: document.getElementById('empEmail').value,
+                        job_title: document.getElementById('empFonction').value,
+                        department: document.getElementById('empDept').value,
+                        hire_date: document.getElementById('empEmbauche').value || new Date().toISOString().slice(0, 10),
+                        status: statuses[document.getElementById('empStatut').value] || 'active',
+                        address: document.getElementById('empAdresse').value,
+                        monthly_salary: Number(document.getElementById('empSalaire').value) || 0,
+                        monthly_bonus: Number(document.getElementById('empPrime').value) || 0,
+                    };
+                    if (current?._hrEmployeeId) await HRAPI.updateEmployee(current._hrEmployeeId, body);
+                    else await HRAPI.createEmployee(body);
+                
+                
+                await syncAllEmployees();
+                closeModal('addEmpModal'); editingId = null;
+                renderPage('employes'); updateBadges();
+                showToast(`✅ ${prenom} ${nom} enregistré`, 'success');
+            } catch (err) {
+                console.error('[RH] saveEmployee échoué:', err);
+                showToast('❌ Enregistrement impossible. Vérifiez la connexion et vos droits.', 'error');
+            }
+        }
+        async function initRH() {
+            console.log('[RH] Démarrage du module RH CEJEC...');
+            
+            // Chargement silencieux des données API en arrière-plan
+            try {
+                leaveTypesFromAPI = await HRAPI.leaveTypes();
+                console.log('[RH] Types de congés chargés:', leaveTypesFromAPI.length);
+            } catch (e) {
+                console.warn('[RH] Types de congés non disponibles:', e.message);
+            }
+            
+            await syncAllEmployees();
+
+            _apiReady = true;
+            console.log('✅ Module RH CEJEC prêt ! API:', _apiReady);
+            
+            // On rend la page APRES le chargement pour inclure les professeurs de l'API
+            renderPage('employes');
+            updateBadges();
+        }
+
+        initRH();

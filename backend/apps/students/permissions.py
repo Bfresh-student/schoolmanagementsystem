@@ -18,6 +18,14 @@ class HasResourcePermission(BasePermission):
         "DELETE": "delete",
     }
 
+    ROLE_PERMISSIONS = {
+    "ADMIN":     {"courses": {"create", "read", "update", "delete"}, "classes": {"create", "read", "update", "delete"}},
+    "DIRECTOR":  {"courses": {"create", "read", "update", "delete"}, "classes": {"create", "read", "update", "delete"}},
+    "TEACHER":   {"courses": {"read"}, "classes": {"read"}},
+    "SECRETARY": {"courses": {"read"}, "classes": {"read"}},
+    "STUDENT":   {"courses": {"read"}, "classes": {"read"}},
+}
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -35,7 +43,7 @@ class HasResourcePermission(BasePermission):
             return False
 
         role = role.upper()
-        allowed_actions = {
+        additional_permissions = {
             "TEACHER": {
                 "students": {"read"},
                 "specializations": {"read"},
@@ -46,7 +54,9 @@ class HasResourcePermission(BasePermission):
             },
         }
 
-        return action in allowed_actions.get(role, {}).get(resource, set())
+        allowed_actions = self.ROLE_PERMISSIONS.get(role, {}).get(resource, set())
+        allowed_actions |= additional_permissions.get(role, {}).get(resource, set())
+        return action in allowed_actions
 
 
 class IsOwnerStudentOrStaff(BasePermission):

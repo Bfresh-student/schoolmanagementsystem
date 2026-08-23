@@ -18,33 +18,33 @@ class LeaveTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "contract_type", "status", "start_date", "end_date", "monthly_salary", "currency")
+    list_display = ("employee", "contract_type", "status", "start_date", "end_date", "monthly_salary", "currency")
     list_filter = ("status", "contract_type", "currency")
-    search_fields = ("teacher__user__first_name", "teacher__user__last_name")
+    search_fields = ("employee__first_name", "employee__last_name")
 
 
 @admin.register(Salary)
 class SalaryAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "pay_period_start", "pay_period_end", "net_salary", "status")
+    list_display = ("employee", "pay_period_start", "pay_period_end", "net_salary", "status")
     list_filter = ("status",)
     readonly_fields = ("net_salary",)
 
 
 @admin.register(Leave)
 class LeaveAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "leave_type", "start_date", "end_date", "days_used", "status", "approver")
+    list_display = ("employee", "leave_type", "start_date", "end_date", "days_used", "status", "approver")
     list_filter = ("status", "leave_type")
 
 
 @admin.register(PerformanceEvaluation)
 class PerformanceEvaluationAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "evaluator", "evaluation_date", "rating", "evaluation_type", "teacher_acknowledged")
-    list_filter = ("evaluation_type", "teacher_acknowledged")
+    list_display = ("employee", "evaluator", "evaluation_date", "rating", "evaluation_type", "employee_acknowledged")
+    list_filter = ("evaluation_type", "employee_acknowledged")
 
 
 @admin.register(HRDocument)
 class HRDocumentAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "document_type", "expiry_date", "status")
+    list_display = ("employee", "document_type", "expiry_date", "status")
     list_filter = ("document_type", "status")
 
 

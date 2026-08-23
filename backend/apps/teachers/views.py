@@ -78,7 +78,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Filtrer les professeurs selon les paramètres"""
         queryset = Teacher.objects.prefetch_related(
-            'qualifications', 'specialties', 'schedules', 'certifications'
+            'qualifications', 'specialties', 'schedules', 'certifications', 'courses_taught'
         )
 
         # Filtrer par statut

@@ -163,6 +163,9 @@
               <a class="dropdown22-item" href="gestion_notes.html"
                 ><i class="fa-solid fa-sticky-note"></i> Notes</a
               >
+              <a class="dropdown22-item" href="gestion_utilisateurs.html#presences"
+                ><i class="fa-solid fa-clock"></i> Présences</a
+              >
               <a class="dropdown22-item" href="gestion_medias.html">
                 <span class="fa-stack" style="width: 1.5em">
                   <!-- ICON PRINCIPAL -->
@@ -320,18 +323,18 @@
           </div>
 
           <div class="quick-actions">
-            <a href="Rapports_Admin.html#" class="btn-report"
+            <a href="Rapports_Admin.html" class="btn-report"
               ><i class="fa-solid fa-file-pdf text-red"></i> Rapport
               Académique</a
             >
-            <a href="gestion_utilisateurs.html#" class="btn-report"
+            <a href="gestion_utilisateurs.html#presences" class="btn-report"
               ><i class="fa-solid fa-user-check text-blue"></i> Présences</a
             >
-            <a href="gestion_utilisateurs.html#" class="btn-report"
+            <a href="gestion_utilisateurs.html#clients" class="btn-report"
               ><i class="fa-solid fa-users"></i> Étudiants</a
             >
             <a
-              href="incubateur_calendrier.html#"
+              href="incubateur_calendrier.html#projectModal"
               class="btn-report btn-primary-action"
               ><i class="fa-solid fa-plus"></i> Nouveau Projet</a
             >
@@ -357,26 +360,6 @@
               <canvas
                 id="spark-1"
                 aria-label="Graphique des étudiants inscrits"></canvas>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-title">Promotions Actives</span>
-              <div class="kpi-icon">
-                <i class="fa-solid fa-layer-group"></i>
-              </div>
-            </div>
-            <div class="kpi-middle">
-              <span class="kpi-value">6</span>
-              <span class="kpi-badge badge-up"
-                ><i class="fa-solid fa-minus"></i> Stable</span
-              >
-            </div>
-            <div class="sparkline-wrapper">
-              <canvas
-                id="spark-2"
-                aria-label="Graphique des promotions actives"></canvas>
             </div>
           </div>
 
@@ -456,26 +439,6 @@
 
           <div class="kpi-card">
             <div class="kpi-top">
-              <span class="kpi-title">Diplômes Délivrés</span>
-              <div class="kpi-icon">
-                <i class="fa-solid fa-certificate"></i>
-              </div>
-            </div>
-            <div class="kpi-middle">
-              <span class="kpi-value">120</span>
-              <span class="kpi-badge badge-up"
-                ><i class="fa-solid fa-check"></i> 100%</span
-              >
-            </div>
-            <div class="sparkline-wrapper">
-              <canvas
-                id="spark-7"
-                aria-label="Graphique des diplômes délivrés"></canvas>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-top">
               <span class="kpi-title">Projets Incubés</span>
               <div class="kpi-icon"><i class="fa-solid fa-lightbulb"></i></div>
             </div>
@@ -491,6 +454,25 @@
                 aria-label="Graphique des projets incubés"></canvas>
             </div>
           </div>
+
+          <!-- <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Diplômes Délivrés</span>
+              <div class="kpi-icon"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="kpi-middle">
+              <span class="kpi-value">120</span>
+              <span class="kpi-badge badge-up"
+                ><i class="fa-solid fa-arrow-up"></i> +12%</span
+              >
+            </div>
+            <div class="sparkline-wrapper">
+              <canvas
+                id="spark-7"
+                aria-label="Graphique des diplômes délivrés"></canvas>
+            </div>
+          </div> -->
+
 
           <div class="kpi-card red-variant">
             <div class="kpi-top">
@@ -630,7 +612,7 @@
             <div class="panel-header">
               <h3 class="panel-title">
                 <a
-                  href="incubateur_calendrier.html"
+                  href="incubateur_calendrier.html#calendrier"
                   title="Voir le calendrier complet de l'incubateur">
                   <i class="fa-regular fa-calendar"></i> Planification des
                   Événements

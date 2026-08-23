@@ -98,10 +98,28 @@
       el.textContent = fullName;
     });
 
+    const phone = user.phone || 'Non renseigné';
+
     // Email dans la zone .user-info (span enfant direct)
     document.querySelectorAll('.user-info').forEach((el) => {
-      const span = el.querySelector('span');
-      if (span) span.textContent = email;
+      const span = el.querySelector('span:not(.user-phone)');
+      if (span) {
+          span.textContent = email;
+          span.style.display = 'block';
+      }
+      
+      // Inject or update the phone number
+      let phoneEl = el.querySelector('.user-phone');
+      if (!phoneEl) {
+          phoneEl = document.createElement('span');
+          phoneEl.className = 'user-phone';
+          phoneEl.style.fontSize = '0.85em';
+          phoneEl.style.opacity = '0.8';
+          phoneEl.style.display = 'block'; // Make it stack below the email
+          phoneEl.style.marginTop = '2px';
+          el.appendChild(phoneEl);
+      }
+      phoneEl.textContent = phone !== 'Non renseigné' ? phone : '';
       
       const strong = el.querySelector('strong');
       if (strong && strong.textContent.trim() === 'CEJEC') {

@@ -3,7 +3,10 @@ from rest_framework.routers import DefaultRouter
 
 from apps.hr.views import (
     AuditLogViewSet,
+    CandidateViewSet,
     ContractViewSet,
+    EmployeeAttendanceViewSet,
+    EmployeeViewSet,
     HRDocumentViewSet,
     LeaveTypeViewSet,
     LeaveViewSet,
@@ -12,6 +15,9 @@ from apps.hr.views import (
 )
 
 router = DefaultRouter()
+router.register("employees", EmployeeViewSet, basename="employee")
+router.register("candidates", CandidateViewSet, basename="candidate")
+router.register("attendances", EmployeeAttendanceViewSet, basename="employee-attendance")
 router.register("leave-types", LeaveTypeViewSet, basename="leave-type")
 router.register("contracts", ContractViewSet, basename="contract")
 router.register("salaries", SalaryViewSet, basename="salary")

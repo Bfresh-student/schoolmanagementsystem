@@ -37,6 +37,7 @@ class EventListSerializer(serializers.ModelSerializer):
 
     seats_available = serializers.IntegerField(read_only=True)
     is_full = serializers.BooleanField(read_only=True)
+    confirmed_participants_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Event
@@ -52,6 +53,8 @@ class EventListSerializer(serializers.ModelSerializer):
             "capacity_max",
             "seats_available",
             "is_full",
+            "confirmed_participants_count",
+            "calendar_metadata",
         ]
 
 
@@ -86,6 +89,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
             "creator_name",
             "created_at",
             "updated_at",
+            "calendar_metadata",
             "participants",
             "media_items",
         ]

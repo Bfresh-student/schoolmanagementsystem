@@ -42,22 +42,23 @@ class ProjectsModelTests(TestCase):
         project = Project.objects.create(
             name="App e-commerce", course=self.course, teacher=self.teacher
         )
-        ProjectMember.objects.create(project=project, student_id=uuid.uuid4(), role="leader")
+        ProjectMember.objects.create(project=project, student_id=1, role="leader")
         self.assertEqual(project.members_count, 1)
 
     def test_deliverable_is_late(self):
+        from django.utils import timezone
         project = Project.objects.create(name="Projet X", course=self.course)
         deliverable = ProjectDeliverable.objects.create(
             project=project,
             name="Rapport final",
-            due_date=timezone_now_minus_one_day(),
+            due_date=timezone.now() - timedelta(days=1),
         )
         self.assertTrue(deliverable.is_late)
 
     def test_internship_creation(self):
         company = Company.objects.create(name="TechCorp")
         internship = Internship.objects.create(
-            student_id=uuid.uuid4(),
+            student_id=1,
             company=company,
             mentor=self.teacher,
             start_date=date(2024, 6, 1),
@@ -67,13 +68,13 @@ class ProjectsModelTests(TestCase):
 
     def test_mentorship_creation(self):
         mentorship = Mentorship.objects.create(
-            student_id=uuid.uuid4(), teacher=self.teacher, start_date=date(2024, 1, 1)
+            student_id=1, teacher=self.teacher, start_date=date(2024, 1, 1)
         )
         self.assertEqual(mentorship.status, "active")
 
     def test_business_plan_creation(self):
         plan = BusinessPlan.objects.create(
-            student_id=uuid.uuid4(), business_name="EcoMarket"
+            student_id=1, business_name="EcoMarket"
         )
         self.assertEqual(plan.status, "draft")
 

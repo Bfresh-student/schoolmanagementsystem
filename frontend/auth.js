@@ -50,6 +50,47 @@ function getRefreshToken() {
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
+/**
+ * Helper: turn a failed fetch Response into a readable Error.
+ * Django REST Framework usually returns JSON like:
+ *   {"email": ["Ce champ est requis."]}
+ *   {"detail": "No active account found with the given credentials"}
+ * This extracts the most useful human-readable message instead of
+ * throwing the raw JSON text.
+ */
+async function buildResponseError(resp, fallbackPrefix) {
+  const raw = await resp.text();
+  let message = null;
+
+  try {
+    const data = JSON.parse(raw);
+    if (typeof data === "string") {
+      message = data;
+    } else if (data.detail) {
+      message = data.detail;
+    } else if (data.message) {
+      message = data.message;
+    } else if (data.non_field_errors) {
+      message = [].concat(data.non_field_errors).join(" ");
+    } else if (typeof data === "object") {
+      // Take the first field error found, e.g. { email: ["..."] }
+      const firstKey = Object.keys(data)[0];
+      if (firstKey) {
+        const val = data[firstKey];
+        message = `${firstKey}: ${[].concat(val).join(" ")}`;
+      }
+    }
+  } catch (e) {
+    // Not JSON, fall back to raw text if it's short/readable
+    if (raw && raw.length < 200) message = raw;
+  }
+
+  if (!message) {
+    message = `${fallbackPrefix} (${resp.status})`;
+  }
+  return new Error(message);
+}
+
 /** Attempt to refresh access token automatically */
 export async function refreshAccessToken() {
   const refresh = getRefreshToken();
@@ -99,8 +140,7 @@ export async function signUp(data) {
     body: JSON.stringify(data),
   });
   if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`Sign-up failed: ${resp.status} ${err}`);
+    throw await buildResponseError(resp, "L'inscription a échoué");
   }
   const result = await resp.json();
   const token = result.access || result.token;
@@ -124,8 +164,7 @@ export async function signIn(credentials) {
     body: JSON.stringify(payload),
   });
   if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`Sign-in failed: ${resp.status} ${err}`);
+    throw await buildResponseError(resp, "La connexion a échoué");
   }
   const result = await resp.json();
   const token = result.access || result.token;
@@ -133,6 +172,32 @@ export async function signIn(credentials) {
   if (token) setToken(token, refresh);
   if (result.user) setUserData(result.user);
   return result;
+}
+
+/**
+ * Request a password reset email for the given address.
+ * Expects a Django endpoint like /auth/users/reset_password/
+ * that accepts { email } and sends a reset link/OTP.
+ * Always resolves successfully from the caller's perspective when the
+ * request reaches the server, even if the email doesn't exist, so we
+ * don't leak which emails are registered — the backend should return
+ * 200 regardless. Network/server errors are still thrown.
+ */
+export async function resetPassword(email) {
+  const url = `${DJANGO_API_URL}/auth/users/reset_password/`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!resp.ok) {
+    throw await buildResponseError(resp, "L'envoi des instructions a échoué");
+  }
+  try {
+    return await resp.json();
+  } catch (e) {
+    return { success: true };
+  }
 }
 
 /** Logout the current user */
@@ -183,8 +248,7 @@ export async function authFetch(endpoint, { method = "GET", body = null } = {}, 
   }
 
   if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`Request failed: ${resp.status} ${err}`);
+    throw await buildResponseError(resp, "La requête a échoué");
   }
   return resp.json();
 }

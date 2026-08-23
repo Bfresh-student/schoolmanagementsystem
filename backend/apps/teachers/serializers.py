@@ -111,13 +111,14 @@ class TeacherListSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField( read_only=True)
     email = serializers.CharField( read_only=True)
     primary_specialty = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     
     class Meta:
         model = Teacher
         fields = [
             'id', 'user', 'full_name', 'email', 'teacher_id', 'employment_type',
-            'status', 'status_display', 'primary_specialty', 'rating', 'hire_date'
+            'status', 'status_display', 'primary_specialty', 'courses', 'rating', 'hire_date'
         ]
         read_only_fields = [
             'id', 'user', 'full_name', 'email', 'rating', 'hire_date'
@@ -129,6 +130,12 @@ class TeacherListSerializer(serializers.ModelSerializer):
             return TeacherSpecialtySerializer(specialty).data
         return None
 
+    def get_courses(self, obj):
+        """Cours dont ce professeur est responsable, pour le tableau RH."""
+        return [
+            {"id": str(course.id), "code": course.code, "name": course.name}
+            for course in obj.courses_taught.all()
+        ]
 
 class TeacherDetailSerializer(serializers.ModelSerializer):
     """Serializer détaillé pour les professeurs"""

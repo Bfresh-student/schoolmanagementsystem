@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from apps.courses.models import Course
-from apps.students.models import Specialization, Student
+from apps.students.models import SchoolClass, Specialization, Student
 from apps.users.models import User
 
 from apps.enrollments.models import Inscription, InscriptionStatus
@@ -64,12 +64,13 @@ class OfflineSyncIdempotenceTests(TestCase):
             fees_amount=450.00,
         )
 
+        self.school_class = SchoolClass.objects.create(specialization=specialization, level=1)
     def test_replay_with_same_local_uuid_does_not_duplicate(self):
-        from .serializers import InscriptionCreateSerializer
+        from apps.enrollments.serializers import InscriptionCreateSerializer
 
         payload = {
             "student": self.student.id,
-            "course": self.course.id,
+            "school_class": self.school_class.id,
             "created_offline": True,
         }
         s1 = InscriptionCreateSerializer(data=payload)
@@ -83,4 +84,4 @@ class OfflineSyncIdempotenceTests(TestCase):
         second = s2.save()
 
         self.assertEqual(first.id, second.id)
-        self.assertEqual(Inscription.objects.filter(student=self.student, course=self.course).count(), 1)
+        self.assertEqual(Inscription.objects.filter(student=self.student, school_class=self.school_class).count(), 1)

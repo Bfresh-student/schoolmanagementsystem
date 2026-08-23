@@ -51,17 +51,19 @@ def check_expiring_hr_documents(warning_window_days: int = 30):
         doc.refresh_status(warning_window_days=warning_window_days)
         if doc.status != previous_status:
             updated += 1
-            teacher_user_id = doc.teacher.user_id
+            recipient_user_id = getattr(getattr(doc, "employee", None), "user_id", None)
+            if recipient_user_id is None:
+                continue
             if doc.status == HRDocumentStatus.EXPIRING_SOON:
                 send_hr_notification(
-                    teacher_user_id,
+                    recipient_user_id,
                     "Document expirant bientôt",
                     f"Votre document « {doc.get_document_type_display()} » expire le {doc.expiry_date}.",
                     "hr_document_expiring",
                 )
             elif doc.status == HRDocumentStatus.EXPIRED:
                 send_hr_notification(
-                    teacher_user_id,
+                    recipient_user_id,
                     "Document expiré",
                     f"Votre document « {doc.get_document_type_display()} » a expiré le {doc.expiry_date}.",
                     "hr_document_expired",
@@ -78,12 +80,15 @@ def check_expiring_contracts(warning_window_days: int = 30):
         end_date__isnull=False,
         end_date__lte=threshold,
         end_date__gte=today,
-    ).select_related("teacher")
+    ).select_related("employee", "employee__user")
     for contract in contracts:
+        recipient_user_id = getattr(getattr(contract.employee, "user", None), "id", None)
+        if recipient_user_id is None:
+            continue
         send_hr_notification(
-            contract.teacher.user_id,
+            recipient_user_id,
             "Contrat arrivant à échéance",
-            f"Le contrat de {contract.teacher} expire le {contract.end_date}.",
+            f"Le contrat de {contract.employee} expire le {contract.end_date}.",
             "contract_expiring",
         )
     return {"notified": contracts.count()}

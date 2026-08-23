@@ -25,3 +25,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3002',
     'http://127.0.0.1:3002',
 ]
+
+# Run celery tasks synchronously in local development to avoid hanging when redis is down
+CELERY_TASK_ALWAYS_EAGER = True

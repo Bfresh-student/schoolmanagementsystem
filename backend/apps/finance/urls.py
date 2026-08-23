@@ -10,7 +10,4 @@ router.register("payment-methods", views.PaymentMethodViewSet, basename="payment
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("webhooks/stripe/", views.StripeWebhookView.as_view(), name="webhook-stripe"),
-    path("webhooks/paypal/", views.PayPalWebhookView.as_view(), name="webhook-paypal"),
-    path("webhooks/mobile-money/", views.MobileMoneyWebhookView.as_view(), name="webhook-mobile-money"),
 ]

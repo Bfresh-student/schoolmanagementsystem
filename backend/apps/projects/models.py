@@ -33,7 +33,9 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="projects")
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="projects", null=True, blank=True
+    )
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.SET_NULL,
@@ -54,6 +56,9 @@ class Project(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Données propres aux projets de l'incubateur (budget, promotion, catégorie,
+    # porteur et avancement). Elles restent séparées du projet pédagogique.
+    incubator_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -78,7 +83,7 @@ class ProjectMember(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="members")
-    student_id = models.UUIDField()
+    student_id = models.BigIntegerField()
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="member")
     contribution = models.TextField(blank=True)
     joined_at = models.DateTimeField(auto_now_add=True)
@@ -112,7 +117,7 @@ class ProjectDeliverable(models.Model):
 
     file_path = models.CharField(max_length=500, blank=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
-    submitted_by_student_id = models.UUIDField(null=True, blank=True)
+    submitted_by_student_id = models.BigIntegerField(null=True, blank=True)
 
     grade = models.DecimalField(
         max_digits=4,
@@ -173,7 +178,12 @@ class Internship(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student_id = models.UUIDField()
+    student_id = models.BigIntegerField(null=True, blank=True)
+    student_name = models.CharField(max_length=255, blank=True)
+    promotion = models.CharField(max_length=100, blank=True)
+    position = models.CharField(max_length=255, blank=True)
+    supervisor_name = models.CharField(max_length=255, blank=True)
+    assessment = models.CharField(max_length=10, blank=True)
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="internships")
     mentor = models.ForeignKey(
         Teacher,
@@ -243,7 +253,7 @@ class Mentorship(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student_id = models.UUIDField()
+    student_id = models.BigIntegerField()
     teacher = models.ForeignKey(
         Teacher, on_delete=models.CASCADE, related_name="mentorships"
     )
@@ -285,6 +295,27 @@ class MentorshipSession(models.Model):
         return f"{self.mentorship} — {self.session_date:%Y-%m-%d}"
 
 
+class IncubatorMentor(models.Model):
+    """Répertoire des mentors externes et internes de l'incubateur."""
+
+    AVAILABILITY_CHOICES = [("yes", "Oui"), ("partial", "Partiel"), ("no", "Non")]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    full_name = models.CharField(max_length=255)
+    profession = models.CharField(max_length=255, blank=True)
+    company = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    specialty = models.CharField(max_length=150, blank=True)
+    availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, default="yes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["full_name"]
+        verbose_name = "Mentor de l'incubateur"
+        verbose_name_plural = "Mentors de l'incubateur"
+
+
 class BusinessPlan(models.Model):
     """Projet entrepreneurial d'un étudiant."""
 
@@ -297,7 +328,9 @@ class BusinessPlan(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student_id = models.UUIDField()
+    student_id = models.BigIntegerField(null=True, blank=True)
+    bearer_name = models.CharField(max_length=255, blank=True)
+    submitted_date = models.DateField(null=True, blank=True)
     business_name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     financial_projection = models.JSONField(

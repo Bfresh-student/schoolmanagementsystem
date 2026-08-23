@@ -20,10 +20,25 @@ class AttendanceSerializer(serializers.ModelSerializer):
 class AttendanceItemSerializer(serializers.Serializer):
     """Une ligne d'appel, dans un batch."""
     student = serializers.IntegerField()
-    present = serializers.BooleanField()
+    # Accept three status options instead of a boolean
+    status = serializers.ChoiceField(choices=[('present', 'Présent'), ('absent', 'Absent'), ('retard', 'Retard')])
     reason_if_absent = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     local_timestamp = serializers.DateTimeField()
     local_uuid = serializers.UUIDField(required=False)
+    
+    def to_internal_value(self, data):
+        # Call parent to validate basic fields
+        validated = super().to_internal_value(data)
+        # Map status to the existing boolean fields expected by services
+        status = validated.pop('status')
+        if status == 'present':
+            validated['present'] = True
+        elif status == 'absent':
+            validated['present'] = False
+        else:  # retard
+            validated['present'] = True
+            validated['reason_if_absent'] = 'Retard'
+        return validated
 
 
 class AttendanceBatchSubmitSerializer(serializers.Serializer):

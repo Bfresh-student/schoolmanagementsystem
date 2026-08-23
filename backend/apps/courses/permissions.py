@@ -14,6 +14,14 @@ class HasResourcePermission(BasePermission):
         "DELETE": "delete",
     }
 
+    ROLE_PERMISSIONS = {
+    "ADMIN":     {"courses": {"create", "read", "update", "delete"}},
+    "DIRECTOR":  {"courses": {"create", "read", "update", "delete"}},
+    "TEACHER":   {"courses": {"read"}},
+    "SECRETARY": {"courses": {"read"}},
+    "STUDENT":   {"courses": {"read"}},
+}
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -23,13 +31,8 @@ class HasResourcePermission(BasePermission):
             return False
 
         action = self.ACTION_MAP.get(request.method)
-        role = getattr(request.user, "role", None)
-        if role is None:
-            return False
-
-        return role.permissions.filter(resource=resource, action=action).exists()
-
-
+        allowed = self.ROLE_PERMISSIONS.get(request.user.role, {}).get(resource, set())
+        return action in allowed
 class CourseWriteRequiresOnline(BasePermission):
     """
     Les cours sont une donnée de RÉFÉRENCE synchronisée en one-way

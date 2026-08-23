@@ -4,16 +4,27 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import services
-from .models import Grade, GradeConflict, GradeSyncEntry
+from .models import Assessment, Grade, GradeConflict, GradeSyncEntry
 from .permissions import GradePermission
 from .serializers import (
     GradeConflictResolveSerializer,
+    AssessmentSerializer,
     GradeConflictSerializer,
     GradeSerializer,
     GradeSubmitSerializer,
 )
 
 
+class AssessmentViewSet(viewsets.ModelViewSet):
+    queryset = Assessment.objects.select_related("course", "school_class").all()
+    serializer_class = AssessmentSerializer
+    permission_classes = [GradePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if school_class := self.request.query_params.get("school_class"): qs = qs.filter(school_class_id=school_class)
+        if academic_year := self.request.query_params.get("academic_year"): qs = qs.filter(academic_year=academic_year)
+        return qs.filter(course__teacher__user=self.request.user) if self.request.user.role == "TEACHER" else qs
 class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     GET  /grades/                -> liste (filtrée par rôle)
@@ -29,10 +40,10 @@ class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
-        role_name = getattr(getattr(user, "role", None), "name", None)
-        if role_name == "student":
+        role_name = user.role
+        if role_name == "STUDENT":
             return qs.filter(student__user=user)
-        if role_name == "teacher":
+        if role_name == "TEACHER":
             return qs.filter(course__teacher__user=user)
         return qs
 
@@ -42,11 +53,11 @@ class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        role_name = getattr(getattr(request.user, "role", None), "name", None)
+        role_name = request.user.role
         teacher_profile = getattr(request.user, "teacher_profile", None)
 
         # Un teacher ne peut noter que sur SES cours (l'admin peut passer outre).
-        if role_name == "teacher" and data["course"].teacher_id != getattr(teacher_profile, "id", None):
+        if role_name == "TEACHER" and data["course"].teacher_id != getattr(teacher_profile, "id", None):
             return Response(
                 {"detail": "Vous ne pouvez saisir des notes que sur vos propres cours."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -54,13 +65,14 @@ class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
 
         entry, result = services.submit_grade(
             student=data["student"],
-            course=data["course"],
+            course=data["assessment"].course if data.get("assessment") else data["course"],
             teacher=teacher_profile,
             value=data["value"],
             source=GradeSyncEntry.Source.LOCAL if request.data.get("offline") else GradeSyncEntry.Source.REMOTE,
             submitted_by=request.user,
             local_timestamp=data["local_timestamp"],
             local_uuid=data.get("local_uuid"),
+            assessment=data.get("assessment"),
         )
 
         return Response(
@@ -79,26 +91,34 @@ class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         après plusieurs jours). Chaque item est traité dans l'ordre de son
         `local_timestamp`, cf. Phase 2/3 du document.
         """
-        # On crée d'abord toutes les entries en PENDING, puis on les traite
-        # en lot dans l'ordre chronologique de leur local_timestamp (garantit
-        # l'ordre des opérations même si le payload arrive dans le désordre).
         items = request.data.get("items", [])
-        created_entries = []
-        from .serializers import GradeSyncEntrySerializer
+        if not isinstance(items, list):
+            return Response({"detail": "items doit être une liste."}, status=status.HTTP_400_BAD_REQUEST)
 
+        results = []
+        role_name = request.user.role
+        teacher_profile = getattr(request.user, "teacher_profile", None)
         for item in items:
-            s = GradeSyncEntrySerializer(data=item)
-            if not s.is_valid():
-                created_entries.append({"local_uuid": item.get("local_uuid"), "errors": s.errors})
+            serializer = GradeSubmitSerializer(data=item)
+            if not serializer.is_valid():
+                results.append({"local_uuid": item.get("local_uuid"), "errors": serializer.errors})
                 continue
-            if GradeSyncEntry.objects.filter(local_uuid=s.validated_data.get("local_uuid")).exists():
+            data = serializer.validated_data
+            if role_name == "TEACHER" and data["course"].teacher_id != getattr(teacher_profile, "id", None):
+                results.append({"local_uuid": str(data.get("local_uuid", "")), "errors": {"course": ["Cours non autorisé."]}})
                 continue
-            created_entries.append(s.save(status="pending"))
-
-        pending_qs = GradeSyncEntry.objects.filter(
-            id__in=[e.id for e in created_entries if hasattr(e, "id")]
-        )
-        results = services.process_pending_queue(pending_qs)
+            entry, result = services.submit_grade(
+                student=data["student"],
+                course=data["assessment"].course if data.get("assessment") else data["course"],
+                teacher=teacher_profile,
+                value=data["value"],
+                source=GradeSyncEntry.Source.LOCAL,
+                submitted_by=request.user,
+                local_timestamp=data["local_timestamp"],
+                local_uuid=data.get("local_uuid"),
+                assessment=data.get("assessment"),
+            )
+            results.append({"entry_id": entry.id, "local_uuid": str(entry.local_uuid), **result})
         return Response({"results": results}, status=status.HTTP_200_OK)
 
 

@@ -18,6 +18,11 @@ class HasResourcePermission(BasePermission):
         "DELETE": "delete",
     }
 
+    # `User.role` est un CharField. Ces droits couvrent les ressources du
+    # domaine projets sans supposer un modèle Role relationnel inexistant.
+    STAFF_ROLES = {"ADMIN", "DIRECTOR"}
+    READ_ROLES = {"TEACHER", "SECRETARY", "ACCOUNTANT", "STAFF"}
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -27,8 +32,9 @@ class HasResourcePermission(BasePermission):
             return False
 
         action = self.ACTION_MAP.get(request.method)
-        role = getattr(request.user, "role", None)
-        if role is None:
-            return False
-
-        return role.permissions.filter(resource=resource, action=action).exists()
+        role = str(getattr(request.user, "role", "")).upper()
+        if request.user.is_staff or role in self.STAFF_ROLES:
+            return True
+        if action == "read" and role in self.READ_ROLES:
+            return True
+        return False

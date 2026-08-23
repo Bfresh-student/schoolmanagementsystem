@@ -94,40 +94,40 @@ class StudentAPITests(TestCase):
         return client
 
     def test_unauthenticated_access_denied(self):
-        response = APIClient().get("/api/students/")
+        response = APIClient().get("/api/v1/students/students/")
         self.assertIn(response.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
 
     def test_teacher_can_list_students(self):
-        response = self._auth(self.teacher_client, self.teacher_user).get("/api/students/")
+        response = self._auth(self.teacher_client, self.teacher_user).get("/api/v1/students/students/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
     def test_student_only_sees_own_profile(self):
-        response = self._auth(self.student_client, self.student_user).get("/api/students/")
+        response = self._auth(self.student_client, self.student_user).get("/api/v1/students/students/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.student.id)
 
     def test_student_can_access_me_endpoint(self):
-        response = self._auth(self.student_client, self.student_user).get("/api/students/me/")
+        response = self._auth(self.student_client, self.student_user).get("/api/v1/students/students/me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["id"], self.student.id)
 
     def test_student_cannot_access_other_profile(self):
         response = self._auth(self.student_client, self.student_user).get(
-            f"/api/students/{self.other_student.id}/"
+            f"/api/v1/students/students/{self.other_student.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_teacher_cannot_anonymize_student(self):
         response = self._auth(self.teacher_client, self.teacher_user).post(
-            f"/api/students/{self.student.id}/anonymize/"
+            f"/api/v1/students/students/{self.student.id}/anonymize/"
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_can_anonymize_student(self):
         response = self._auth(self.admin_client, self.admin_user).post(
-            f"/api/students/{self.student.id}/anonymize/"
+            f"/api/v1/students/students/{self.student.id}/anonymize/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.student.refresh_from_db()
@@ -136,14 +136,14 @@ class StudentAPITests(TestCase):
 
     def test_teacher_cannot_create_specialization(self):
         response = self._auth(self.teacher_client, self.teacher_user).post(
-            "/api/specializations/",
+            "/api/v1/students/specializations/",
             {"name": "Commerce", "description": ""},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_can_create_specialization(self):
         response = self._auth(self.admin_client, self.admin_user).post(
-            "/api/specializations/",
+            "/api/v1/students/specializations/",
             {"name": "Commerce", "description": ""},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -1345,7 +1345,6 @@ GESTION UTILISATEUR ← FOUNDATION
 ÉTAPE 2 : Création de Compte
   Système crée USERS + STUDENTS
     → Email verification token envoyé
-    → Étudiant clique lien d'activation
 
 ÉTAPE 3 : Approbation Admin
   Admin visite dashboard
@@ -1357,9 +1356,8 @@ GESTION UTILISATEUR ← FOUNDATION
 ÉTAPE 4 : Auto-Facturation
   Système trigger (app Finance) :
     → Crée INVOICES
-    → Montant = fees du cours
-    → Envoie EMAIL + NOTIFICATION
-    → "Votre facture est prête, cliquez pour payer"
+    → Montant = fees de la classe
+    -> entrer le montant paye
 
 ÉTAPE 5 : Paiement
   Étudiant clique lien de paiement

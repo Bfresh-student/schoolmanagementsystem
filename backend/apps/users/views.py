@@ -1,17 +1,25 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.db.models import Q
+from apps.students.models import Student
 from .models import User, UserProfile, LoginLog, PasswordResetToken
 from .serializers import (
     UserListSerializer, UserDetailSerializer, UserCreateSerializer,
     UserUpdateSerializer, UserPasswordChangeSerializer, LoginLogSerializer,
     UserRoleChangeSerializer, UserStatusChangeSerializer
 )
+
+
+class IsAdministrator(BasePermission):
+    """Réserve l'administration des comptes aux rôles d'administration."""
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.is_admin_user)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -54,8 +62,10 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserListSerializer
     
     def get_permissions(self):
-        if self.action in ['create', 'register', 'login', 'refresh']:
+        if self.action in ['register', 'login', 'refresh']:
             return [AllowAny()]
+        if self.action in ['list', 'create', 'destroy', 'login_logs', 'change_role', 'change_status']:
+            return [IsAdministrator()]
         return super().get_permissions()
     
     def get_queryset(self):
@@ -86,25 +96,68 @@ class UserViewSet(viewsets.ModelViewSet):
                 Q(last_name__icontains=search)
             )
         
+        if not self.request.user.is_admin_user:
+            return queryset.filter(pk=self.request.user.pk)
         return queryset
     
     @action(detail=False, methods=['post'])
     def register(self, request):
-        """Endpoint d'inscription"""
+        """Endpoint d'inscription avec déduplication des étudiants."""
+        role = request.data.get("role", "STUDENT")
+        phone = (request.data.get("phone") or "").strip()
+        first_name = (request.data.get("first_name") or "").strip()
+        last_name = (request.data.get("last_name") or "").strip()
+
+        if role != "STUDENT" and (
+            not request.user.is_authenticated or not request.user.is_admin_user
+        ):
+            return Response(
+                {"detail": "Seul un administrateur peut créer ce type de compte."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        user = None
+        if role == "STUDENT" and phone and first_name and last_name:
+            user = User.objects.filter(
+                role="STUDENT", phone=phone,
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            ).first()
+        # Contrôle d'autorisation déplacé avant la déduplication.
+        #
+        #
+        #
+
+        #
+        #
+        #
+
+        # SECURITY FIX: never issue tokens for an existing account without
+        # verifying the password. Return 400 so the caller can direct the
+        # user to the login screen instead.
+        if user is not None:
+            return Response(
+                {"detail": "Un compte existe déjà avec ces informations. Veuillez vous connecter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        user.status = 'ACTIVE'
-        user.save()
-        
+        user.status = "ACTIVE"
+        user.save(update_fields=["status"])
+
+        if user.role == "STUDENT":
+            Student.objects.get_or_create(user=user)
+
         refresh = RefreshToken.for_user(user)
         return Response({
-            'message': 'Utilisateur créé avec succès',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'user': UserDetailSerializer(user).data
+            "message": "Utilisateur créé avec succès",
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserDetailSerializer(user).data,
         }, status=status.HTTP_201_CREATED)
-    
+
     @action(detail=False, methods=['post'])
     def login(self, request):
         """Endpoint de connexion"""
@@ -261,12 +314,16 @@ class UserViewSet(viewsets.ModelViewSet):
         
         user.role = serializer.validated_data['role']
         user.save()
-        
+
+        # Créer le profil Student si le nouveau rôle est STUDENT
+        if user.role == "STUDENT":
+            Student.objects.get_or_create(user=user)
+
         return Response({
             'message': f'Rôle changé en {user.get_role_display()}',
             'user': UserDetailSerializer(user).data
         }, status=status.HTTP_200_OK)
-    
+
     @action(detail=True, methods=['post'], url_path='change-status')
     def change_status(self, request, pk=None):
         """Changer le statut d'un utilisateur (Admin seulement)"""

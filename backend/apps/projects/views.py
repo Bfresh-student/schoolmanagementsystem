@@ -6,7 +6,7 @@ fichiers sources courts et lisibles par sous-module.
 
 from apps.projects.views_business_plan import BusinessPlanViewSet
 from apps.projects.views_internships import CompanyViewSet, InternshipViewSet
-from apps.projects.views_mentorship import MentorshipViewSet
+from apps.projects.views_mentorship import IncubatorMentorViewSet, MentorshipViewSet
 from apps.projects.views_projects import ProjectViewSet
 
 __all__ = [
@@ -14,5 +14,6 @@ __all__ = [
     "CompanyViewSet",
     "InternshipViewSet",
     "MentorshipViewSet",
+    "IncubatorMentorViewSet",
     "BusinessPlanViewSet",
 ]

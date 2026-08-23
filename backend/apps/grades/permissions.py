@@ -12,24 +12,24 @@ class GradePermission(BasePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
-        role_name = getattr(getattr(request.user, "role", None), "name", None)
+        role_name = request.user.role
 
-        if role_name == "admin":
+        if role_name in ("ADMIN", "DIRECTOR"):
             return True
         if view.action in ("list", "retrieve"):
-            return role_name in ("student", "teacher", "admin")
-        if view.action == "submit":
-            return role_name in ("teacher", "admin")
+            return role_name in ("STUDENT", "TEACHER", "ADMIN", "DIRECTOR")
+        if view.action in ("submit", "sync_batch"):
+            return role_name in ("TEACHER", "ADMIN", "DIRECTOR")
         # resolve_conflict, list_conflicts : admin uniquement
         return False
 
     def has_object_permission(self, request, view, obj):
-        role_name = getattr(getattr(request.user, "role", None), "name", None)
-        if role_name == "admin":
+        role_name = request.user.role
+        if role_name in ("ADMIN", "DIRECTOR"):
             return True
-        if role_name == "student":
+        if role_name == "STUDENT":
             return request.method in SAFE_METHODS and obj.student.user_id == request.user.id
-        if role_name == "teacher":
+        if role_name == "TEACHER":
             teacher_profile_id = getattr(request.user, "teacher_profile_id", None)
             if request.method in SAFE_METHODS:
                 return obj.course.teacher_id == teacher_profile_id

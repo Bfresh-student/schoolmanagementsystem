@@ -72,7 +72,16 @@ class Inscription(models.Model):
         "students.Student", on_delete=models.CASCADE, related_name="inscriptions"
     )
     course = models.ForeignKey(
-        "courses.Course", on_delete=models.PROTECT, related_name="inscriptions"
+        "courses.Course", on_delete=models.PROTECT, related_name="inscriptions",
+        null=True, blank=True,
+    )
+    school_class = models.ForeignKey(
+        "students.SchoolClass",
+        on_delete=models.PROTECT,
+        related_name="inscriptions",
+        null=True,
+        blank=True,
+        help_text="Classe dans laquelle l'étudiant s'inscrit. Remplace le champ 'course' au niveau macro.",
     )
 
     # --- État ---
@@ -113,10 +122,23 @@ class Inscription(models.Model):
         ordering = ["-requested_at"]
         constraints = [
             # Un étudiant ne peut avoir qu'UNE inscription "vivante" (non terminale)
+            models.UniqueConstraint(
+                fields=["student", "course"],
+                condition=models.Q(
+                    course__isnull=False,
+                    status__in=[
+                        InscriptionStatus.PENDING,
+                        InscriptionStatus.APPROVED,
+                        InscriptionStatus.ACTIVE,
+                        InscriptionStatus.SUSPENDED,
+                    ],
+                ),
+                name="uniq_active_inscription_per_student_course",
+            ),
             # par cours à la fois. Les inscriptions rejetées/validées ne comptent pas,
             # ce qui autorise une ré-inscription après un rejet ou un cursus terminé.
             models.UniqueConstraint(
-                fields=["student", "course"],
+                fields=["student", "school_class"],
                 condition=models.Q(
                     status__in=[
                         InscriptionStatus.PENDING,
@@ -125,7 +147,7 @@ class Inscription(models.Model):
                         InscriptionStatus.SUSPENDED,
                     ]
                 ),
-                name="uniq_active_inscription_per_student_course",
+                name="uniq_active_inscription_per_student_class",
             )
         ]
         indexes = [
@@ -182,3 +204,77 @@ class Inscription(models.Model):
             actor=actor,
         )
         return self
+
+
+class PreInscriptionStatus(models.TextChoices):
+    NEW = "new", "Nouvelle"
+    REVIEWED = "reviewed", "Examinée"
+    CONVERTED = "converted", "Convertie en inscription"
+    REJECTED = "rejected", "Rejetée"
+
+
+class PreInscription(models.Model):
+    """
+    Pré-inscription soumise depuis le formulaire public du site (etudes.html).
+    Ne nécessite aucun compte. Un admin examine ensuite le dossier et crée
+    l'objet Student + Inscription correspondant si la candidature est retenue.
+    """
+    # -- Référence --
+    reference = models.CharField(
+        max_length=20, unique=True, editable=False,
+        help_text="Numéro de dossier auto-généré (ex: PRE-2026-0001).",
+    )
+
+    # -- Informations personnelles --
+    nom = models.CharField(max_length=100)
+    prenom = models.CharField(max_length=100)
+    sexe = models.CharField(max_length=10, blank=True)
+    date_naissance = models.DateField(null=True, blank=True)
+
+    # -- Coordonnées --
+    telephone = models.CharField(max_length=30)
+    email = models.EmailField(blank=True)
+    adresse = models.TextField(blank=True)
+    commune = models.CharField(max_length=100, blank=True)
+    departement = models.CharField(max_length=100, blank=True)
+
+    # -- Programme demandé --
+    programme = models.CharField(max_length=200, blank=True, default="Entrepreneuriat")
+    promotion = models.CharField(max_length=100, blank=True)
+
+    # -- Suivi --
+    status = models.CharField(
+        max_length=20,
+        choices=PreInscriptionStatus.choices,
+        default=PreInscriptionStatus.NEW,
+    )
+    notes_admin = models.TextField(blank=True)
+
+    # -- Timestamps --
+    date_inscription = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "pre_inscriptions"
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.reference:
+            year = timezone.now().year
+            last = PreInscription.objects.filter(
+                reference__startswith=f"PRE-{year}-"
+            ).order_by("-reference").first()
+            if last:
+                try:
+                    seq = int(last.reference.split("-")[-1]) + 1
+                except ValueError:
+                    seq = 1
+            else:
+                seq = 1
+            self.reference = f"PRE-{year}-{seq:04d}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.reference} — {self.prenom} {self.nom}"
+

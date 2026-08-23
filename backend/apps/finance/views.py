@@ -1,15 +1,11 @@
-import json
 import logging
 
-from django.conf import settings
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Invoice, Payment, PaymentMethod
-from .permissions import IsAdminOnly, IsOwnerStudentOrAdmin, ReadOnlyOrAdmin
+from .permissions import IsAdminOnly, IsOwnerStudentOrAdmin, ReadOnlyOrAdmin, _is_admin
 from .serializers import (
     InvoiceDetailSerializer,
     InvoiceSerializer,
@@ -17,13 +13,14 @@ from .serializers import (
     PaymentMethodSerializer,
     PaymentSerializer,
 )
-from .services import PaymentError, PaymentService
+from .services import InvoiceService, PaymentError, PaymentService
 
 logger = logging.getLogger(__name__)
 
-
-def _is_admin(user):
-    return user.is_staff or getattr(getattr(user, "role", None), "name", None) == "admin"
+# ⚠️ CORRIGÉ : _is_admin n'est plus redéfinie ici. L'ancienne copie locale
+# était identique (bug pour bug) à celle de permissions.py — avoir deux
+# définitions de la même règle est ce qui a rendu ce bug difficile à
+# repérer. Une seule source de vérité désormais : permissions._is_admin.
 
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
@@ -40,6 +37,24 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = Invoice.objects.select_related("student", "inscription")
+        from apps.enrollments.models import Inscription, InscriptionStatus
+        missing = Inscription.objects.select_related("school_class", "course").filter(status__in=[InscriptionStatus.PENDING, InscriptionStatus.APPROVED, InscriptionStatus.ACTIVE, InscriptionStatus.SUSPENDED], invoice__isnull=True)
+        student_id = self.request.query_params.get("student")
+        if student_id:
+            missing = missing.filter(student_id=student_id)
+        for inscription in missing:
+            amount = inscription.school_class.tuition_fee if inscription.school_class_id else None
+            if amount is None and inscription.course_id:
+                amount = inscription.course.fees_amount
+            if amount is not None:
+                InvoiceService.create_for_inscription(inscription, amount=amount)
+
+        qs = Invoice.objects.select_related("student", "inscription")
+        
+        student_id = self.request.query_params.get("student")
+        if student_id:
+            qs = qs.filter(student_id=student_id)
+            
         if _is_admin(self.request.user):
             return qs
         return qs.filter(student__user=self.request.user)
@@ -50,111 +65,68 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
         return InvoiceSerializer
 
 
-class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
+class PaymentViewSet(viewsets.ModelViewSet):
+    """
+    ⚠️ CHANGEMENT : n'est plus en lecture seule. Le système ne gère aucun
+    paiement en ligne ni webhook — un paiement est créé et complété en un
+    seul appel `POST /finance/payments/` (espèces/virement/mobile money
+    saisis en personne par le staff, confirmés sur place).
+
+    Pas de PUT/PATCH/DELETE : un paiement enregistré ne se modifie pas
+    (intégrité comptable) — pour corriger une erreur de saisie, utiliser
+    l'action `void` ci-dessous plutôt que d'éditer l'enregistrement.
+    """
+
+    http_method_names = ["get", "post", "head", "options"]
     permission_classes = [IsOwnerStudentOrAdmin]
 
     def get_queryset(self):
-        qs = Payment.objects.select_related("invoice", "student", "payment_method", "receipt")
+        # Les anciennes versions créaient un paiement à 0 HTG : ce n'est pas
+        # une transaction et il ne doit pas apparaître dans l'historique.
+        qs = Payment.objects.filter(amount__gt=0).select_related(
+            "invoice", "student", "payment_method", "receipt", "initiated_by"
+        )
         if _is_admin(self.request.user):
             return qs
         return qs.filter(student__user=self.request.user)
 
     def get_serializer_class(self):
+        if self.action == "create":
+            return PaymentCreateSerializer
         return PaymentSerializer
 
-    @action(detail=False, methods=["post"])
-    def initiate(self, request):
-        """Initie un paiement pour une facture. Pour Stripe/PayPal, le
-        front doit avoir déjà créé l'intent/order côté passerelle et fournir
-        sa référence ; la confirmation finale arrive ensuite via webhook.
-        Pour espèces/virement, le paiement reste 'pending' jusqu'à
-        confirmation manuelle par un admin (endpoint /confirm/)."""
-        serializer = PaymentCreateSerializer(data=request.data, context={"request": request})
+    def get_permissions(self):
+        # Seul le staff (admin/secrétariat via _is_admin) encaisse un
+        # paiement — un étudiant ne peut que consulter les siens.
+        if self.action in ("create", "void"):
+            return [IsAdminOnly()]
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
         try:
-            method = PaymentMethod.objects.get(code=data.pop("payment_method_code"), is_active=True)
-        except PaymentMethod.DoesNotExist:
-            return Response({"detail": "Moyen de paiement invalide ou inactif."}, status=400)
-
-        try:
-            payment = PaymentService.initiate(
+            payment = PaymentService.record_manual(
                 invoice=data["invoice"],
-                payment_method=method,
+                payment_method=data["payment_method"],
                 amount=data["amount"],
-                idempotency_key=data["idempotency_key"],
                 user=request.user,
-                gateway_reference=data.get("gateway_reference", ""),
             )
         except PaymentError as exc:
-            return Response({"detail": str(exc)}, status=400)
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(PaymentSerializer(payment).data, status=201)
+        return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAdminOnly])
-    def confirm(self, request, pk=None):
-        """Confirmation manuelle — espèces reçues en personne, virement
-        vérifié sur le relevé bancaire. Admin uniquement."""
+    @action(detail=True, methods=["post"])
+    def void(self, request, pk=None):
+        """Annule un paiement saisi par erreur. Admin uniquement (voir get_permissions)."""
         payment = self.get_object()
+        reason = request.data.get("reason", "")
         try:
-            payment = PaymentService.confirm_manual(payment, confirmed_by=request.user)
+            payment = PaymentService.void(payment, voided_by=request.user, reason=reason)
         except PaymentError as exc:
-            return Response({"detail": str(exc)}, status=400)
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(PaymentSerializer(payment).data)
 
-
-# ---------------------------------------------------------------------------
-# Webhooks passerelles — non authentifiés (JWT n'a pas de sens pour un
-# serveur tiers), sécurisés par vérification de signature à la place.
-# ---------------------------------------------------------------------------
-
-class StripeWebhookView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
-
-    def post(self, request):
-        import stripe
-
-        payload = request.body
-        sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
-        try:
-            event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
-        except (ValueError, stripe.error.SignatureVerificationError):
-            logger.warning("Signature Stripe invalide sur webhook reçu.")
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        PaymentService.handle_stripe_event(event)
-        return Response(status=status.HTTP_200_OK)
-
-
-class PayPalWebhookView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
-
-    def post(self, request):
-        # La vérification de signature PayPal se fait via leur endpoint
-        # /v1/notifications/verify-webhook-signature (transmission_id, cert_url, etc.)
-        # — appel omis ici, à implémenter avec les identifiants PayPal du projet.
-        event = json.loads(request.body)
-        PaymentService.handle_paypal_event(event)
-        return Response(status=status.HTTP_200_OK)
-
-
-class MobileMoneyWebhookView(APIView):
-    """Point d'entrée générique — chaque fournisseur (Digicel, MonCash, MTN)
-    a son propre format ; un adaptateur en amont doit normaliser la charge
-    utile en {id, status, reference} avant d'appeler ce endpoint, ou bien
-    ce endpoint doit être dupliqué/spécialisé par fournisseur."""
-
-    permission_classes = [AllowAny]
-    authentication_classes = []
-
-    def post(self, request):
-        shared_secret = request.META.get("HTTP_X_WEBHOOK_SECRET", "")
-        if shared_secret != settings.MOBILE_MONEY_WEBHOOK_SECRET:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-        event = json.loads(request.body)
-        PaymentService.handle_mobile_money_event(event)
-        return Response(status=status.HTTP_200_OK)

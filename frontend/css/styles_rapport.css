@@ -226,6 +226,16 @@
       padding: 6px 12px;
       font-size: 0.78rem;
     }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--input-border);
+      color: var(--muted);
+    }
+    .btn-outline:hover {
+      background: var(--blue-lighter);
+      border-color: var(--blue-soft);
+      color: var(--blue);
+    }
     .btn-icon {
       padding: 8px;
       border-radius: 50%;

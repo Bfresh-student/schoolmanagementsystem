@@ -8,6 +8,10 @@
     <title>Authentification · CEJEC ERP</title>
     <link rel="manifest" href="manifest.json" />
     <script src="sw-register.js" defer></script>
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/favicon.png" />
+    <link rel="shortcut icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -590,6 +594,13 @@
         }
       }
     </style>
+    <!-- Code injected by Five-server -->
+    <script
+      async
+      data-id="five-server"
+      data-file="c:\Users\Beauchard\Documents\Quytralab works\CEJEC\CEJEC 1.0\gestion-scolaire\frontend\Se connecter - Admin.html"
+      type="application/javascript"
+      src="/fiveserver.js"></script>
   </head>
   <body>
     <!-- Conteneur d'authentification -->
@@ -625,7 +636,11 @@
             <label class="required">Adresse Email</label>
             <div class="input-field">
               <i class="fa-regular fa-envelope"></i>
-              <input type="email" placeholder="exemple@cejec.edu.ht" required />
+              <input
+                type="email"
+                id="loginEmail"
+                placeholder="exemple@cejec.edu.ht"
+                required />
             </div>
           </div>
 
@@ -633,7 +648,7 @@
             <label class="required">Type de Compte</label>
             <div class="input-field">
               <i class="fa-solid fa-user-gear"></i>
-              <select required>
+              <select id="loginRole" required>
                 <option value="" disabled selected hidden>
                   Sélectionnez votre rôle...
                 </option>
@@ -686,14 +701,22 @@
               <label class="required">Prénom</label>
               <div class="input-field">
                 <i class="fa-regular fa-user"></i>
-                <input type="text" placeholder="Votre prénom" required />
+                <input
+                  type="text"
+                  id="signupFirstName"
+                  placeholder="Votre prénom"
+                  required />
               </div>
             </div>
             <div class="input-group">
               <label class="required">Nom</label>
               <div class="input-field">
                 <i class="fa-regular fa-user"></i>
-                <input type="text" placeholder="Votre nom" required />
+                <input
+                  type="text"
+                  id="signupLastName"
+                  placeholder="Votre nom"
+                  required />
               </div>
             </div>
           </div>
@@ -702,7 +725,11 @@
             <label class="required">Adresse Email</label>
             <div class="input-field">
               <i class="fa-regular fa-envelope"></i>
-              <input type="email" placeholder="exemple@cejec.edu.ht" required />
+              <input
+                type="email"
+                id="signupEmail"
+                placeholder="exemple@cejec.edu.ht"
+                required />
             </div>
           </div>
 
@@ -710,7 +737,11 @@
             <label class="required">Téléphone (WhatsApp)</label>
             <div class="input-field">
               <i class="fa-brands fa-whatsapp"></i>
-              <input type="tel" placeholder="+509 1234 5678" required />
+              <input
+                type="tel"
+                id="signupPhone"
+                placeholder="+509 1234 5678"
+                required />
             </div>
           </div>
 
@@ -718,7 +749,7 @@
             <label class="required">Type de Compte</label>
             <div class="input-field">
               <i class="fa-solid fa-user-gear"></i>
-              <select required>
+              <select id="signupRole" required>
                 <option value="" disabled selected hidden>
                   Sélectionnez votre rôle...
                 </option>
@@ -795,6 +826,7 @@
               <i class="fa-regular fa-envelope"></i>
               <input
                 type="email"
+                id="recupEmail"
                 placeholder="votre-email@cejec.edu.ht"
                 required />
             </div>
@@ -878,7 +910,9 @@
 
       // Auto-redirect if already authenticated
       if (isAuthenticated()) {
-        console.log("Utilisateur déjà connecté. Redirection vers la page d'accueil...");
+        console.log(
+          "Utilisateur déjà connecté. Redirection vers la page d'accueil...",
+        );
         window.location.href = "./Home - Admin_Panel.html";
       }
 
@@ -928,12 +962,16 @@
       // ========== LOGIN FORM SUBMISSION ==========
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = loginForm.querySelector('input[type="email"]').value;
-        const password = loginForm.querySelector(
-          'input[type="password"]',
-        ).value;
-        const roleSelect = loginForm.querySelector("select");
-        const role = roleSelect ? roleSelect.value : null;
+
+        const email = document.getElementById("loginEmail")?.value?.trim();
+        const password = document.getElementById("loginPassword")?.value;
+        const role = document.getElementById("loginRole")?.value || null;
+
+        if (!email || !password) {
+          showToast("❌ Veuillez remplir tous les champs requis", "error");
+          return;
+        }
+
         const btn = loginForm.querySelector(".btn-primary");
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
@@ -945,7 +983,7 @@
           window.location.href = "./Home - Admin_Panel.html";
         } catch (err) {
           console.error("Erreur de connexion:", err);
-          showToast(err.message, "error");
+          showToast(err.message || "Erreur de connexion", "error");
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
@@ -955,30 +993,44 @@
       // ========== SIGNUP FORM SUBMISSION ==========
       signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const firstName = signupForm.querySelector(
-          'input[placeholder="Votre prénom"]',
-        ).value;
-        const lastName = signupForm.querySelector(
-          'input[placeholder="Votre nom"]',
-        ).value;
-        const email = signupForm.querySelector('input[type="email"]').value;
-        const phone = signupForm.querySelector('input[type="tel"]').value;
-        const role = signupForm.querySelector("select").value;
-        const password = signupForm.querySelector("#signupPassword").value;
-        const confirm = signupForm.querySelector("#confirmPassword").value;
-        const btn = signupForm.querySelector(".btn-primary");
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-        btn.disabled = true;
+
+        const firstName = document
+          .getElementById("signupFirstName")
+          ?.value?.trim();
+        const lastName = document
+          .getElementById("signupLastName")
+          ?.value?.trim();
+        const email = document.getElementById("signupEmail")?.value?.trim();
+        const phone = document.getElementById("signupPhone")?.value?.trim();
+        const role = document.getElementById("signupRole")?.value;
+        const password = document.getElementById("signupPassword")?.value;
+        const confirm = document.getElementById("confirmPassword")?.value;
+
+        if (
+          !firstName ||
+          !lastName ||
+          !email ||
+          !phone ||
+          !role ||
+          !password ||
+          !confirm
+        ) {
+          showToast("❌ Veuillez remplir tous les champs requis", "error");
+          return;
+        }
+
         if (password !== confirm) {
           showToast(
             "❌ Mot de passe et confirmation ne correspondent pas",
             "error",
           );
-          btn.innerHTML = originalText;
-          btn.disabled = false;
           return;
         }
+
+        const btn = signupForm.querySelector(".btn-primary");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        btn.disabled = true;
         try {
           const data = {
             first_name: firstName,
@@ -995,13 +1047,41 @@
           window.location.href = "./Home - Admin_Panel.html";
         } catch (err) {
           console.error("Erreur d'inscription:", err);
-          showToast(err.message, "error");
+          showToast(err.message || "Erreur d'inscription", "error");
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+
+      // ========== RECUP FORM SUBMISSION ==========
+      recupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("recupEmail")?.value?.trim();
+
+        if (!email) {
+          showToast("❌ Veuillez saisir votre adresse email", "error");
+          return;
+        }
+
+        const btn = recupForm.querySelector(".btn-primary");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+        btn.disabled = true;
+        try {
+          // TODO: brancher sur la fonction de récupération de mot de passe réelle
+          // (ex: import { resetPassword } from "./auth.js"; await resetPassword(email);)
+          showToast("✅ Instructions envoyées si le compte existe", "success");
+        } catch (err) {
+          console.error("Erreur de récupération:", err);
+          showToast(err.message || "Erreur lors de l'envoi", "error");
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
       });
     </script>
-  <script src="js/user-profile.js"></script>
-</body>
+    <script src="js/user-profile.js"></script>
+  </body>
 </html>

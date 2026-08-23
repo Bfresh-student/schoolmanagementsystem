@@ -12,7 +12,7 @@ rôles strictement : il suffirait de retirer "admin" de HR_STAFF_ROLES).
 
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-HR_STAFF_ROLES = {"admin", "hr"}
+HR_STAFF_ROLES = {"admin", "director"}
 
 
 def _role_name(user):
@@ -62,5 +62,5 @@ class IsHRStaffOrOwnerReadOnly(BasePermission):
             return True
         if request.method not in SAFE_METHODS:
             return False
-        teacher = getattr(obj, "teacher", None)
-        return teacher is not None and getattr(teacher, "user_id", None) == request.user.id
+        employee = getattr(obj, "employee", None)
+        return employee is not None and getattr(employee, "user_id", None) == request.user.id

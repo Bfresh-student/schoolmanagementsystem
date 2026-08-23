@@ -15,10 +15,10 @@ class AttendancePermission(BasePermission):
 
         if role_name == "ADMIN":
             return True
-        if view.action in ("list", "retrieve"):
+        if view.action in ("list", "retrieve", "by_course", "stats"):
             return role_name in ("STUDENT", "TEACHER", "ADMIN")
         if view.action == "submit_batch":
-            return role_name == "TEACHER"
+            return role_name in ("TEACHER", "ADMIN")
         return False  # resolve, destroy... : admin uniquement
 
     def has_object_permission(self, request, view, obj):
@@ -26,8 +26,9 @@ class AttendancePermission(BasePermission):
         if role_name == "ADMIN":
             return True
         if role_name == "STUDENT":
-            return request.method in SAFE_METHODS and obj.student.user_id == request.user.id
+            return request.method in SAFE_METHODS and getattr(obj.student, "user_id", None) == request.user.id
         if role_name == "TEACHER":
-            teacher_profile_id = getattr(request.user, "teacher_profile_id", None)
+            teacher_profile = getattr(request.user, "teacher_profile", None)
+            teacher_profile_id = getattr(teacher_profile, "id", None) if teacher_profile else getattr(request.user, "teacher_profile_id", None)
             return obj.course.teacher_id == teacher_profile_id
         return False

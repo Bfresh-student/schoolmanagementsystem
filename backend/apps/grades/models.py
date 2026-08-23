@@ -28,12 +28,42 @@ from django.db import models
 from django.utils import timezone
 
 
+class Assessment(models.Model):
+    """Évaluation pondérée d'un cours pour une classe et une période."""
+
+    class Type(models.TextChoices):
+        QUIZ = "quiz", "Quiz"
+        ASSIGNMENT = "assignment", "Devoir"
+        EXAM = "exam", "Examen"
+        PROJECT = "project", "Projet"
+        ORAL = "oral", "Oral"
+
+    course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="assessments")
+    school_class = models.ForeignKey("students.SchoolClass", on_delete=models.PROTECT, related_name="assessments")
+    academic_year = models.CharField(max_length=9, help_text="Ex. 2025-2026")
+    term = models.CharField(max_length=80, blank=True)
+    title = models.CharField(max_length=150)
+    evaluation_type = models.CharField(max_length=20, choices=Type.choices, default=Type.ASSIGNMENT)
+    coefficient = models.DecimalField(max_digits=5, decimal_places=2, default=1, validators=[MinValueValidator(0.01)])
+    evaluation_date = models.DateField(default=timezone.now)
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-evaluation_date", "title"]
+        constraints = [models.UniqueConstraint(fields=["course", "school_class", "academic_year", "term", "title"], name="uniq_assessment_per_period")]
+
+    def __str__(self):
+        return f"{self.course} — {self.title} ({self.academic_year})"
+
+
 class Grade(models.Model):
     """Source de vérité : LA note actuelle d'un étudiant pour un cours."""
 
     id = models.BigAutoField(primary_key=True)
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="grades")
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="grades")
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="grades", null=True, blank=True)
     teacher = models.ForeignKey(
         "teachers.Teacher", on_delete=models.SET_NULL, null=True, related_name="grades_given"
     )
@@ -55,11 +85,11 @@ class Grade(models.Model):
         app_label = "grades"
         db_table = "grades"
         constraints = [
-            models.UniqueConstraint(fields=["student", "course"], name="uniq_grade_per_student_course")
+            models.UniqueConstraint(fields=["student", "assessment"], name="uniq_grade_per_student_assessment")
         ]
         indexes = [
             models.Index(fields=["synced"]),
-            models.Index(fields=["student", "course"]),
+            models.Index(fields=["student", "assessment"]),
         ]
 
     def __str__(self):
@@ -96,6 +126,7 @@ class GradeSyncEntry(models.Model):
 
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, null=True, blank=True)
     teacher = models.ForeignKey("teachers.Teacher", on_delete=models.SET_NULL, null=True)
 
     value = models.DecimalField(

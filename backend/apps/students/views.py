@@ -3,15 +3,24 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from .models import SchoolClass
+from .serializers import SchoolClassSerializer
 from .models import Specialization, Student
 from .permissions import HasResourcePermission, IsOwnerStudentOrStaff
 from .serializers import (
+    SchoolClassSerializer,
     SpecializationSerializer,
     StudentCreateSerializer,
     StudentPublicSerializer,
     StudentSerializer,
 )
+
+
+class SchoolClassViewSet(viewsets.ModelViewSet):
+    queryset = SchoolClass.objects.select_related('specialization').all()
+    serializer_class = SchoolClassSerializer
+    resource_name = 'classes'
+    permission_classes = [HasResourcePermission]
 
 
 class SpecializationViewSet(viewsets.ModelViewSet):
@@ -47,10 +56,14 @@ class StudentViewSet(viewsets.ModelViewSet):
         if isinstance(role_name, str):
             role_name = role_name.upper()
         if role_name == "STUDENT":
-            # Un étudiant ne liste/récupère que son propre profil
+            # Un étudiant ne liste/récupère que son propre profil.
             return qs.filter(user=self.request.user)
+        #
+        #
         # Filtres pratiques pour Admin/Teacher
         params = self.request.query_params
+        if user_id := params.get("user"):
+            qs = qs.filter(user_id=user_id)
         if status_filter := params.get("status"):
             qs = qs.filter(status=status_filter)
         if spec_id := params.get("specialization"):

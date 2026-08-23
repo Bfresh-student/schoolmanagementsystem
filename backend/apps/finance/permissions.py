@@ -2,7 +2,18 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 def _is_admin(user):
-    return user.is_staff or getattr(getattr(user, "role", None), "name", None) == "admin"
+    """
+    ⚠️ CORRIGÉ : `user.role` est un CharField/TextChoices qui contient
+    directement la valeur du rôle (ex. "ADMIN"), pas une relation vers un
+    modèle Role avec un attribut `.name`. L'ancienne version
+    (`getattr(getattr(user, "role", None), "name", None) == "admin"`)
+    renvoyait toujours False, car une string n'a pas d'attribut `.name` et
+    la comparaison était en plus sensible à la casse ("admin" != "ADMIN").
+    On normalise en majuscules pour rester robuste peu importe la casse
+    utilisée en base.
+    """
+    role = getattr(user, "role", None)
+    return bool(user.is_staff or (role and str(role).upper() == "ADMIN"))
 
 
 class IsOwnerStudentOrAdmin(BasePermission):

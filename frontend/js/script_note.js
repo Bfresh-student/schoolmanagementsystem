@@ -1,4 +1,4 @@
-        const matieres = [
+        let matieres = [
             'Entrepreneuriat', 'Plan d\'affaires', 'Sociologie de la pratique des affaires',
             'Éducation à la technologie', 'Développement personnel', 'Marketing',
             'Droit des affaires', 'Les lois du succès', 'Gestion des ressources humaines',
@@ -44,8 +44,19 @@
         let currentPanelStudent = null;
         let currentEditStudent = null;
         let chartInstances = {};
+        let schoolClasses = [];
+        let courses = [];
+        let assessments = [];
+        let editingAssessmentId = null;
+        function getCurrentClassData() { return schoolClasses.find(item => item.name === currentClass); }
+        function refreshCurrentCourses() { const schoolClass = getCurrentClassData(); evaluations = assessments.filter(item => (!schoolClass || item.school_class === schoolClass.id) && item.academic_year === currentYear).map(item => ({ id: String(item.id), matiere: item.course_name, type: item.title, evaluationType: item.evaluation_type, date: item.evaluation_date, coef: Number(item.coefficient), comment: item.term, annee: item.academic_year, classe: item.school_class_name })); matieres = [...new Set(evaluations.map(evaluation => evaluation.matiere))]; }
+        async function loadRealData() { const [students, loadedClasses, loadedCourses, loadedGrades, loadedAssessments] = await Promise.all([StudentsAPI.list(), ClassesAPI.list(), CoursesAPI.list(), GradesAPI.list(), AssessmentsAPI.list()]); schoolClasses = loadedClasses.filter(item => item.is_active); courses = loadedCourses.filter(item => item.status === 'active'); assessments = loadedAssessments; classes = schoolClasses.map(item => item.name); if (classes.length) currentClass = classes[0]; academicyears = [...new Set(assessments.map(item => item.academic_year))]; currentYear = academicyears[0] || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`; etudiants = students.map(student => ({ id: student.id, nom: student.full_name || `Étudiant #${student.id}`, matricule: student.registration_number, telephone: '', classe: student.school_class_name || 'Sans classe', annee: currentYear })); refreshCurrentCourses(); notes = {}; loadedGrades.forEach(grade => { notes[`${grade.student}_${grade.assessment || grade.course}`] = Number(grade.value); }); }
+        function getEvaluationForMatiere(reference) { return evaluations.find(evaluation => String(evaluation.id) === String(reference)) || evaluations.find(evaluation => evaluation.matiere === reference); }
+        async function persistNote(etudiantId, matiere, value, date) { const evaluation = getEvaluationForMatiere(matiere); if (!evaluation) throw new Error('EVALUATION_INTROUVABLE'); const result = await GradesAPI.submit({ student: etudiantId, assessment: evaluation.id, value, date }); if (result.outcome === 'conflict') throw new Error('CONFLIT_NOTE'); notes[`${etudiantId}_${evaluation.id}`] = value; }
+        function getRecordedNoteCount(studentId = null) { const students = studentId == null ? getFilteredEtudiants().map(student => student.id) : [studentId]; return students.reduce((count, id) => count + evaluations.filter(evaluation => notes[`${id}_${evaluation.id}`] !== undefined && notes[`${id}_${evaluation.id}`] !== null).length, 0); }
 
         function initSampleData() {
+            if (etudiants.length > 0 && evaluations.length > 0) return; // FIX: Don't overwrite real data
             matieres.forEach((mat, idx) => {
                 const evalId1 = nextEvalId++;
                 evaluations.push({ id: evalId1, matiere: mat, type: 'Devoir', date: '2026-03-' + String(10 + idx)
@@ -217,7 +228,7 @@
             document.getElementById('classNameDisplay').textContent = currentClass;
             document.getElementById('currentYear').textContent = currentYear;
             document.getElementById('currentClass').textContent = currentClass;
-            document.getElementById('notesCount').textContent = classEvals.length;
+            document.getElementById('notesCount').textContent = getRecordedNoteCount();
             updateStats();
             updateCharts();
         }
@@ -234,32 +245,11 @@
             input.dataset.matiere = matiere;
         }
 
-        function finishCellEdit(input, etudiantId, matiere) {
-            const cell = input.closest('.note-cell');
-            if (!cell) return;
-            const val = parseFloat(input.value);
-            const classEvals = evaluations.filter(ev => ev.matiere === matiere && ev.annee === currentYear && ev
-                .classe === currentClass);
-            if (input.value === '' || isNaN(val)) {
-                classEvals.forEach(ev => { delete notes[`${etudiantId}_${ev.id}`]; });
-                showToast('Notes de ' + matiere + ' effacées', 'info');
-            } else {
-                const clampedVal = Math.round(Math.min(20, Math.max(0, val)) * 2) / 2;
-                if (classEvals.length === 0) {
-                    const evalId = nextEvalId++;
-                    evaluations.push({ id: evalId, matiere: matiere, type: 'Note saisie', date: new Date()
-                            .toISOString().split('T')[0], coef: 1, comment: 'Ajoutée depuis le tableau',
-                        annee: currentYear, classe: currentClass });
-                    notes[`${etudiantId}_${evalId}`] = clampedVal;
-                    showToast('✅ Note ajoutée : ' + matiere + ' = ' + clampedVal + '/20', 'success');
-                } else {
-                    classEvals.forEach(ev => { notes[`${etudiantId}_${ev.id}`] = clampedVal; });
-                    showToast('✅ Note mise à jour : ' + matiere + ' = ' + clampedVal + '/20', 'success');
-                }
-            }
-            cell.classList.remove('editing');
-            renderTable();
-        }
+        async function finishCellEdit(input, etudiantId, matiere) { const cell = input.closest('.note-cell'); if (!cell) return; const value = Number(input.value); cell.classList.remove('editing'); if (input.value === '' || Number.isNaN(value)) { showToast('La suppression d’une note n’est pas encore disponible.', 'info'); renderTable(); return; } if (value < 0 || value > 20) { showToast('La note doit être comprise entre 0 et 20.', 'error'); renderTable(); return; } try { await persistNote(etudiantId, matiere, value, new Date().toISOString().slice(0, 10)); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Enregistrement impossible.', 'error'); } renderTable(); }
+
+        function openAssessmentModal(id = null) { editingAssessmentId = id; const existing = id ? assessments.find(item => String(item.id) === String(id)) : null; const schoolClass = getCurrentClassData(); document.getElementById('assessmentModalTitle').textContent = existing ? 'Modifier l’évaluation' : 'Nouvelle évaluation'; document.getElementById('assessmentCourse').innerHTML = courses.map(course => `<option value="${course.id}">${course.code} — ${course.name}</option>`).join(''); document.getElementById('assessmentCourse').value = existing?.course || ''; document.getElementById('assessmentTitle').value = existing?.title || ''; document.getElementById('assessmentType').value = existing?.evaluation_type || 'assignment'; document.getElementById('assessmentCoefficient').value = existing?.coefficient || 1; document.getElementById('assessmentTerm').value = existing?.term || ''; document.getElementById('assessmentYear').value = existing?.academic_year || currentYear; document.getElementById('assessmentDate').value = existing?.evaluation_date || new Date().toISOString().slice(0, 10); if (!schoolClass) { showToast('Sélectionnez une classe active.', 'error'); return; } document.getElementById('assessmentModal').classList.add('open'); }
+        function closeAssessmentModal() { document.getElementById('assessmentModal').classList.remove('open'); editingAssessmentId = null; }
+        async function saveAssessment() { const schoolClass = getCurrentClassData(); const payload = { course: document.getElementById('assessmentCourse').value, school_class: schoolClass?.id, title: document.getElementById('assessmentTitle').value.trim(), evaluation_type: document.getElementById('assessmentType').value, coefficient: Number(document.getElementById('assessmentCoefficient').value), term: document.getElementById('assessmentTerm').value.trim(), academic_year: document.getElementById('assessmentYear').value.trim(), evaluation_date: document.getElementById('assessmentDate').value }; if (!payload.course || !payload.school_class || !payload.title || !payload.academic_year || !payload.evaluation_date || payload.coefficient <= 0) { showToast('Complétez tous les champs requis.', 'error'); return; } try { const saved = editingAssessmentId ? await AssessmentsAPI.update(editingAssessmentId, payload) : await AssessmentsAPI.create(payload); const index = assessments.findIndex(item => String(item.id) === String(saved.id)); if (index >= 0) assessments[index] = saved; else assessments.push(saved); if (!academicyears.includes(saved.academic_year)) academicyears.push(saved.academic_year); currentYear = saved.academic_year; updateYearFilter(); refreshCurrentCourses(); closeAssessmentModal(); renderTable(); showToast('Évaluation enregistrée.', 'success'); } catch (error) { showToast('Enregistrement de l’évaluation impossible.', 'error'); } }
 
         function openAddNoteModal() {
             const studentSelect = document.getElementById('addNoteStudent');
@@ -268,8 +258,9 @@
                 .map(e => `<option value="${e.id}">${e.nom}</option>`).join('');
 
             const matiereSelect = document.getElementById('addNoteMatiere');
-            matiereSelect.innerHTML = '<option value="">-- Sélectionner une matière --</option>' +
-                matieres.map(m => `<option value="${m}">${m}</option>`).join('');
+            matiereSelect.innerHTML = '<option value="">-- Sélectionner une évaluation --</option>' +
+                evaluations.map(e => `<option value="${e.id}">${e.matiere} · ${e.type} · coef ${e.coef}</option>`).join('');
+            matiereSelect.onchange = () => { const e = getEvaluationForMatiere(matiereSelect.value); const labels = { quiz: 'Quiz', assignment: 'Devoir', exam: 'Examen', project: 'Projet', oral: 'Oral' }; document.getElementById('addNoteCoef').value = e?.coef || ''; document.getElementById('addNoteType').value = labels[e?.evaluationType] || ''; };
 
             document.getElementById('addNoteDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('addNoteValue').value = 15;
@@ -281,34 +272,7 @@
 
         function closeAddNoteModal() { document.getElementById('addNoteModal').classList.remove('open'); }
 
-        function saveNewNote() {
-            const etudiantId = parseInt(document.getElementById('addNoteStudent').value);
-            const matiere = document.getElementById('addNoteMatiere').value;
-            const noteVal = parseFloat(document.getElementById('addNoteValue').value);
-            const coef = parseInt(document.getElementById('addNoteCoef').value) || 1;
-            const type = document.getElementById('addNoteType').value;
-            const date = document.getElementById('addNoteDate').value;
-
-            if (!etudiantId) { showToast('❌ Veuillez sélectionner un élève', 'error');
-                document.getElementById('addNoteStudent').focus(); return; }
-            if (!matiere) { showToast('❌ Veuillez sélectionner une matière', 'error');
-                document.getElementById('addNoteMatiere').focus(); return; }
-            if (isNaN(noteVal) || noteVal < 0 || noteVal > 20) { showToast(
-                    '❌ La note doit être entre 0 et 20', 'error');
-                document.getElementById('addNoteValue').focus(); return; }
-
-            const clampedVal = Math.round(Math.min(20, Math.max(0, noteVal)) * 2) / 2;
-            const evalId = nextEvalId++;
-            evaluations.push({ id: evalId, matiere: matiere, type: type, date: date, coef: coef, comment: '',
-                annee: currentYear, classe: currentClass });
-            notes[`${etudiantId}_${evalId}`] = clampedVal;
-
-            closeAddNoteModal();
-            renderTable();
-            const et = etudiants.find(e => e.id === etudiantId);
-            showToast('✅ Note ajoutée : ' + (et ? et.nom : 'Élève') + ' - ' + matiere + ' = ' + clampedVal + '/20 (' +
-                type + ', coef ' + coef + ')', 'success');
-        }
+        async function saveNewNote() { const etudiantId = Number(document.getElementById('addNoteStudent').value); const matiere = document.getElementById('addNoteMatiere').value; const noteVal = Number(document.getElementById('addNoteValue').value); const date = document.getElementById('addNoteDate').value; if (!etudiantId || !matiere || Number.isNaN(noteVal) || noteVal < 0 || noteVal > 20) { showToast('Sélectionnez un élève, un cours et une note entre 0 et 20.', 'error'); return; } try { await persistNote(etudiantId, matiere, noteVal, date); closeAddNoteModal(); renderTable(); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : la note doit être arbitrée par un administrateur.' : 'Enregistrement impossible.', 'error'); } }
 
         function updateStats() {
             const filtered = getFilteredEtudiants();
@@ -395,7 +359,7 @@
             <div class="info-row"><span class="label">Téléphone</span><span class="value">${currentPanelStudent.telephone}</span></div>
             <div class="info-row"><span class="label">Classe</span><span class="value">${currentPanelStudent.classe}</span></div>
             <div class="info-row"><span class="label">Année</span><span class="value">${currentPanelStudent.annee}</span></div>
-            <div class="info-row"><span class="label">Notes saisies</span><span class="value">${classEvals.length}</span></div>
+            <div class="info-row"><span class="label">Notes saisies</span><span class="value">${getRecordedNoteCount(etudiantId)}</span></div>
             <hr style="margin:10px 0;border-color:var(--border-light)">
             <div class="info-row"><span class="label" style="font-weight:700;color:var(--blue);font-size:0.85rem">Moyenne</span><span class="value" style="font-size:1.3rem;font-weight:800;color:var(--blue)">${avg > 0 ? avg.toFixed(2)+'/20' : 'N/A'}</span></div>
             <div class="info-row"><span class="label">Rang</span><span class="value" style="font-weight:700">${rank} / ${filtered.length}</span></div>
@@ -477,19 +441,7 @@
         function closeEditNotesModal() { document.getElementById('editNotesModal').classList.remove('open');
             currentEditStudent = null; }
 
-        function saveEditedNotes() {
-            if (!currentEditStudent) return;
-            document.querySelectorAll('.note-edit-input').forEach(inp => {
-                const evalId = parseInt(inp.dataset.eval);
-                const val = parseFloat(inp.value);
-                const key = `${currentEditStudent.id}_${evalId}`;
-                if (inp.value === '' || isNaN(val)) { notes[key] = null; } else { notes[key] = Math.round(Math
-                        .min(20, Math.max(0, val)) * 2) / 2; }
-            });
-            closeEditNotesModal();
-            renderTable();
-            showToast('✅ Notes de ' + currentEditStudent.nom + ' mises à jour', 'success');
-        }
+        async function saveEditedNotes() { if (!currentEditStudent) return; const student = currentEditStudent; try { for (const input of document.querySelectorAll('.note-edit-input')) { if (input.value === '') continue; const value = Number(input.value); const evaluation = evaluations.find(item => String(item.id) === input.dataset.eval); if (!evaluation || Number.isNaN(value) || value < 0 || value > 20) throw new Error('NOTE_INVALIDE'); await persistNote(student.id, evaluation.matiere, value, new Date().toISOString().slice(0, 10)); } closeEditNotesModal(); renderTable(); showToast(`Notes de ${student.nom} enregistrées.`, 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Une note est invalide ou n’a pas pu être enregistrée.', 'error'); } }
 
         function archiveStudent(etudiantId) {
             const et = etudiants.find(e => e.id === etudiantId);
@@ -623,7 +575,7 @@
                 showToast('Classe ' + input + ' ajoutée', 'success'); } else if (input) { showToast(
                 'Cette classe existe déjà', 'error'); } }
 
-        function switchClass(cls) { currentClass = cls;
+        function switchClass(cls) { currentClass = cls; refreshCurrentCourses();
             document.getElementById('filterClass').value = cls;
             closeClassModal();
             renderTable();
@@ -653,10 +605,14 @@
 
         function applyFilters() { const yearVal = document.getElementById('filterYear').value; const classVal = document
                 .getElementById('filterClass').value; if (yearVal && yearVal !== currentYear) currentYear = yearVal; if (
-                    classVal && classVal !== currentClass) currentClass = classVal;
+                    classVal && classVal !== currentClass) { currentClass = classVal; refreshCurrentCourses(); }
             renderTable(); }
 
-        function init() { initSampleData();
+        addYear = () => showToast('Les années académiques ne sont pas encore gérées par le backend.', 'info');
+        addClass = () => showToast('Créez une classe depuis la gestion des classes.', 'info');
+        addStudent = () => showToast('Créez un élève depuis la gestion des utilisateurs ou inscriptions.', 'info');
+        archiveStudent = () => showToast('L’archivage doit être effectué depuis la fiche de l’élève.', 'info');
+        async function init() { try { await loadRealData(); } catch (error) { console.error('Chargement des notes impossible', error); etudiants = []; evaluations = []; matieres = []; showToast('Impossible de charger les données réelles.', 'error'); }
             updateYearFilter();
             updateClassFilter();
             renderTable();

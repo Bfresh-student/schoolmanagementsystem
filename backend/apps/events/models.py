@@ -49,6 +49,9 @@ class Event(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Paramètres d'affichage et de rappel du calendrier (couleur, priorité,
+    # responsable et alarme). Un JSON évite de détourner le modèle métier.
+    calendar_metadata = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-start_datetime"]

@@ -5,6 +5,7 @@ from apps.projects.views import (
     BusinessPlanViewSet,
     CompanyViewSet,
     InternshipViewSet,
+    IncubatorMentorViewSet,
     MentorshipViewSet,
     ProjectViewSet,
 )
@@ -14,6 +15,7 @@ router.register("projects", ProjectViewSet, basename="project")
 router.register("companies", CompanyViewSet, basename="company")
 router.register("internships", InternshipViewSet, basename="internship")
 router.register("mentorships", MentorshipViewSet, basename="mentorship")
+router.register("incubator-mentors", IncubatorMentorViewSet, basename="incubator-mentor")
 router.register("business-plans", BusinessPlanViewSet, basename="business-plan")
 
 app_name = "projects"

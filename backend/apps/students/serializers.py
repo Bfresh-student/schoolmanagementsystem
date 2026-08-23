@@ -2,8 +2,23 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .models import Specialization, Student
+from .models import SchoolClass
 
 User = get_user_model()
+
+ 
+ 
+class SchoolClassSerializer(serializers.ModelSerializer):
+    specialization_name = serializers.CharField(source='specialization.name', read_only=True)
+    student_count = serializers.IntegerField(source='students.count', read_only=True)
+ 
+    class Meta:
+        model = SchoolClass
+        fields = [
+            'id', 'name', 'specialization', 'specialization_name',
+            'level', 'room', 'capacity', 'tuition_fee', 'is_active', 'student_count',
+        ]
+        read_only_fields = ['name']  # généré automatiquement par le modèle
 
 
 class SpecializationSerializer(serializers.ModelSerializer):
@@ -31,24 +46,19 @@ class StudentSerializer(serializers.ModelSerializer):
         source="specialization.name", read_only=True, default=None
     )
 
+    school_class_name = serializers.CharField(
+        source="school_class.name", read_only=True, default=None
+    )
+
     class Meta:
         model = Student
         fields = [
-            "id",
-            "user",
-            "full_name",
-            "registration_number",
-            "specialization",
-            "specialization_name",
-            "date_of_birth",
-            "address",
-            "emergency_contacts",
-            "enrollment_date",
-            "status",
-            "is_active",
-            "synced",
-            "created_at",
-            "updated_at",
+            "id", "user", "full_name", "registration_number",
+            "specialization", "specialization_name",
+            "school_class", "school_class_name",   # <-- à ajouter
+            "date_of_birth", "address", "emergency_contacts",
+            "enrollment_date", "status", "is_active",
+            "synced", "created_at", "updated_at",
         ]
         read_only_fields = [
             "id", "registration_number", "enrollment_date",
@@ -86,12 +96,15 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     Création d'un profil étudiant à partir d'un USER existant
     (ex: après inscription approuvée — voir app Inscription).
     """
+    school_class_name = serializers.CharField(
+        source="school_class.name", read_only=True, default=None
+    )
 
     class Meta:
         model = Student
         fields = [
             "user", "specialization", "date_of_birth",
-            "address", "emergency_contacts",
+            "address", "emergency_contacts", "school_class_name",
         ]
 
     def validate_user(self, user):

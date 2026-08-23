@@ -247,15 +247,42 @@
         </div>
 
         <div class="modal-overlay" id="addClassModal">
-            <div class="modal"><div class="modal-header"><h3><i class="fas fa-plus"></i> <span id="modalTitle">Ajouter une Classe</span></h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+            <div class="modal"><div class="modal-header"><h3> <span id="modalTitle">Ajouter une Classe</span></h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
             <div class="modal-body"><input type="hidden" id="editClassId"><div class="form-grid">
-                <div class="form-group full"><label>Nom de la Classe</label><input type="text" id="modalClassName" placeholder="Ex: Entrepreneuriat, Marketing Digital..."></div>
-                <div class="form-group full"><label>Niveau / Filière</label><input type="text" id="modalLevel" placeholder="Ex: Formation Professionnelle, Certificat..."></div>
-                <div class="form-group"><label>Nombre d'Élèves</label><input type="number" id="modalStudents" min="1" value="25"></div>
-                <div class="form-group"><label>Salle de Classe</label><input type="text" id="modalRoom" placeholder="Ex: Salle A-101"></div>
+
+                <div class="form-group full">
+                    <label>Filière</label>
+                    <div style="display:flex;gap:8px;align-items:stretch">
+                        <select id="modalSpecialization" style="flex:1" onchange="updateNamePreview()">
+                            <option value="">— Sélectionner une filière —</option>
+                        </select>
+                        <button type="button" class="btn-add-prof-row" onclick="promptNewSpecialization()" title="Créer une nouvelle filière"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Niveau</label>
+                    <input type="number" id="modalNiveau" min="1" max="10" value="1" oninput="updateNamePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label>Nom généré</label>
+                    <input type="text" id="modalNamePreview" placeholder="— sélectionnez une filière —" readonly style="background:var(--bg-light,#f5f6f8);color:var(--muted,#888)">
+                </div>
+
+                <div class="form-group"><label>Capacité maximale</label><input type="number" id="modalStudents" min="1" value="25"></div>
+                                <div class="form-group"><label>Salle de Classe</label><input type="text" id="modalRoom" placeholder="Ex: Salle A-101"></div>
+                <div class="form-group"><label>Frais de scolarité (HTG)</label><input type="number" id="modalTuitionFee" min="0" step="0.01" value="0"></div>
+
+                <div class="form-group full" id="currentCountRow" style="display:none">
+                    <span class="info-badge"><i class="fas fa-user-graduate"></i> <span id="modalCurrentCount">0</span> élève(s) actuellement inscrit(s) dans cette classe</span>
+                </div>
+
                 <div class="form-group full">
                     <label>Cours et Professeurs</label>
-                    <p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Associez chaque cours à son professeur responsable</p>
+                    <p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">
+                        <i class="fas fa-circle-info"></i> Les cours sont rattachés à la <strong>filière</strong> : les modifier ici les modifie pour tous les niveaux de cette filière (ex: Entrepreneuriat 1, 2 et 3 partagent le même programme).
+                    </p>
                     <div class="cours-prof-editor" id="coursProfEditor"></div>
                     <button type="button" class="btn-add-prof-row" onclick="addCoursProfRow()" style="margin-top:8px"><i class="fas fa-plus"></i> Ajouter un cours</button>
                 </div>

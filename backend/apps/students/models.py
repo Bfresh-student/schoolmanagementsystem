@@ -32,6 +32,54 @@ class Specialization(models.Model):
         return self.name
 
 
+ 
+# ============================================================================
+# NOUVEAU : SchoolClass
+# ============================================================================
+class SchoolClass(models.Model):
+    '''
+    Une "classe" = un niveau au sein d'une filière (ex: "Entrepreneuriat 1").
+    Persiste d'une année sur l'autre : chaque nouvelle cohorte d'élèves est
+    simplement assignée à une classe existante via Student.school_class.
+    Le suivi de l'année académique se fait séparément (registration_number /
+    enrollment_date sur Student), pas ici.
+    '''
+ 
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=150, blank=True)  # auto-généré si vide
+    specialization = models.ForeignKey(
+        Specialization,
+        on_delete=models.CASCADE,
+        related_name="classes",
+    )
+    level = models.PositiveSmallIntegerField(default=1)  # niveau/année : 1, 2, 3...
+    room = models.CharField(max_length=50, blank=True)
+    capacity = models.PositiveSmallIntegerField(default=30)
+    tuition_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Frais de scolarité pour cette classe. Utilisé pour générer la facture à l'inscription.",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        ordering = ["specialization__name", "level"]
+        unique_together = ("specialization", "level")
+        verbose_name = "Classe"
+        verbose_name_plural = "Classes"
+        app_label = "students"
+ 
+    def __str__(self):
+        return self.name or f"{self.specialization.name} {self.level}"
+ 
+    def save(self, *args, **kwargs):
+        if not self.name and self.specialization_id:
+            self.name = f"{self.specialization.name} {self.level}"
+        super().save(*args, **kwargs)
+ 
+
 class Student(models.Model):
     """
     Profil étudiant, lié 1:1 à USERS.
@@ -56,10 +104,18 @@ class Student(models.Model):
     )
 
     # Identifiant métier unique, ex: "PROF-2024-001"
-    registration_number = models.CharField(max_length=30, unique=True, editable=False)
+    registration_number = models.CharField(max_length=30, editable=False)
 
     specialization = models.ForeignKey(
         Specialization,
+        on_delete=models.PROTECT,
+        related_name="students",
+        null=True,
+        blank=True,
+    )
+    
+    school_class = models.ForeignKey(
+        SchoolClass,
         on_delete=models.PROTECT,
         related_name="students",
         null=True,

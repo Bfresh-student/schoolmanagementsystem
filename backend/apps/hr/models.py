@@ -91,6 +91,9 @@ class AuditAction(models.TextChoices):
 
 
 class AuditEntityType(models.TextChoices):
+    EMPLOYEE = "employee", "Employé"
+    CANDIDATE = "candidate", "Candidat"
+    ATTENDANCE = "attendance", "Présence"
     CONTRACT = "contract", "Contrat"
     SALARY = "salary", "Salaire"
     LEAVE = "leave", "Congé"
@@ -115,12 +118,106 @@ class LeaveType(models.Model):
 
 
 # ---------------------------------------------------------------------------
+# Personnel administratif et recrutement
+# ---------------------------------------------------------------------------
+
+class EmployeeStatus(models.TextChoices):
+    ACTIVE = "active", "Actif"
+    SUSPENDED = "suspended", "Suspendu"
+    INACTIVE = "inactive", "Inactif"
+    TERMINATED = "terminated", "Fin de contrat"
+
+
+class Employee(models.Model):
+    """Fiche RH persistante des collaborateurs hors app Teachers."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="employee_profile")
+    employee_number = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    gender = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    job_title = models.CharField(max_length=150)
+    department = models.CharField(max_length=150)
+    hire_date = models.DateField()
+    status = models.CharField(max_length=20, choices=EmployeeStatus.choices, default=EmployeeStatus.ACTIVE)
+    monthly_salary = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
+    monthly_bonus = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["last_name", "first_name"]
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.employee_number})"
+
+
+class CandidateStatus(models.TextChoices):
+    PENDING = "pending", "En attente"
+    INTERVIEW = "interview", "Entretien"
+    SELECTED = "selected", "Sélectionné"
+    REJECTED = "rejected", "Rejeté"
+    HIRED = "hired", "Embauché"
+
+
+class Candidate(models.Model):
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField()
+    position = models.CharField(max_length=150)
+    application_date = models.DateField(default=timezone.localdate)
+    status = models.CharField(max_length=20, choices=CandidateStatus.choices, default=CandidateStatus.PENDING)
+    interview_date = models.DateField(null=True, blank=True)
+    interview_time = models.TimeField(null=True, blank=True)
+    interviewer = models.CharField(max_length=150, blank=True)
+    notes = models.TextField(blank=True)
+    cv_file = models.FileField(upload_to="hr/candidates/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-application_date", "last_name", "first_name"]
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} — {self.position}"
+
+
+class AttendanceStatus(models.TextChoices):
+    PRESENT = "present", "Présent"
+    LATE = "late", "Retard"
+    ABSENT = "absent", "Absent"
+    EXCUSED = "excused", "Absence justifiée"
+
+
+class EmployeeAttendance(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="attendances")
+    date = models.DateField(default=timezone.localdate)
+    check_in_time = models.TimeField(null=True, blank=True)
+    check_out_time = models.TimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=AttendanceStatus.choices, default=AttendanceStatus.PRESENT)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date", "employee__last_name"]
+        constraints = [models.UniqueConstraint(fields=["employee", "date"], name="hr_one_attendance_per_employee_day")]
+
+    def clean(self):
+        if self.check_in_time and self.check_out_time and self.check_out_time < self.check_in_time:
+            raise ValidationError("L'heure de sortie ne peut pas précéder l'heure d'entrée.")
+
+# ---------------------------------------------------------------------------
 # Contract
 # ---------------------------------------------------------------------------
 
 class Contract(models.Model):
-    teacher = models.ForeignKey(
-        "teachers.Teacher", on_delete=models.CASCADE, related_name="contracts"
+    employee = models.ForeignKey(
+        "hr.Employee", on_delete=models.CASCADE, null=True, blank=True, related_name="contracts"
     )
     contract_type = models.CharField(max_length=20, choices=ContractType.choices)
     start_date = models.DateField()
@@ -143,7 +240,7 @@ class Contract(models.Model):
         ordering = ["-start_date"]
 
     def __str__(self):
-        return f"Contrat {self.get_contract_type_display()} — {self.teacher}"
+        return f"Contrat {self.get_contract_type_display()} — {self.employee}"
 
     def clean(self):
         if self.end_date and self.end_date < self.start_date:
@@ -151,7 +248,7 @@ class Contract(models.Model):
 
         if self.status == ContractStatus.ACTIVE:
             active_qs = Contract.objects.filter(
-                teacher=self.teacher, status=ContractStatus.ACTIVE
+                employee=self.employee, status=ContractStatus.ACTIVE
             ).exclude(pk=self.pk)
             if active_qs.exists():
                 raise ValidationError(
@@ -172,8 +269,8 @@ class Contract(models.Model):
 # ---------------------------------------------------------------------------
 
 class Salary(models.Model):
-    teacher = models.ForeignKey(
-        "teachers.Teacher", on_delete=models.CASCADE, related_name="salaries"
+    employee = models.ForeignKey(
+        "hr.Employee", on_delete=models.CASCADE, null=True, blank=True, related_name="salaries"
     )
     contract = models.ForeignKey(
         Contract, on_delete=models.SET_NULL, null=True, blank=True, related_name="salaries"
@@ -194,11 +291,11 @@ class Salary(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("teacher", "pay_period_start", "pay_period_end")
+        unique_together = ("employee", "pay_period_start", "pay_period_end")
         ordering = ["-pay_period_start"]
 
     def __str__(self):
-        return f"Paie {self.teacher} — {self.pay_period_start:%Y-%m}"
+        return f"Paie {self.employee} — {self.pay_period_start:%Y-%m}"
 
     def clean(self):
         if self.pay_period_end < self.pay_period_start:
@@ -221,8 +318,8 @@ class Salary(models.Model):
 # ---------------------------------------------------------------------------
 
 class Leave(models.Model):
-    teacher = models.ForeignKey(
-        "teachers.Teacher", on_delete=models.CASCADE, related_name="leaves"
+    employee = models.ForeignKey(
+        "hr.Employee", on_delete=models.CASCADE, null=True, blank=True, related_name="leaves"
     )
     leave_type = models.ForeignKey(
         LeaveType, on_delete=models.PROTECT, related_name="leaves"
@@ -249,12 +346,12 @@ class Leave(models.Model):
         ordering = ["-start_date"]
 
     def __str__(self):
-        return f"Congé {self.leave_type} — {self.teacher} ({self.status})"
+        return f"Congé {self.leave_type} — {self.employee} ({self.status})"
 
     @classmethod
-    def remaining_balance(cls, teacher, leave_type, year: int) -> Decimal:
+    def remaining_balance(cls, employee, leave_type, year: int) -> Decimal:
         used = cls.objects.filter(
-            teacher=teacher,
+            employee=employee,
             leave_type=leave_type,
             status=LeaveStatus.APPROVED,
             start_date__year=year,
@@ -267,7 +364,7 @@ class Leave(models.Model):
 
         overlap = (
             Leave.objects.filter(
-                teacher=self.teacher,
+                employee=self.employee,
                 start_date__lte=self.end_date,
                 end_date__gte=self.start_date,
             )
@@ -278,7 +375,7 @@ class Leave(models.Model):
             raise ValidationError("Ce formateur a déjà un congé sur une période qui chevauche celle-ci.")
 
         if self.status in (LeaveStatus.PENDING,):
-            balance = self.remaining_balance(self.teacher, self.leave_type, self.start_date.year)
+            balance = self.remaining_balance(self.employee, self.leave_type, self.start_date.year)
             if self.days_used > balance:
                 raise ValidationError(
                     f"Solde insuffisant : {balance} jour(s) restant(s) pour {self.leave_type}."
@@ -301,8 +398,8 @@ class Leave(models.Model):
 # ---------------------------------------------------------------------------
 
 class PerformanceEvaluation(models.Model):
-    teacher = models.ForeignKey(
-        "teachers.Teacher", on_delete=models.CASCADE, related_name="evaluations"
+    employee = models.ForeignKey(
+        "hr.Employee", on_delete=models.CASCADE, null=True, blank=True, related_name="evaluations"
     )
     evaluator = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="evaluations_given"
@@ -319,8 +416,8 @@ class PerformanceEvaluation(models.Model):
     strengths = models.TextField(blank=True)
     areas_for_improvement = models.TextField(blank=True)
     evaluation_type = models.CharField(max_length=20, choices=EvaluationType.choices)
-    teacher_acknowledged = models.BooleanField(default=False)
-    teacher_comments = models.TextField(blank=True)
+    employee_acknowledged = models.BooleanField(default=False)
+    employee_comments = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -328,12 +425,12 @@ class PerformanceEvaluation(models.Model):
         ordering = ["-evaluation_date"]
 
     def __str__(self):
-        return f"Évaluation {self.teacher} — {self.evaluation_date}"
+        return f"Évaluation {self.employee} — {self.evaluation_date}"
 
     def acknowledge(self, comments: str = ""):
-        self.teacher_acknowledged = True
+        self.employee_acknowledged = True
         if comments:
-            self.teacher_comments = comments
+            self.employee_comments = comments
         self.save()
 
 
@@ -342,8 +439,8 @@ class PerformanceEvaluation(models.Model):
 # ---------------------------------------------------------------------------
 
 class HRDocument(models.Model):
-    teacher = models.ForeignKey(
-        "teachers.Teacher", on_delete=models.CASCADE, related_name="hr_documents"
+    employee = models.ForeignKey(
+        "hr.Employee", on_delete=models.CASCADE, null=True, blank=True, related_name="hr_documents"
     )
     document_type = models.CharField(max_length=20, choices=HRDocumentType.choices)
     filename = models.CharField(max_length=255)
@@ -358,7 +455,7 @@ class HRDocument(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.get_document_type_display()} — {self.teacher}"
+        return f"{self.get_document_type_display()} — {self.employee}"
 
     def refresh_status(self, warning_window_days: int = 30):
         """Appelé par le job Celery périodique (voir tasks.py)."""

@@ -1,6 +1,6 @@
     (function() {
       // ----- DATA -----
-      const etudiantsListe = [
+      let etudiantsListe = [
         { id: 'ETU-001', nom: 'Pierre Antoine', sexe: 'M', cours: 'Entrepreneuriat', statut: 'Actif', moyenne: 92, presences: 95, solde: 0, nouvelInscrit: false },
         { id: 'ETU-002', nom: 'Marie Joseph', sexe: 'F', cours: 'Marketing', statut: 'Actif', moyenne: 78, presences: 88, solde: 15000, nouvelInscrit: false },
         { id: 'ETU-003', nom: 'Jameson Pierre', sexe: 'M', cours: 'Leadership', statut: 'Actif', moyenne: 65, presences: 72, solde: 5000, nouvelInscrit: false },
@@ -15,22 +15,22 @@
         { id: 'ETU-012', nom: 'Chantal Bijou', sexe: 'F', cours: 'Art Oratoire', statut: 'Actif', moyenne: 76, presences: 85, solde: 22000, nouvelInscrit: false }
       ];
 
-      const coursCEJEC = ['Entrepreneuriat', "Plan d'Affaires", 'Sociologie des Affaires', 'Éducation Technologique', 'Développement Personnel', 'Marketing', 'Droit des Affaires', 'Lois du Succès', 'GRH', 'Leadership', 'Correspondance Admin', 'Art Oratoire'];
-      const coursStats = coursCEJEC.map(c => ({ nom: c, etudiants: Math.floor(Math.random() * 40) + 15, reussite: Math.floor(Math.random() * 30) + 65, abandon: Math.floor(Math.random() * 8) + 1 }));
-      const partenaires = [
+      let coursCEJEC = ['Entrepreneuriat', "Plan d'Affaires", 'Sociologie des Affaires', 'Éducation Technologique', 'Développement Personnel', 'Marketing', 'Droit des Affaires', 'Lois du Succès', 'GRH', 'Leadership', 'Correspondance Admin', 'Art Oratoire'];
+      let coursStats = coursCEJEC.map(c => ({ nom: c, etudiants: 0, reussite: 0, abandon: 0 }));
+      let partenaires = [
         { nom: 'Digicel', type: 'Technologie', contrats: 3, stages: 12 },
         { nom: 'Banque Nationale', type: 'Finance', contrats: 2, stages: 8 },
         { nom: 'Fondation Espoir', type: 'ONG', contrats: 1, stages: 5 },
         { nom: 'Université Quisqueya', type: 'Éducation', contrats: 2, stages: 10 },
         { nom: 'BRANA', type: 'Industrie', contrats: 1, stages: 6 }
       ];
-      const evenements = [
+      let evenements = [
         { nom: 'Journée Portes Ouvertes', date: '15/06/2026', participants: 250, cout: 50000, retombees: 'Élevées' },
         { nom: 'Conférence Entrepreneuriat', date: '22/06/2026', participants: 150, cout: 35000, retombees: 'Moyennes' },
         { nom: 'Cérémonie de Remise Diplômes', date: '30/06/2026', participants: 400, cout: 120000, retombees: 'Très Élevées' },
         { nom: 'Atelier Leadership', date: '05/07/2026', participants: 80, cout: 25000, retombees: 'Bonnes' }
       ];
-      const employesRH = [
+      let employesRH = [
         { nom: 'Jean-Marc Dubois', fonction: 'Administrateur', presences: 22, absences: 0, conges: 2, salaire: 95000 },
         { nom: 'Jacques Mentor', fonction: 'Professeur', presences: 20, absences: 1, conges: 3, salaire: 75000 },
         { nom: 'Marie Louis', fonction: 'Secrétaire', presences: 21, absences: 0, conges: 1, salaire: 65000 },
@@ -41,6 +41,47 @@
       let currentPage = 'academique';
       let currentFilter = 'mois';
       let chartInstances = {};
+      let invoices = [];
+      let payments = [];
+
+      const reportList = data => Array.isArray(data) ? data : (data.results || []);
+      async function reportApi(path) {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('http://localhost:8000/api/v1' + path, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+        if (!response.ok) throw new Error('API_ERROR_' + response.status);
+        return response.json();
+      }
+      function courseStat(course) {
+        const enrolled = Number(course.seats_taken || 0);
+        return { nom: course.name, etudiants: enrolled, reussite: 0, abandon: 0 };
+      }
+      function monthlyAmounts(items, dateField) {
+        const buckets = new Map();
+        items.forEach(item => { const date = item[dateField]; if (!date) return; const key = date.slice(0, 7); buckets.set(key, (buckets.get(key) || 0) + Number(item.amount || 0)); });
+        return [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
+      }
+      function financialSeries() {
+        const revenue = monthlyAmounts(payments.filter(payment => payment.status === 'completed'), 'paid_at');
+        return { labels: revenue.map(([month]) => month), revenus: revenue.map(([, amount]) => amount), depenses: revenue.map(() => 0) };
+      }
+      async function loadReportData() {
+        try {
+          const [studentsData, coursesData, teachersData, invoicesData, paymentsData, companiesData, eventsData, internshipsData] = await Promise.all([
+            reportApi('/students/students/'), reportApi('/courses/'), reportApi('/teachers/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/')
+          ]);
+          const students = reportList(studentsData);
+          const courses = reportList(coursesData);
+          invoices = reportList(invoicesData); payments = reportList(paymentsData);
+          const invoicesByStudent = new Map(invoices.map(invoice => [String(invoice.student), invoice]));
+          etudiantsListe = students.map(student => { const invoice = invoicesByStudent.get(String(student.id)); return { id: student.registration_number || student.id, nom: student.full_name, sexe: '—', cours: student.school_class_name || student.specialization_name || '—', statut: student.status, moyenne: 0, presences: 0, solde: Number(invoice ? invoice.balance_due : 0), nouvelInscrit: false }; });
+          coursCEJEC = courses.map(course => course.name); coursStats = courses.map(courseStat);
+          employesRH = reportList(teachersData).map(teacher => ({ nom: teacher.full_name, fonction: 'Professeur', presences: 0, absences: 0, conges: 0, salaire: 0 }));
+          const internships = reportList(internshipsData);
+          partenaires = reportList(companiesData).map(company => ({ nom: company.name, type: company.sector || '—', contrats: 0, stages: internships.filter(internship => internship.company === company.id).length }));
+          evenements = reportList(eventsData).map(event => ({ nom: event.name, date: event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : '—', participants: event.confirmed_participants_count || 0, cout: 0, retombees: event.status }));
+          renderPage(currentPage);
+        } catch (error) { showToast('Chargement des rapports impossible : ' + error.message, 'error'); }
+      }
 
       // ----- TOAST SYSTEM -----
       function showToast(msg, type = 'success') {
@@ -363,10 +404,9 @@
 
       // ----- FINANCIER -----
       function renderFinancier() {
-        const revenusMensuels = [185000, 220000, 250000, 280000, 300000, 285000];
-        const depensesMensuels = [120000, 140000, 155000, 170000, 180000, 175000];
+        const series = financialSeries(); const revenusMensuels = series.revenus; const depensesMensuels = series.depenses;
         let rows = revenusMensuels.map((r, i) => `
-          <tr><td>${['Septembre','Octobre','Novembre','Décembre','Janvier','Février'][i]} 2025</td><td>${r.toLocaleString()} HTG</td><td>${depensesMensuels[i].toLocaleString()} HTG</td><td style="font-weight:800;color:var(--success)">${(r-depensesMensuels[i]).toLocaleString()} HTG</td><td><span class="pill ${r-depensesMensuels[i]>80000?'pill-success':'pill-warning'}">${Math.round((r-depensesMensuels[i])/r*100)}%</span></td></tr>`).join('');
+          <tr><td>${series.labels[i]}</td><td>${r.toLocaleString()} HTG</td><td>${depensesMensuels[i].toLocaleString()} HTG</td><td style="font-weight:800;color:var(--success)">${(r-depensesMensuels[i]).toLocaleString()} HTG</td><td><span class="pill ${r ? 'pill-success' : 'pill-warning'}">${r ? Math.round((r-depensesMensuels[i])/r*100) : 0}%</span></td></tr>`).join('');
         const totalRevenus = revenusMensuels.reduce((a, b) => a + b, 0);
         const totalDepenses = depensesMensuels.reduce((a, b) => a + b, 0);
         const totalBenefices = totalRevenus - totalDepenses;
@@ -380,7 +420,7 @@
             <div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Revenus mensuels</h3><div class="chart-wrap"><canvas id="finRevChart"></canvas></div></div>
             <div class="chart-box"><h3><i class="fas fa-chart-line"></i> Comparaison Revenus/Dépenses</h3><div class="chart-wrap"><canvas id="finCompChart"></canvas></div></div>
           </div>
-          <div class="alert-box alert-warning"><i class="fas fa-exclamation-triangle"></i> <strong>2 paiements en attente</strong> — Vérifier la comptabilité</div>
+          <div class="alert-box alert-warning"><i class="fas fa-exclamation-triangle"></i> <strong>${invoices.filter(invoice => invoice.status !== 'paid').length} facture(s) non soldée(s)</strong> — Vérifier la comptabilité</div>
           <div class="card">
             <div class="card-header"><h2><i class="fas fa-file-invoice-dollar"></i> Détail Financier</h2><div class="btn-group">
               <button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button>
@@ -391,10 +431,11 @@
           </div>`;
       }
       function initFinancierCharts() {
+        const series = financialSeries();
         const ctx1 = document.getElementById('finRevChart');
-        if (ctx1 && !chartInstances['finRev']) chartInstances['finRev'] = new Chart(ctx1, { type: 'bar', data: { labels: ['Sep', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév'], datasets: [{ label: 'Revenus (K HTG)', data: [185, 220, 250, 280, 300, 285], backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        if (ctx1 && !chartInstances['finRev']) chartInstances['finRev'] = new Chart(ctx1, { type: 'bar', data: { labels: series.labels, datasets: [{ label: 'Revenus (HTG)', data: series.revenus, backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false } });
         const ctx2 = document.getElementById('finCompChart');
-        if (ctx2 && !chartInstances['finComp']) chartInstances['finComp'] = new Chart(ctx2, { type: 'line', data: { labels: ['Sep', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév'], datasets: [{ label: 'Revenus', data: [185, 220, 250, 280, 300, 285], borderColor: '#10b981', borderWidth: 2, tension: 0.3 }, { label: 'Dépenses', data: [120, 140, 155, 170, 180, 175], borderColor: '#D62828', borderWidth: 2, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        if (ctx2 && !chartInstances['finComp']) chartInstances['finComp'] = new Chart(ctx2, { type: 'line', data: { labels: series.labels, datasets: [{ label: 'Revenus', data: series.revenus, borderColor: '#10b981', borderWidth: 2, tension: 0.3 }, { label: 'Dépenses', data: series.depenses, borderColor: '#D62828', borderWidth: 2, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
       }
 
       // ----- FORMATIONS -----
@@ -428,12 +469,12 @@
           <div class="card"><div class="card-header"><h2><i class="fas fa-calendar-star"></i> Événements</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Nom</th><th>Date</th><th>Participants</th><th>Coût</th><th>Retombées</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
       }
 
-      function refreshAll() { renderPage(currentPage); showToast('Données actualisées (filtre: ' + currentFilter + ')', 'info'); }
+      async function refreshAll() { await loadReportData(); showToast('Données actualisées (filtre: ' + currentFilter + ')', 'info'); }
 
       // ----- INIT -----
       document.addEventListener('DOMContentLoaded', () => {
         initDateFilter();
-        renderPage('academique');
+        loadReportData();
         document.querySelector('#navRH button[data-page="academique"]').classList.add('active');
         console.log('CEJEC Rapports & Analytics prêt - Export 6 sections fonctionnel.');
       });

@@ -1,475 +1,849 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>Médias & Communication · CEJEC ERP</title>
     <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="css/StyleBordAD.css">
-    <link rel="stylesheet" href="css/AI_Styles.css">
-    <link rel="stylesheet" href="css/styles_media.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/StyleBordAD.css" />
+    <link rel="stylesheet" href="css/AI_Styles.css" />
+    <link rel="stylesheet" href="css/styles_media.css" />
+  </head>
+  <body>
     <div class="dashboard">
-        <!-- Header -->
-        <header class="header">
+      <!-- Header -->
+      <header class="header">
+        <!-- LOGO -->
+        <div class="header-left">
+          <!-- Menu Toggle Button -->
+          <button
+            id="menu-toggle"
+            class="menu-toggle"
+            aria-label="Ouvrir le menu"
+            aria-expanded="false">
+            <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+              <rect width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+            </svg>
+          </button>
 
-            <!-- LOGO -->
-            <div class="header-left">
-                <!-- Menu Toggle Button -->
-                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
-                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
-                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
-                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
-                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
-                    </svg>
-                </button>
-
-                <a href="Dashbord-Admin.html" class="logo-link">
-                    <i class="fas fa-chart-line logo-img"></i>
-                </a>
-            </div>
-
-            <!-- SEARCH BAR -->
-            <div class="header-center">
-                <div class="input-group">
-                    <span class="search-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </span>
-                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
-                    <button type="submit" class="btn-search">Recherche</button>
-                </div>
-            </div>
-            
-            <!-- USER + NOTIFICATIONS -->
-            <div class="header-right">
-
-                <!-- USER MENU -->
-                <div class="user-section">
-                    <div class="user-trigger" onclick="toggleUserMenu()">
-                        <div class="avatar">B</div>
-                        <span class="user-name">Bruno Jean</span>
-                        <i class="fa-solid fa-chevron-down arrow"></i>
-                    </div>
-
-                    <div class="user-menu" id="userMenu">
-                        <div class="user-info">
-                            <strong>CEJEC</strong>
-                            <span>brunojean90@gmail.com</span>
-                        </div>
-
-                        <!-- PARAMÈTRE -->
-                        <a href="Parametre_Admin.html" class="menu-item">
-                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
-                        </a>
-
-                        <div class="menu-divider"></div>
-
-                        <a href="Se connecter - Admin.html" class="menu-item logout">
-                            <i class="fa-solid fa-right-from-bracket"></i> 
-                            <span>Se déconnecter</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- NOTIFICATIONS -->
-                <div class="header-actions">
-                    <div class="notification-bell">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="badge44">5</span>
-                    </div>
-                </div>
-
-            </div>
-        </header>
-
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-
-            <!-- BRAND -->
-            <div class="brand">
-                <div class="logo">
-                <img src="assets/favicon.png" alt="CEJEC Logo">
-                </div>
-                <div>
-                <h1>CEJEC</h1>
-                <div class="muted">Admin Panel</div>
-                </div>
-            </div>
-
-            <!-- NAVIGATION -->
-            <nav>
-
-                <!-- DASHBOARD -->
-                <p>Vue d'ensemble</p>                
-                <a href="Dashbord-Admin.html">
-                <div class="nav-item">
-                <i class="fa-solid fa-chart-line"></i>
-                Tableau de bord
-                </div>
-                </a>
-                
-                <!-- MANAGEMENT -->
-                <p>Opérations</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-school fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Académique
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
-                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
-                        <a class="dropdown22-item active" href="gestion_medias.html">
-                            <span class="fa-stack" style="width: 1.5em;">
-                                    <!-- ICON PRINCIPAL -->
-                                    <i class="fa-solid fa-image fa-stack-1x"></i>
-                                    <!-- PETIT GEAR (TOP RIGHT) -->
-                                    <i class="fa-solid fa-newspaper fa-stack-1x"
-                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                            </span>  
-                        Médias & Communication
-                    </a>
-                    </div>
-                </div>
-                
-                <!-- INCUBATEUR PROJETS & CALDRIER -->
-                <a href="incubateur_calendrier.html">
-                <div class="nav-item">
-                <span class="fa-stack" style="width: 1.5em;">
-                    <!-- ICON PRINCIPAL -->
-                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
-                    <!-- PETIT GEAR (TOP RIGHT) -->
-                    <i class="fa-solid fa-calendar-days fa-stack-1x"
-                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                </span>                    
-                Incubateur Projets & Calendrier
-                </div>
-                </a>
-             
-                <!-- OPERATIONS -->
-                <p>Système</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Opérations
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
-                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
-                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
-                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
-                    </div>
-                </div>   
-  
-                <!-- PARAMÈT -->
-                <a href="Parametre_Admin.html">
-                <div class="nav-item">
-                <i class="fa-solid fa-gear"></i>
-                Paramètre
-                </div>
-                </a>
-
-            </nav>
-                
-            <!-- FOOTER TOOLS -->
-            <div class="sidebar-footer">
-
-                <div class="user-profile2">
-                    <div class="avatar-wrapper2">
-                        <div class="avatar2">BJ</div>
-                        <span class="status-indicator2"></span>
-                    </div>
-                    
-                    <div class="user-info2">
-                        <div class="user-name2">Bruno Jean</div>
-                        <div class="user-role2">Super Admin</div>
-                    </div>
-                    <a href="Se connecter - Admin.html">
-                        <button class="logout-btn2" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </a>
-                </div>
-                
-            </div>
-
-        </aside>
-
-        <!-- OVERLAY -->
-        <div class="overlay"></div>
-        
-        <!-- MAIN CONTENT -->
-        <div class="container">
-            <div class="breadcrumb"><i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <span class="current">Médias & Communication</span></div>
-            <header class="header-page">
-                <div><h1><span class="icon-circle"><i class="fas fa-photo-film"></i></span> Médias & Communication</h1><span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span><p>Gérez la médiathèque, les articles et la communication du centre</p></div>
-                <div class="header-actions27"><button class="btn btn-primary" onclick="openMediaModal()"><i class="fas fa-plus"></i> Ajouter média</button><button class="btn btn-outline" onclick="openArticleModal()"><i class="fas fa-pen"></i> Nouvel article</button></div>
-            </header>
-            <nav class="nav-tabs" id="navTabs"><button class="active" data-page="mediatheque"><i class="fas fa-images"></i> Médiathèque</button><button data-page="blog"><i class="fas fa-newspaper"></i> Blog & Articles</button></nav>
-            <div id="mainContent"></div>
+          <a href="Dashbord-Admin.html" class="logo-link">
+            <i class="fas fa-chart-line logo-img"></i>
+          </a>
         </div>
 
-        <!-- Modal Média -->
-        <div class="modal-overlay" id="mediaModal"><div class="modal"><div class="modal-header"><h3 id="mediaModalTitle"><i class="fas fa-image"></i> Ajouter un média</h3><button class="modal-close" onclick="closeModal('mediaModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><div class="form-grid"><div class="form-group full"><label>Titre du média <span style="color:var(--red)">*</span></label><input type="text" id="mediaTitre" placeholder="Ex: Cérémonie de remise des diplômes 2025" style="font-weight:600;font-size:1rem"><input type="hidden" id="mediaEditId" value=""></div><div class="form-group full"><div class="drag-drop-zone" id="dropZone" onclick="document.getElementById('mediaFile').click()"><i class="fas fa-cloud-upload-alt"></i><p>Glissez-déposez vos fichiers ici</p><span>ou cliquez pour parcourir</span><input type="file" id="mediaFile" multiple accept="image/*,video/*" hidden onchange="handleFileSelect(event)"></div><div id="filePreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div></div><div class="form-group"><label>Type</label><select id="mediaType"><option>Photo</option><option>Vidéo</option></select></div><div class="form-group"><label>Promotion</label><select id="mediaPromo"><option>Promotion 1</option><option>Promotion 2</option><option>Promotion 3</option><option>Promotion 4</option><option>Promotion 5</option><option>Promotion 6</option></select></div><div class="form-group full"><label>Album</label><input type="text" id="mediaAlbum" list="albumList" placeholder="Chwazi yon album oswa tape yon nouvo..." autocomplete="off"><datalist id="albumList"><option value="Journées Portes Ouvertes"><option value="Remises de diplômes"><option value="Conférences"><option value="Sorties pédagogiques"><option value="Hackathons"><option value="Activités culturelles"><option value="Visites d'entreprises"><option value="Partenariats"><option value="Cérémonies"><option value="Événements spéciaux"><option value="Ateliers pratiques"><option value="Séminaires"><option value="Compétitions"><option value="Galas"><option value="Formations"></datalist></div><div class="form-group full"><label>Description</label><textarea id="mediaDesc" rows="3" placeholder="Description détaillée du média..."></textarea></div></div></div><div class="modal-footer"><button class="btn btn-outline btn-danger" id="mediaDeleteBtn" style="display:none;margin-right:auto" onclick="deleteMedia()"><i class="fas fa-trash"></i> Supprimer</button><button class="btn btn-outline" onclick="closeModal('mediaModal')">Annuler</button><button class="btn btn-primary" onclick="saveMedia()"><i class="fas fa-save"></i> Enregistrer</button></div></div></div>
+        <!-- SEARCH BAR -->
+        <div class="header-center">
+          <div class="input-group">
+            <span class="search-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              id="globalSearchInput"
+              placeholder="Rechercher étudiants, formations, enseignants ou informations..."
+              aria-label="Rechercher dans le tableau de bord" />
+            <button type="submit" class="btn-search">Recherche</button>
+          </div>
+        </div>
 
-        <!-- Modal Article -->
-        <div class="modal-overlay" id="articleModal"><div class="modal"><div class="modal-header"><h3 id="articleModalTitle"><i class="fas fa-pen"></i> Nouvel Article</h3><button class="modal-close" onclick="closeModal('articleModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><div class="form-grid"><input type="hidden" id="articleEditId" value=""><div class="form-group full"><label>Titre de l'article <span style="color:var(--red)">*</span></label><input type="text" id="articleTitle" placeholder="Saisissez un titre accrocheur..." style="font-size:1.1rem;font-weight:600" oninput="updateSEOPreview()"></div><div class="form-group"><label>Catégorie</label><select id="articleCat"><option>Actualités</option><option>Communiqués</option><option>Événements</option><option>Entrepreneuriat</option><option>Innovation</option><option>Témoignages</option><option>Partenariats</option><option>Vie estudiantine</option><option>Réussites</option><option>Formations</option></select></div><div class="form-group"><label>Auteur</label><input type="text" id="articleAuthor" value="CEJEC Communication"></div><div class="form-group"><label>Statut</label><select id="articleStatus"><option value="brouillon">Brouillon</option><option value="publié">Publié</option><option value="archivé">Archivé</option><option value="programmé">Programmé</option></select></div><div class="form-group"><label>Date de publication</label><input type="datetime-local" id="articleDate"></div><div class="form-group full"><label>Tags / Mots-clés</label><div class="tags-input" id="tagsContainer" onclick="document.getElementById('tagInput').focus()"><input type="text" id="tagInput" placeholder="Ajouter un tag... (Entrée pour valider)" onkeydown="handleTagInput(event)"></div></div><div class="form-group full"><label>🖼️ Image de couverture</label><div class="cover-image-section"><div class="cover-upload-zone" id="coverDropZone" onclick="document.getElementById('coverImageInput').click()"><i class="fas fa-image"></i><h4>Glissez-déposez votre image</h4><p>ou cliquez pour parcourir</p><div class="cover-formats"><span>JPG</span><span>PNG</span><span>WebP</span><span>GIF</span></div><input type="file" id="coverImageInput" accept="image/*" hidden onchange="handleCoverImage(event)"></div><div class="cover-preview-container"><div class="cover-preview-card"><div class="preview-header"><i class="fas fa-newspaper"></i> Aperçu couverture</div><div class="preview-image-area" id="coverPreviewArea"><div class="no-image"><i class="fas fa-image"></i><span>Aucune image</span></div></div><div class="preview-info"><span class="file-name" id="coverFileName">—</span><button class="remove-cover-btn" id="removeCoverBtn" onclick="removeCoverImage(event)" title="Retirer"><i class="fas fa-trash"></i></button></div></div><div class="cover-recommendations"><div class="rec-item" onclick="selectRecommendedCover('https://picsum.photos/seed/cejec1/400/250')" title="Campus"><img src="https://picsum.photos/seed/cejec1/100/60" alt="Campus"></div><div class="rec-item" onclick="selectRecommendedCover('https://picsum.photos/seed/cejec2/400/250')" title="Étudiants"><img src="https://picsum.photos/seed/cejec2/100/60" alt="Étudiants"></div><div class="rec-item" onclick="selectRecommendedCover('https://picsum.photos/seed/cejec3/400/250')" title="Conférence"><img src="https://picsum.photos/seed/cejec3/100/60" alt="Conférence"></div><div class="rec-item" onclick="selectRecommendedCover('https://picsum.photos/seed/cejec4/400/250')" title="Diplômes"><img src="https://picsum.photos/seed/cejec4/100/60" alt="Diplômes"></div></div></div></div></div><div class="form-group full"><label>📸 Galerie média supplémentaire</label><div class="media-upload-grid" id="galleryGrid"><div class="media-upload-item" onclick="document.getElementById('galleryInput').click()"><div class="add-placeholder"><i class="fas fa-plus-circle"></i><span>Ajouter</span></div></div></div><input type="file" id="galleryInput" multiple accept="image/*,video/*" hidden onchange="addGalleryMedia(event)"><small style="color:var(--muted-light);font-size:.7rem;margin-top:4px">JPG, PNG, GIF, MP4, WebM | Max: 10MB</small></div><div class="form-group full"><label>Résumé / Extrait <span style="color:var(--red)">*</span></label><textarea id="articleResume" rows="3" placeholder="Résumé accrocheur (150-160 caractères recommandés)..." oninput="updateSEOPreview();updateCharCount()"></textarea><small id="charCount" style="color:var(--muted-light);font-size:.7rem;text-align:right">0 caractères</small></div><div class="form-group full"><label>Contenu principal <span style="color:var(--red)">*</span></label><div class="editor-wrapper"><div class="editor-toolbar" id="editorToolbar"><button type="button" class="editor-btn" data-cmd="bold" title="Gras (Ctrl+B)"><i class="fas fa-bold"></i></button><button type="button" class="editor-btn" data-cmd="italic" title="Italique (Ctrl+I)"><i class="fas fa-italic"></i></button><button type="button" class="editor-btn" data-cmd="underline" title="Souligné (Ctrl+U)"><i class="fas fa-underline"></i></button><span class="toolbar-divider"></span><button type="button" class="editor-btn" data-cmd="h1" title="Titre 1"><i class="fas fa-heading"></i><small>1</small></button><button type="button" class="editor-btn" data-cmd="h2" title="Titre 2"><i class="fas fa-heading"></i><small>2</small></button><button type="button" class="editor-btn" data-cmd="h3" title="Titre 3"><i class="fas fa-heading"></i><small>3</small></button><span class="toolbar-divider"></span><button type="button" class="editor-btn" data-cmd="ul" title="Liste à puces"><i class="fas fa-list-ul"></i></button><button type="button" class="editor-btn" data-cmd="ol" title="Liste numérotée"><i class="fas fa-list-ol"></i></button><button type="button" class="editor-btn" data-cmd="quote" title="Citation"><i class="fas fa-quote-right"></i></button><span class="toolbar-divider"></span><button type="button" class="editor-btn" data-cmd="link" title="Insérer un lien"><i class="fas fa-link"></i></button><button type="button" class="editor-btn" data-cmd="image" title="Insérer une image"><i class="fas fa-image"></i></button><button type="button" class="editor-btn" data-cmd="hr" title="Ligne de séparation"><i class="fas fa-minus"></i></button></div><div id="articleContent" class="editor-content" contenteditable="true"></div></div></div><div class="form-group full"><label>Aperçu SEO Google</label><div class="seo-preview"><div class="seo-title" id="seoTitle">Titre de l'article</div><div class="seo-url">cejec.edu.ht/blog/<span id="seoSlug">titre-article</span></div><div class="seo-desc" id="seoDesc">Le résumé de votre article apparaîtra ici...</div></div></div><div class="form-group full"><label>📤 Partager sur les réseaux sociaux</label><div class="share-section"><h4><i class="fas fa-share-alt"></i> Publier sur :</h4><div class="social-share-modal"><button class="social-share-btn" style="background:var(--facebook)" onclick="shareArticle('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button><button class="social-share-btn" style="background:var(--twitter)" onclick="shareArticle('twitter')"><i class="fab fa-x-twitter"></i> X/Twitter</button><button class="social-share-btn" style="background:var(--linkedin)" onclick="shareArticle('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button><button class="social-share-btn" style="background:var(--whatsapp)" onclick="shareArticle('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="social-share-btn" style="background:var(--instagram)" onclick="shareArticle('instagram')"><i class="fab fa-instagram"></i> Instagram</button><button class="social-share-btn" style="background:var(--tiktok)" onclick="shareArticle('tiktok')"><i class="fab fa-tiktok"></i> TikTok</button></div><div class="share-link-box"><input type="text" id="shareLink" value="https://cejec.edu.ht/blog/titre-article" readonly><button class="btn btn-primary btn-sm" onclick="copyShareLink()"><i class="fas fa-copy"></i> Copier</button></div></div></div></div></div><div class="modal-footer"><button class="btn btn-outline btn-danger" id="articleDeleteBtn" style="display:none;margin-right:auto" onclick="deleteArticle()"><i class="fas fa-trash"></i> Supprimer</button><div style="display:flex;gap:8px;align-items:center;flex:1"><button class="btn btn-outline btn-sm" onclick="previewArticle()"><i class="fas fa-eye"></i> Aperçu</button></div><button class="btn btn-outline" onclick="closeModal('articleModal')">Annuler</button><button class="btn btn-outline" onclick="saveArticle('brouillon')"><i class="fas fa-save"></i> Brouillon</button><button class="btn btn-outline" onclick="saveArticle('programmé')"><i class="fas fa-clock"></i> Programmer</button><button class="btn btn-primary" id="articlePublishBtn" onclick="saveArticle('publié')"><i class="fas fa-rocket"></i> Publier</button></div></div></div>
+        <!-- USER + NOTIFICATIONS -->
+        <div class="header-right">
+          <!-- USER MENU -->
+          <div class="user-section">
+            <div class="user-trigger" onclick="toggleUserMenu()">
+              <div class="avatar">B</div>
+              <span class="user-name">Bruno Jean</span>
+              <i class="fa-solid fa-chevron-down arrow"></i>
+            </div>
 
-        <div class="lightbox-overlay" id="lightbox" style="display:none" onclick="closeLightbox()"><span class="lightbox-close">&times;</span><img src="" alt="Lightbox" id="lightboxImg"></div>
-        <div class="toast-container" id="toastContainer"></div>
-        <!-- AI Systeme -->
-        <div id="orion-concierge-sistem"></div>        
+            <div class="user-menu" id="userMenu">
+              <div class="user-info">
+                <strong>CEJEC</strong>
+                <span>brunojean90@gmail.com</span>
+              </div>
+
+              <!-- PARAMÈTRE -->
+              <a href="Parametre_Admin.html" class="menu-item">
+                <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+              </a>
+
+              <div class="menu-divider"></div>
+
+              <a href="Se connecter - Admin.html" class="menu-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Se déconnecter</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="header-actions">
+            <div class="notification-bell">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge44">5</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- BRAND -->
+        <div class="brand">
+          <div class="logo">
+            <img src="assets/favicon.png" alt="CEJEC Logo" />
+          </div>
+          <div>
+            <h1>CEJEC</h1>
+            <div class="muted">Admin Panel</div>
+          </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav>
+          <!-- DASHBOARD -->
+          <p>Vue d'ensemble</p>
+          <a href="Dashbord-Admin.html">
+            <div class="nav-item">
+              <i class="fa-solid fa-chart-line"></i>
+              Tableau de bord
+            </div>
+          </a>
+
+          <!-- MANAGEMENT -->
+          <p>Opérations</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggleAcademique">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-school fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Académique
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenuAcademique">
+              <a class="dropdown22-item" href="gestion_classes.html"
+                ><i class="fa-solid fa-chalkboard"></i> Classes</a
+              >
+              <a class="dropdown22-item" href="gestion_notes.html"
+                ><i class="fa-solid fa-sticky-note"></i> Notes</a
+              >
+              <a class="dropdown22-item active" href="gestion_medias.html">
+                <span class="fa-stack" style="width: 1.5em">
+                  <!-- ICON PRINCIPAL -->
+                  <i class="fa-solid fa-image fa-stack-1x"></i>
+                  <!-- PETIT GEAR (TOP RIGHT) -->
+                  <i
+                    class="fa-solid fa-newspaper fa-stack-1x"
+                    style="
+                      font-size: 0.55em;
+                      transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                Médias & Communication
+              </a>
+            </div>
+          </div>
+
+          <!-- INCUBATEUR PROJETS & CALDRIER -->
+          <a href="incubateur_calendrier.html">
+            <div class="nav-item">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-calendar-days fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Incubateur Projets & Calendrier
+            </div>
+          </a>
+
+          <!-- OPERATIONS -->
+          <p>Système</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggleOperations">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Opérations
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenuOperations">
+              <a class="dropdown22-item" href="gestion_inscriptions.html"
+                ><i class="fa-solid fa-user-plus"></i> Inscriptions</a
+              >
+              <a class="dropdown22-item" href="gestion_utilisateurs.html"
+                ><i class="fa-solid fa-users"></i> Eleves & Professeurs</a
+              >
+              <a class="dropdown22-item" href="Rapports_Admin.html"
+                ><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a
+              >
+              <a class="dropdown22-item" href="rh.html"
+                ><i class="fa-solid fa-user-tie"></i> RH</a
+              >
+            </div>
+          </div>
+
+          <!-- PARAMÈT -->
+          <a href="Parametre_Admin.html">
+            <div class="nav-item">
+              <i class="fa-solid fa-gear"></i>
+              Paramètre
+            </div>
+          </a>
+        </nav>
+
+        <!-- FOOTER TOOLS -->
+        <div class="sidebar-footer">
+          <div class="user-profile2">
+            <div class="avatar-wrapper2">
+              <div class="avatar2">BJ</div>
+              <span class="status-indicator2"></span>
+            </div>
+
+            <div class="user-info2">
+              <div class="user-name2">Bruno Jean</div>
+              <div class="user-role2">Super Admin</div>
+            </div>
+            <a href="Se connecter - Admin.html">
+              <button class="logout-btn2" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </button>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- OVERLAY -->
+      <div class="overlay"></div>
+
+      <!-- MAIN CONTENT -->
+      <div class="container">
+        <div class="breadcrumb">
+          <i class="fas fa-home"></i> Accueil
+          <i class="fas fa-chevron-right"></i>
+          <span class="current">Médias & Communication</span>
+        </div>
+        <header class="header-page">
+          <div>
+            <h1>
+              <span class="icon-circle"><i class="fas fa-photo-film"></i></span>
+              Médias & Communication
+            </h1>
+            <span class="header-badge"
+              ><i class="fas fa-graduation-cap"></i> CEJEC · Promotion
+              2026</span
+            >
+            <p>
+              Gérez la médiathèque, les articles et la communication du centre
+            </p>
+          </div>
+          <div class="header-actions27">
+            <button class="btn btn-primary" onclick="openMediaModal()">
+              <i class="fas fa-plus"></i> Ajouter média</button
+            ><button class="btn btn-outline" onclick="openArticleModal()">
+              <i class="fas fa-pen"></i> Nouvel article
+            </button>
+          </div>
+        </header>
+        <nav class="nav-tabs" id="navTabs">
+          <button class="active" data-page="mediatheque">
+            <i class="fas fa-images"></i> Médiathèque</button
+          ><button data-page="blog">
+            <i class="fas fa-newspaper"></i> Blog & Articles
+          </button>
+        </nav>
+        <div id="mainContent"></div>
+      </div>
+
+      <!-- Modal Média -->
+      <div class="modal-overlay" id="mediaModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3 id="mediaModalTitle">
+              <i class="fas fa-image"></i> Ajouter un média
+            </h3>
+            <button class="modal-close" onclick="closeModal('mediaModal')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group full">
+                <label
+                  >Titre du média
+                  <span style="color: var(--red)">*</span></label
+                ><input
+                  type="text"
+                  id="mediaTitre"
+                  placeholder="Ex: Cérémonie de remise des diplômes 2025"
+                  style="font-weight: 600; font-size: 1rem" /><input
+                  type="hidden"
+                  id="mediaEditId"
+                  value="" />
+              </div>
+              <div class="form-group full">
+                <div
+                  class="drag-drop-zone"
+                  id="dropZone"
+                  onclick="document.getElementById('mediaFile').click()">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Glissez-déposez vos fichiers ici</p>
+                  <span>ou cliquez pour parcourir</span
+                  ><input
+                    type="file"
+                    id="mediaFile"
+                    multiple
+                    accept="image/*,video/*"
+                    hidden
+                    onchange="handleFileSelect(event)" />
+                </div>
+                <div
+                  id="filePreview"
+                  style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-top: 12px;
+                  "></div>
+              </div>
+              <div class="form-group">
+                <label>Type</label
+                ><select id="mediaType">
+                  <option>Photo</option>
+                  <option>Vidéo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Promotion</label
+                ><select id="mediaPromo">
+                  <option>Promotion 1</option>
+                  <option>Promotion 2</option>
+                  <option>Promotion 3</option>
+                  <option>Promotion 4</option>
+                  <option>Promotion 5</option>
+                  <option>Promotion 6</option>
+                </select>
+              </div>
+              <div class="form-group full">
+                <label>Album</label
+                ><input
+                  type="text"
+                  id="mediaAlbum"
+                  list="albumList"
+                  placeholder="Chwazi yon album oswa tape yon nouvo..."
+                  autocomplete="off" /><datalist id="albumList">
+                  <option value="Journées Portes Ouvertes"></option>
+                  <option value="Remises de diplômes"></option>
+                  <option value="Conférences"></option>
+                  <option value="Sorties pédagogiques"></option>
+                  <option value="Hackathons"></option>
+                  <option value="Activités culturelles"></option>
+                  <option value="Visites d'entreprises"></option>
+                  <option value="Partenariats"></option>
+                  <option value="Cérémonies"></option>
+                  <option value="Événements spéciaux"></option>
+                  <option value="Ateliers pratiques"></option>
+                  <option value="Séminaires"></option>
+                  <option value="Compétitions"></option>
+                  <option value="Galas"></option>
+                  <option value="Formations"></option>
+                </datalist>
+              </div>
+              <div class="form-group full">
+                <label>Description</label
+                ><textarea
+                  id="mediaDesc"
+                  rows="3"
+                  placeholder="Description détaillée du média..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn btn-outline btn-danger"
+              id="mediaDeleteBtn"
+              style="display: none; margin-right: auto"
+              onclick="deleteMedia()">
+              <i class="fas fa-trash"></i> Supprimer</button
+            ><button class="btn btn-outline" onclick="closeModal('mediaModal')">
+              Annuler</button
+            ><button class="btn btn-primary" onclick="saveMedia()">
+              <i class="fas fa-save"></i> Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Article -->
+      <div class="modal-overlay" id="articleModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3 id="articleModalTitle">
+              <i class="fas fa-pen"></i> Nouvel Article
+            </h3>
+            <button class="modal-close" onclick="closeModal('articleModal')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-grid">
+              <input type="hidden" id="articleEditId" value="" />
+              <div class="form-group full">
+                <label
+                  >Titre de l'article
+                  <span style="color: var(--red)">*</span></label
+                ><input
+                  type="text"
+                  id="articleTitle"
+                  placeholder="Saisissez un titre accrocheur..."
+                  style="font-size: 1.1rem; font-weight: 600"
+                  oninput="updateSEOPreview()" />
+              </div>
+              <div class="form-group">
+                <label>Catégorie</label
+                ><select id="articleCat">
+                  <option value="news">Actualités</option>
+                  <option value="communication">Communiqués</option>
+                  <option value="event">Événements</option>
+                  <option value="entrepreneurship">Entrepreneuriat</option>
+                  <option value="innovation">Innovation</option>
+                  <option value="testimonial">Témoignages</option>
+                  <option value="partnership">Partenariats</option>
+                  <option value="student_life">Vie estudiantine</option>
+                  <option value="success">Réussites</option>
+                  <option value="training">Formations</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Auteur</label
+                ><input
+                  type="text"
+                  id="articleAuthor"
+                  value="CEJEC Communication" />
+              </div>
+              <div class="form-group">
+                <label>Statut</label
+                ><select id="articleStatus">
+                  <option value="draft">Brouillon</option>
+                  <option value="published">Publié</option>
+                  <option value="archived">Archivé</option>
+                  <option value="scheduled">Programmé</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date de publication</label
+                ><input type="datetime-local" id="articleDate" />
+              </div>
+              <div class="form-group full">
+                <label>Tags / Mots-clés</label>
+                <div
+                  class="tags-input"
+                  id="tagsContainer"
+                  onclick="document.getElementById('tagInput').focus()">
+                  <input
+                    type="text"
+                    id="tagInput"
+                    placeholder="Ajouter un tag... (Entrée pour valider)"
+                    onkeydown="handleTagInput(event)" />
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>🖼️ Image de couverture</label>
+                <div class="cover-image-section">
+                  <div
+                    class="cover-upload-zone"
+                    id="coverDropZone"
+                    onclick="
+                      document.getElementById('coverImageInput').click()
+                    ">
+                    <i class="fas fa-image"></i>
+                    <h4>Glissez-déposez votre image</h4>
+                    <p>ou cliquez pour parcourir</p>
+                    <div class="cover-formats">
+                      <span>JPG</span><span>PNG</span><span>WebP</span
+                      ><span>GIF</span>
+                    </div>
+                    <input
+                      type="file"
+                      id="coverImageInput"
+                      accept="image/*"
+                      hidden
+                      onchange="handleCoverImage(event)" />
+                  </div>
+                  <div class="cover-preview-container">
+                    <div class="cover-preview-card">
+                      <div class="preview-header">
+                        <i class="fas fa-newspaper"></i> Aperçu couverture
+                      </div>
+                      <div class="preview-image-area" id="coverPreviewArea">
+                        <div class="no-image">
+                          <i class="fas fa-image"></i><span>Aucune image</span>
+                        </div>
+                      </div>
+                      <div class="preview-info">
+                        <span class="file-name" id="coverFileName">—</span
+                        ><button
+                          class="remove-cover-btn"
+                          id="removeCoverBtn"
+                          onclick="removeCoverImage(event)"
+                          title="Retirer">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="cover-recommendations">
+                      <div
+                        class="rec-item"
+                        onclick="
+                          selectRecommendedCover(
+                            'https://picsum.photos/seed/cejec1/400/250',
+                          )
+                        "
+                        title="Campus">
+                        <img
+                          src="https://picsum.photos/seed/cejec1/100/60"
+                          alt="Campus" />
+                      </div>
+                      <div
+                        class="rec-item"
+                        onclick="
+                          selectRecommendedCover(
+                            'https://picsum.photos/seed/cejec2/400/250',
+                          )
+                        "
+                        title="Étudiants">
+                        <img
+                          src="https://picsum.photos/seed/cejec2/100/60"
+                          alt="Étudiants" />
+                      </div>
+                      <div
+                        class="rec-item"
+                        onclick="
+                          selectRecommendedCover(
+                            'https://picsum.photos/seed/cejec3/400/250',
+                          )
+                        "
+                        title="Conférence">
+                        <img
+                          src="https://picsum.photos/seed/cejec3/100/60"
+                          alt="Conférence" />
+                      </div>
+                      <div
+                        class="rec-item"
+                        onclick="
+                          selectRecommendedCover(
+                            'https://picsum.photos/seed/cejec4/400/250',
+                          )
+                        "
+                        title="Diplômes">
+                        <img
+                          src="https://picsum.photos/seed/cejec4/100/60"
+                          alt="Diplômes" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>📸 Galerie média supplémentaire</label>
+                <div class="media-upload-grid" id="galleryGrid">
+                  <div
+                    class="media-upload-item"
+                    onclick="document.getElementById('galleryInput').click()">
+                    <div class="add-placeholder">
+                      <i class="fas fa-plus-circle"></i><span>Ajouter</span>
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  id="galleryInput"
+                  multiple
+                  accept="image/*,video/*"
+                  hidden
+                  onchange="addGalleryMedia(event)" /><small
+                  style="
+                    color: var(--muted-light);
+                    font-size: 0.7rem;
+                    margin-top: 4px;
+                  "
+                  >JPG, PNG, GIF, MP4, WebM | Max: 10MB</small
+                >
+              </div>
+              <div class="form-group full">
+                <label
+                  >Résumé / Extrait
+                  <span style="color: var(--red)">*</span></label
+                ><textarea
+                  id="articleResume"
+                  rows="3"
+                  placeholder="Résumé accrocheur (150-160 caractères recommandés)..."
+                  oninput="
+                    updateSEOPreview();
+                    updateCharCount();
+                  "></textarea
+                ><small
+                  id="charCount"
+                  style="
+                    color: var(--muted-light);
+                    font-size: 0.7rem;
+                    text-align: right;
+                  "
+                  >0 caractères</small
+                >
+              </div>
+              <div class="form-group full">
+                <label
+                  >Contenu principal
+                  <span style="color: var(--red)">*</span></label
+                >
+                <div class="editor-wrapper">
+                  <div class="editor-toolbar" id="editorToolbar">
+                    <button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="bold"
+                      title="Gras (Ctrl+B)">
+                      <i class="fas fa-bold"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="italic"
+                      title="Italique (Ctrl+I)">
+                      <i class="fas fa-italic"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="underline"
+                      title="Souligné (Ctrl+U)">
+                      <i class="fas fa-underline"></i></button
+                    ><span class="toolbar-divider"></span
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="h1"
+                      title="Titre 1">
+                      <i class="fas fa-heading"></i><small>1</small></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="h2"
+                      title="Titre 2">
+                      <i class="fas fa-heading"></i><small>2</small></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="h3"
+                      title="Titre 3">
+                      <i class="fas fa-heading"></i><small>3</small></button
+                    ><span class="toolbar-divider"></span
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="ul"
+                      title="Liste à puces">
+                      <i class="fas fa-list-ul"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="ol"
+                      title="Liste numérotée">
+                      <i class="fas fa-list-ol"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="quote"
+                      title="Citation">
+                      <i class="fas fa-quote-right"></i></button
+                    ><span class="toolbar-divider"></span
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="link"
+                      title="Insérer un lien">
+                      <i class="fas fa-link"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="image"
+                      title="Insérer une image">
+                      <i class="fas fa-image"></i></button
+                    ><button
+                      type="button"
+                      class="editor-btn"
+                      data-cmd="hr"
+                      title="Ligne de séparation">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                  <div
+                    id="articleContent"
+                    class="editor-content"
+                    contenteditable="true"></div>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>Aperçu SEO Google</label>
+                <div class="seo-preview">
+                  <div class="seo-title" id="seoTitle">Titre de l'article</div>
+                  <div class="seo-url">
+                    cejec.edu.ht/blog/<span id="seoSlug">titre-article</span>
+                  </div>
+                  <div class="seo-desc" id="seoDesc">
+                    Le résumé de votre article apparaîtra ici...
+                  </div>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>📤 Partager sur les réseaux sociaux</label>
+                <div class="share-section">
+                  <h4><i class="fas fa-share-alt"></i> Publier sur :</h4>
+                  <div class="social-share-modal">
+                    <button
+                      class="social-share-btn"
+                      style="background: var(--facebook)"
+                      onclick="shareArticle('facebook')">
+                      <i class="fab fa-facebook-f"></i> Facebook</button
+                    ><button
+                      class="social-share-btn"
+                      style="background: var(--twitter)"
+                      onclick="shareArticle('twitter')">
+                      <i class="fab fa-x-twitter"></i> X/Twitter</button
+                    ><button
+                      class="social-share-btn"
+                      style="background: var(--linkedin)"
+                      onclick="shareArticle('linkedin')">
+                      <i class="fab fa-linkedin-in"></i> LinkedIn</button
+                    ><button
+                      class="social-share-btn"
+                      style="background: var(--whatsapp)"
+                      onclick="shareArticle('whatsapp')">
+                      <i class="fab fa-whatsapp"></i> WhatsApp</button
+                    ><button
+                      class="social-share-btn"
+                      style="background: var(--instagram)"
+                      onclick="shareArticle('instagram')">
+                      <i class="fab fa-instagram"></i> Instagram</button
+                    ><button
+                      class="social-share-btn"
+                      style="background: var(--tiktok)"
+                      onclick="shareArticle('tiktok')">
+                      <i class="fab fa-tiktok"></i> TikTok
+                    </button>
+                  </div>
+                  <div class="share-link-box">
+                    <input
+                      type="text"
+                      id="shareLink"
+                      value="https://cejec.edu.ht/blog/titre-article"
+                      readonly /><button
+                      class="btn btn-primary btn-sm"
+                      onclick="copyShareLink()">
+                      <i class="fas fa-copy"></i> Copier
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn btn-outline btn-danger"
+              id="articleDeleteBtn"
+              style="display: none; margin-right: auto"
+              onclick="deleteArticle()">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+            <div style="display: flex; gap: 8px; align-items: center; flex: 1">
+              <button class="btn btn-outline btn-sm" onclick="previewArticle()">
+                <i class="fas fa-eye"></i> Aperçu
+              </button>
+            </div>
+            <button
+              class="btn btn-outline"
+              onclick="closeModal('articleModal')">
+              Annuler</button
+            ><button class="btn btn-outline" onclick="saveArticle('brouillon')">
+              <i class="fas fa-save"></i> Brouillon</button
+            ><button class="btn btn-outline" onclick="saveArticle('programmé')">
+              <i class="fas fa-clock"></i> Programmer</button
+            ><button
+              class="btn btn-primary"
+              id="articlePublishBtn"
+              onclick="saveArticle('publié')">
+              <i class="fas fa-rocket"></i> Publier
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="lightbox-overlay"
+        id="lightbox"
+        style="display: none"
+        onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span
+        ><img src="" alt="Lightbox" id="lightboxImg" />
+      </div>
+      <div class="toast-container" id="toastContainer"></div>
+      <!-- AI Systeme -->
+      <div id="orion-concierge-sistem"></div>
     </div>
 
-<script src="js/Script_Ad.js"></script>
-<script src="js/AI_Script.js"></script>
-<script>
-// ==================== DONÉES ====================
-let currentPage='mediatheque',galleryFiles=[],coverImageData=null,editingMediaId=null,editingArticleId=null;
-const medias=[{id:1,titre:'Cérémonie de remise des diplômes',type:'Photo',promo:'Promotion 1',album:'Remises de diplômes',desc:'Cérémonie 2025',date:'2025-06-15',url:''},{id:2,titre:'Conférence Entrepreneuriat',type:'Photo',promo:'Promotion 2',album:'Conférences',desc:'Avec Dr. Mentor',date:'2025-05-20',url:''},{id:3,titre:'Vidéo JPO 2025',type:'Vidéo',promo:'Promotion 1',album:'Journées Portes Ouvertes',desc:'Récapitulatif JPO',date:'2025-04-10',url:''},{id:4,titre:'Visite entreprise Digicel',type:'Photo',promo:'Promotion 3',album:'Sorties pédagogiques',desc:'Visite Digicel',date:'2025-03-22',url:''},{id:5,titre:'Hackathon Innovation',type:'Photo',promo:'Promotion 2',album:'Hackathons',desc:'Innovation 2025',date:'2025-02-14',url:''},{id:6,titre:'Cérémonie ouverture 2025',type:'Vidéo',promo:'Promotion 1',album:'Cérémonies',desc:'Ouverture année',date:'2025-01-10',url:''}];
-const articles=[{id:1,titre:'CEJEC lance sa nouvelle promotion 2026',auteur:'CEJEC Communication',date:'2026-06-01T10:00',categorie:'Actualités',statut:'Publié',resume:'Le Centre d\'Études des Jeunes en Entrepreneuriat et Commerce annonce l\'ouverture des inscriptions.',tags:['CEJEC','Inscriptions'],image:'',contenu:'<p>Le CEJEC est fier d\'annoncer la nouvelle promotion 2026.</p>',gallery:[]},{id:2,titre:'Partenariat stratégique Banque Nationale',auteur:'Dr. Jacques Mentor',date:'2026-05-15T14:30',categorie:'Partenariats',statut:'Publié',resume:'Nouveau partenariat pour le financement des projets entrepreneuriaux.',tags:['Partenariat'],image:'',contenu:'<p>Partenariat historique.</p>',gallery:[]},{id:3,titre:'Témoignage : Mon parcours au CEJEC',auteur:'Marie Dupont',date:'2026-05-01T09:00',categorie:'Témoignages',statut:'Publié',resume:'Parcours inspirant de Marie, diplômée 2025.',tags:['Témoignage'],image:'',contenu:'<p>Marie partage.</p>',gallery:[]},{id:4,titre:'Atelier Développement Personnel Juin 2026',auteur:'Prof. Marie Louis',date:'2026-06-10T16:00',categorie:'Événements',statut:'Brouillon',resume:'Atelier développement personnel ouvert à tous.',tags:['Atelier'],image:'',contenu:'<p>Inscrivez-vous.</p>',gallery:[]}];
-let nextMediaId=10,nextArticleId=10,articleTags=[];
-
-// ==================== UTILITAIRES ====================
-function showToast(msg,type='success'){const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};const el=document.createElement('div');el.className=`toast toast-${type}`;el.innerHTML=`<i class="fas ${icons[type]}"></i> ${msg}`;document.getElementById('toastContainer').appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(100px)';el.style.transition='all .3s';setTimeout(()=>el.remove(),300)},3000)}
-function openModal(id){const modal=document.getElementById(id);modal.classList.add('open');document.body.style.overflow='hidden'}
-function closeModal(id){const modal=document.getElementById(id);modal.classList.remove('open');document.body.style.overflow=''}
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');document.body.style.overflow=''}}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>{m.classList.remove('open');document.body.style.overflow=''})}});
-
-// ==================== COVER IMAGE ====================
-function handleCoverImage(event){const file=event.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){showToast('Veuillez sélectionner une image','error');return}if(file.size>5*1024*1024){showToast('Image trop volumineuse (max 5MB)','error');return}const reader=new FileReader();reader.onload=function(e){coverImageData=e.target.result;updateCoverPreview(coverImageData,file.name)};reader.readAsDataURL(file)}
-function updateCoverPreview(dataUrl,fileName){document.getElementById('coverPreviewArea').innerHTML=`<img src="${dataUrl}" alt="Cover">`;document.getElementById('coverFileName').textContent=fileName||'Image sélectionnée';document.getElementById('removeCoverBtn').style.opacity='1'}
-function removeCoverImage(event){event.stopPropagation();coverImageData=null;document.getElementById('coverPreviewArea').innerHTML=`<div class="no-image"><i class="fas fa-image"></i><span>Aucune image</span></div>`;document.getElementById('coverFileName').textContent='—';document.getElementById('removeCoverBtn').style.opacity='0';document.getElementById('coverImageInput').value='';showToast('Image de couverture retirée','info')}
-function selectRecommendedCover(url){coverImageData=url;updateCoverPreview(url,'Image recommandée');showToast('Image de couverture appliquée','success')}
-
-// ==================== ÉDITEUR ====================
-function updateEditorToolbarState(){const editor=document.getElementById('articleContent');document.querySelectorAll('#editorToolbar .editor-btn[data-cmd]').forEach(btn=>{const cmd=btn.dataset.cmd;let isActive=false;if(cmd==='bold')isActive=document.queryCommandState('bold');else if(cmd==='italic')isActive=document.queryCommandState('italic');else if(cmd==='underline')isActive=document.queryCommandState('underline');else if(cmd==='ul')isActive=document.queryCommandState('insertUnorderedList');else if(cmd==='ol')isActive=document.queryCommandState('insertOrderedList');else if(cmd==='h1')isActive=document.queryCommandState('formatBlock')&&document.queryCommandValue('formatBlock')==='h1';else if(cmd==='h2')isActive=document.queryCommandState('formatBlock')&&document.queryCommandValue('formatBlock')==='h2';else if(cmd==='h3')isActive=document.queryCommandState('formatBlock')&&document.queryCommandValue('formatBlock')==='h3';else if(cmd==='quote')isActive=document.queryCommandState('formatBlock')&&document.queryCommandValue('formatBlock')==='blockquote';else if(cmd==='link')isActive=document.queryCommandState('createLink');if(isActive)btn.classList.add('active');else btn.classList.remove('active')})}
-function formatText(cmd){const editor=document.getElementById('articleContent');editor.focus();if(cmd==='link'){const url=prompt('URL du lien:');if(!url)return;const sel=window.getSelection();if(sel.toString().length>0)document.execCommand('createLink',false,url);else document.execCommand('insertHTML',false,`<a href="${url}" target="_blank">${url}</a>`)}else if(cmd==='image'){const url=prompt('URL de l\'image:');if(!url)return;document.execCommand('insertImage',false,url)}else if(cmd==='h1')document.execCommand('formatBlock',false,'h1');else if(cmd==='h2')document.execCommand('formatBlock',false,'h2');else if(cmd==='h3')document.execCommand('formatBlock',false,'h3');else if(cmd==='quote')document.execCommand('formatBlock',false,'blockquote');else if(cmd==='hr')document.execCommand('insertHorizontalRule',false,null);else document.execCommand(cmd,false,null);updateEditorToolbarState()}
-
-// ==================== TAGS ====================
-function handleTagInput(event){if(event.key==='Enter'||event.key===','){event.preventDefault();const input=document.getElementById('tagInput'),tag=input.value.trim().replace(',','');if(tag&&!articleTags.includes(tag)){articleTags.push(tag);renderTags()}input.value=''}}
-function removeTag(i){articleTags.splice(i,1);renderTags()}
-function renderTags(){const container=document.getElementById('tagsContainer'),input=document.getElementById('tagInput');container.innerHTML='';articleTags.forEach((t,i)=>{const s=document.createElement('span');s.className='tag';s.innerHTML=`${t} <span class="tag-close" onclick="event.stopPropagation();removeTag(${i})">&times;</span>`;container.appendChild(s)});container.appendChild(input);input.focus()}
-
-// ==================== GALERIE ====================
-function addGalleryMedia(event){const files=Array.from(event.target.files);files.forEach(f=>{if(f.size>10*1024*1024){showToast(`${f.name} dépasse 10MB`,'error');return}const reader=new FileReader();reader.onload=function(e){galleryFiles.push({name:f.name,type:f.type,data:e.target.result});renderGallery()};reader.readAsDataURL(f)})}
-function removeGalleryMedia(i){galleryFiles.splice(i,1);renderGallery()}
-function renderGallery(){const grid=document.getElementById('galleryGrid');grid.innerHTML='';galleryFiles.forEach((f,i)=>{const isVideo=f.type.startsWith('video/');grid.innerHTML+=`<div class="media-upload-item">${isVideo?`<video src="${f.data}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"></video><i class="fas fa-play" style="position:absolute;z-index:1;color:white;font-size:1.5rem"></i>`:`<img src="${f.data}" alt="${f.name}">`}<button class="remove-media" onclick="event.stopPropagation();removeGalleryMedia(${i})"><i class="fas fa-times"></i></button></div>`});grid.innerHTML+=`<div class="media-upload-item" onclick="document.getElementById('galleryInput').click()"><div class="add-placeholder"><i class="fas fa-plus-circle"></i><span>Ajouter</span></div></div>`}
-
-// ==================== SEO ====================
-function updateCharCount(){const len=document.getElementById('articleResume').value.length;document.getElementById('charCount').textContent=len+' caractères';document.getElementById('charCount').style.color=len>160?'var(--red)':'var(--muted-light)'}
-function updateSEOPreview(){const titre=document.getElementById('articleTitle').value||'Titre de l\'article',resume=document.getElementById('articleResume').value||'Le résumé apparaîtra ici...',slug=titre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'titre-article';document.getElementById('seoTitle').textContent=titre;document.getElementById('seoSlug').textContent=slug;document.getElementById('seoDesc').textContent=resume.length>160?resume.substring(0,157)+'...':resume;document.getElementById('shareLink').value=`https://cejec.edu.ht/blog/${slug}`}
-function shareArticle(platform){const titre=encodeURIComponent(document.getElementById('articleTitle').value||'Article CEJEC'),url=encodeURIComponent(document.getElementById('shareLink').value),shareUrls={facebook:`https://www.facebook.com/sharer/sharer.php?u=${url}`,twitter:`https://x.com/intent/tweet?text=${titre}&url=${url}`,linkedin:`https://www.linkedin.com/sharing/share-offsite/?url=${url}`,whatsapp:`https://wa.me/?text=${titre}%20${url}`};if(platform==='instagram'||platform==='tiktok'){copyShareLink();showToast(`Lien copié pour ${platform}`,'info')}else{window.open(shareUrls[platform],'_blank','width=600,height=500');showToast(`Partagé sur ${platform}`,'success')}}
-function copyShareLink(){const input=document.getElementById('shareLink');input.select();navigator.clipboard.writeText(input.value).then(()=>showToast('Lien copié !','success')).catch(()=>showToast('Erreur','error'))}
-
-// ==================== MÉDIA - CRUD ====================
-function openMediaModal(editId=null){
-    editingMediaId=editId;
-    const deleteBtn=document.getElementById('mediaDeleteBtn');
-    if(editId){
-        const m=medias.find(x=>x.id===editId);
-        if(!m)return;
-        document.getElementById('mediaModalTitle').innerHTML='<i class="fas fa-edit"></i> Modifier le média';
-        document.getElementById('mediaEditId').value=m.id;
-        document.getElementById('mediaTitre').value=m.titre;
-        document.getElementById('mediaType').value=m.type;
-        document.getElementById('mediaPromo').value=m.promo;
-        document.getElementById('mediaAlbum').value=m.album;
-        document.getElementById('mediaDesc').value=m.desc;
-        document.getElementById('filePreview').innerHTML='';
-        deleteBtn.style.display='inline-flex';
-    }else{
-        document.getElementById('mediaModalTitle').innerHTML='<i class="fas fa-image"></i> Ajouter un média';
-        document.getElementById('mediaEditId').value='';
-        document.getElementById('mediaTitre').value='';
-        document.getElementById('mediaType').value='Photo';
-        document.getElementById('mediaPromo').value='Promotion 1';
-        document.getElementById('mediaAlbum').value='';
-        document.getElementById('mediaDesc').value='';
-        document.getElementById('filePreview').innerHTML='';
-        deleteBtn.style.display='none';
-    }
-    openModal('mediaModal');
-}
-function handleFileSelect(event){const preview=document.getElementById('filePreview');preview.innerHTML='';Array.from(event.target.files).forEach(f=>{const reader=new FileReader();reader.onload=function(e){preview.innerHTML+=`<div style="position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover"></div>`};reader.readAsDataURL(f)})}
-function saveMedia(){
-    const titre=document.getElementById('mediaTitre').value.trim(),type=document.getElementById('mediaType').value,promo=document.getElementById('mediaPromo').value,album=document.getElementById('mediaAlbum').value.trim(),desc=document.getElementById('mediaDesc').value.trim(),editId=document.getElementById('mediaEditId').value;
-    if(!titre){showToast('Titre obligatoire','error');return}
-    if(!album){showToast('Album obligatoire','error');return}
-    const dl=document.getElementById('albumList');
-    if(!Array.from(dl.options).map(o=>o.value).includes(album)){const o=document.createElement('option');o.value=album;dl.appendChild(o)}
-    if(editId){
-        const idx=medias.findIndex(m=>m.id==parseInt(editId));
-        if(idx!==-1){medias[idx].titre=titre;medias[idx].type=type;medias[idx].promo=promo;medias[idx].album=album;medias[idx].desc=desc||titre}
-        showToast('Média modifié','success');
-    }else{
-        medias.push({id:nextMediaId++,titre,type,promo,album,desc:desc||titre,date:new Date().toISOString().split('T')[0],url:''});
-        showToast(`"${titre}" ajouté`,'success');
-    }
-    closeModal('mediaModal');renderPage('mediatheque');editingMediaId=null;
-}
-function deleteMedia(){
-    const editId=parseInt(document.getElementById('mediaEditId').value);
-    if(!editId||!confirm('Supprimer définitivement ce média ?'))return;
-    const idx=medias.findIndex(m=>m.id===editId);
-    if(idx!==-1)medias.splice(idx,1);
-    closeModal('mediaModal');renderPage('mediatheque');editingMediaId=null;
-    showToast('Média supprimé','info');
-}
-
-// ==================== ARTICLE - CRUD ====================
-function openArticleModal(editId=null){
-    editingArticleId=editId;
-    const deleteBtn=document.getElementById('articleDeleteBtn');
-    const publishBtn=document.getElementById('articlePublishBtn');
-    
-    document.getElementById('articleTitle').value='';
-    document.getElementById('articleContent').innerHTML='';
-    document.getElementById('articleResume').value='';
-    document.getElementById('articleDate').value=new Date().toISOString().slice(0,16);
-    document.getElementById('articleCat').value='Actualités';
-    document.getElementById('articleStatus').value='brouillon';
-    document.getElementById('articleAuthor').value='CEJEC Communication';
-    coverImageData=null;
-    document.getElementById('coverPreviewArea').innerHTML=`<div class="no-image"><i class="fas fa-image"></i><span>Aucune image</span></div>`;
-    document.getElementById('coverFileName').textContent='—';
-    document.getElementById('removeCoverBtn').style.opacity='0';
-    document.getElementById('coverImageInput').value='';
-    document.getElementById('charCount').textContent='0 caractères';
-    articleTags=[];galleryFiles=[];
-    document.getElementById('shareLink').value='https://cejec.edu.ht/blog/titre-article';
-    
-    if(editId){
-        const a=articles.find(x=>x.id===editId);
-        if(!a)return;
-        document.getElementById('articleModalTitle').innerHTML='<i class="fas fa-edit"></i> Modifier l\'article';
-        document.getElementById('articleEditId').value=a.id;
-        document.getElementById('articleTitle').value=a.titre;
-        document.getElementById('articleContent').innerHTML=a.contenu;
-        document.getElementById('articleResume').value=a.resume;
-        document.getElementById('articleDate').value=a.date;
-        document.getElementById('articleCat').value=a.categorie;
-        document.getElementById('articleStatus').value=a.statut.toLowerCase();
-        document.getElementById('articleAuthor').value=a.auteur;
-        articleTags=[...a.tags];
-        coverImageData=a.image||null;
-        if(coverImageData){
-            updateCoverPreview(coverImageData,'Image actuelle');
-        }
-        galleryFiles=[...a.gallery];
-        renderTags();
-        renderGallery();
-        updateSEOPreview();
-        updateCharCount();
-        updateEditorToolbarState();
-        deleteBtn.style.display='inline-flex';
-        publishBtn.innerHTML='<i class="fas fa-save"></i> Mettre à jour';
-    }else{
-        document.getElementById('articleModalTitle').innerHTML='<i class="fas fa-pen"></i> Nouvel Article';
-        document.getElementById('articleEditId').value='';
-        renderTags();
-        renderGallery();
-        updateSEOPreview();
-        updateEditorToolbarState();
-        deleteBtn.style.display='none';
-        publishBtn.innerHTML='<i class="fas fa-rocket"></i> Publier';
-    }
-    openModal('articleModal');
-}
-function saveArticle(status){
-    const titre=document.getElementById('articleTitle').value.trim(),contenu=document.getElementById('articleContent').innerHTML.trim(),resume=document.getElementById('articleResume').value.trim(),cat=document.getElementById('articleCat').value,auteur=document.getElementById('articleAuthor').value.trim(),date=document.getElementById('articleDate').value||new Date().toISOString().slice(0,16),editId=document.getElementById('articleEditId').value;
-    if(!titre){showToast('Titre obligatoire','error');return}
-    if(!resume){showToast('Résumé obligatoire','error');return}
-    if(!contenu||contenu==='<br>'||contenu==='<p><br></p>'){showToast('Contenu obligatoire','error');return}
-    const statutLabels={brouillon:'Brouillon',publié:'Publié',archivé:'Archivé',programmé:'Programmé'};
-    const articleData={titre,auteur,date,categorie:cat,statut:statutLabels[status]||'Brouillon',resume,tags:[...articleTags],image:coverImageData||'',contenu,gallery:[...galleryFiles]};
-    
-    if(editId){
-        const idx=articles.findIndex(a=>a.id==parseInt(editId));
-        if(idx!==-1){articles[idx]={...articles[idx],...articleData}}
-        showToast(status==='publié'?'Article mis à jour et publié !':'Article mis à jour','success');
-    }else{
-        articles.push({id:nextArticleId++,...articleData});
-        showToast(status==='publié'?'Article publié !':status==='programmé'?'Article programmé !':'Brouillon enregistré','success');
-    }
-    closeModal('articleModal');renderPage('blog');editingArticleId=null;
-}
-function deleteArticle(){
-    const editId=parseInt(document.getElementById('articleEditId').value);
-    if(!editId||!confirm('Supprimer définitivement cet article ?'))return;
-    const idx=articles.findIndex(a=>a.id===editId);
-    if(idx!==-1)articles.splice(idx,1);
-    closeModal('articleModal');renderPage('blog');editingArticleId=null;
-    showToast('Article supprimé','info');
-}
-function previewArticle(){const contenu=document.getElementById('articleContent').innerHTML,titre=document.getElementById('articleTitle').value||'Aperçu';const w=window.open('','_blank','width=900,height=700');w.document.write(`<!DOCTYPE html><html><head><title>${titre}</title><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.8;color:#1a1f2b}${coverImageData?`.cover-img{width:100%;max-height:400px;object-fit:cover;border-radius:16px;margin-bottom:24px}`:''}h1{font-family:'Playfair Display',serif;color:#073864;font-size:2rem}.meta{color:#5b6675;font-size:.9rem;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e5ebf2}img{max-width:100%;height:auto;border-radius:10px}blockquote{border-left:4px solid #0A4D8C;padding:10px 20px;margin:15px 0;background:#f4f8fd;border-radius:0 10px 10px 0}@media(max-width:600px){body{margin:20px auto;padding:15px}h1{font-size:1.5rem}}</style></head><body>${coverImageData?`<img src="${coverImageData}" alt="Cover" class="cover-img">`:''}<h1>${titre}</h1><div class="meta">Par ${document.getElementById('articleAuthor').value} · ${document.getElementById('articleDate').value}</div>${contenu}<script src="js/user-profile.js"></script>
-</body></html>`)}
-
-// ==================== LIGHTBOX ====================
-function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').style.display='flex'}
-function closeLightbox(){document.getElementById('lightbox').style.display='none'}
-
-// ==================== NAVIGASYON ====================
-function navigateTo(page){document.querySelectorAll('#navTabs button').forEach(b=>b.classList.remove('active'));document.querySelector(`#navTabs button[data-page="${page}"]`)?.classList.add('active');currentPage=page;renderPage(page)}
-document.querySelectorAll('#navTabs button').forEach(b=>b.addEventListener('click',function(){navigateTo(this.dataset.page)}));
-function renderPage(page){const mc=document.getElementById('mainContent');mc.innerHTML=page==='mediatheque'?renderMediatheque():page==='blog'?renderBlog():renderMediatheque()}
-
-// ==================== MEDIATHÈQUE ====================
-function renderMediatheque(){const promos=['Promotion 1','Promotion 2','Promotion 3','Promotion 4','Promotion 5','Promotion 6'],allPromos=promos.map(p=>({name:p,items:medias.filter(m=>m.promo===p)})).filter(p=>p.items.length>0);return`<div class="stats-grid"><div class="stat-card"><div class="stat-info"><span>Photos</span><h3>${medias.filter(m=>m.type==='Photo').length}</h3></div><div class="stat-icon"><i class="fas fa-image"></i></div></div><div class="stat-card"><div class="stat-info"><span>Vidéos</span><h3>${medias.filter(m=>m.type==='Vidéo').length}</h3></div><div class="stat-icon"><i class="fas fa-video"></i></div></div><div class="stat-card"><div class="stat-info"><span>Albums</span><h3>${new Set(medias.map(m=>m.album)).size}</h3></div><div class="stat-icon"><i class="fas fa-folder-open"></i></div></div><div class="stat-card"><div class="stat-info"><span>Total</span><h3>${medias.length}</h3></div><div class="stat-icon"><i class="fas fa-database"></i></div></div></div><div class="filters-row"><div class="search-box"><i class="fas fa-search"></i><input placeholder="Rechercher..." oninput="filterMedia(this.value)"></div><select class="filter-select" onchange="filterMediaByType(this.value)"><option value="tous">Types</option><option>Photo</option><option>Vidéo</option></select><select class="filter-select" onchange="filterMediaByPromo(this.value)"><option value="tous">Promotions</option>${promos.map(p=>`<option>${p}</option>`).join('')}</select><select class="filter-select" onchange="filterMediaByAlbum(this.value)"><option value="tous">Albums</option>${[...new Set(medias.map(m=>m.album))].map(a=>`<option>${a}</option>`).join('')}</select></div>${allPromos.map(p=>renderPromoSection(p.name,p.items)).join('')}${medias.length===0?`<div class="card" style="text-align:center;padding:60px"><i class="fas fa-photo-film" style="font-size:4rem;color:var(--muted-light)"></i><h3>Aucun média</h3><button class="btn btn-primary" onclick="openMediaModal()"><i class="fas fa-plus"></i> Ajouter</button></div>`:''}`}
-function renderPromoSection(title,items){if(!items.length)return'';return`<div class="card"><div class="card-header"><h2><i class="fas fa-layer-group"></i> ${title} <span class="pill pill-info">${items.length} média(s)</span></h2></div><div class="media-grid">${items.map(m=>`<div class="media-card"><div class="media-preview" onclick="openLightbox('https://picsum.photos/400/300?random=${m.id}')"><img src="https://picsum.photos/400/300?random=${m.id}" alt="${m.titre}" loading="lazy"><span class="media-badge">${m.type==='Vidéo'?'<i class="fas fa-play"></i>':'<i class="fas fa-image"></i>'} ${m.type}</span><button class="edit-overlay" onclick="event.stopPropagation();openMediaModal(${m.id})" title="Modifier"><i class="fas fa-pen"></i></button></div><div class="media-body"><div class="media-title">${m.titre}</div><div class="media-meta"><i class="fas fa-calendar"></i> ${m.date} · <i class="fas fa-folder"></i> ${m.album}</div></div></div>`).join('')}</div></div>`}
-function filterMedia(v){document.querySelectorAll('.media-card').forEach(c=>c.style.display=c.innerText.toLowerCase().includes(v.toLowerCase())?'':'none')}
-function filterMediaByType(v){document.querySelectorAll('.media-card').forEach(c=>c.style.display=v==='tous'||c.innerText.includes(v)?'':'none')}
-function filterMediaByPromo(v){document.querySelectorAll('.media-card').forEach(c=>{const s=c.closest('.card');c.style.display=v==='tous'||(s&&s.querySelector('h2')?.innerText.includes(v))?'':'none'})}
-function filterMediaByAlbum(v){document.querySelectorAll('.media-card').forEach(c=>{const a=c.querySelector('.media-meta');c.style.display=v==='tous'||(a&&a.innerText.includes(v))?'':'none'})}
-
-// ==================== BLOG ====================
-function renderBlog(){const pub=articles.filter(a=>a.statut==='Publié'),bro=articles.filter(a=>a.statut==='Brouillon');return`<div class="stats-grid"><div class="stat-card"><div class="stat-info"><span>Publiés</span><h3>${pub.length}</h3></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div><div class="stat-card"><div class="stat-info"><span>Brouillons</span><h3>${bro.length}</h3></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-edit"></i></div></div><div class="stat-card"><div class="stat-info"><span>Total</span><h3>${articles.length}</h3></div><div class="stat-icon"><i class="fas fa-newspaper"></i></div></div><div class="stat-card"><div class="stat-info"><span>Catégories</span><h3>${new Set(articles.map(a=>a.categorie)).size}</h3></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-tags"></i></div></div></div><div class="filters-row"><div class="search-box"><i class="fas fa-search"></i><input placeholder="Rechercher..." oninput="filterBlog(this.value)"></div><select class="filter-select" onchange="filterBlogByCat(this.value)"><option value="tous">Catégories</option>${[...new Set(articles.map(a=>a.categorie))].map(c=>`<option>${c}</option>`).join('')}</select><select class="filter-select" onchange="filterBlogByStatus(this.value)"><option value="tous">Statuts</option><option>Publié</option><option>Brouillon</option><option>Archivé</option></select></div><div class="blog-grid">${articles.map(a=>`<div class="blog-card" onclick="openArticleModal(${a.id})"><div class="blog-img"><img src="${a.image||'https://picsum.photos/400/250?random='+(a.id+20)}" alt="${a.titre}" loading="lazy"><span class="blog-category">${a.categorie}</span><button class="edit-btn-overlay" onclick="event.stopPropagation();openArticleModal(${a.id})" title="Modifier"><i class="fas fa-pen"></i></button></div><div class="blog-body"><div class="blog-title">${a.titre}</div><div class="blog-excerpt">${a.resume}</div><div class="blog-meta"><span><i class="fas fa-user"></i> ${a.auteur}</span><span><i class="fas fa-calendar"></i> ${a.date.split('T')[0]}</span><span class="pill ${a.statut==='Publié'?'pill-success':a.statut==='Brouillon'?'pill-warning':'pill-muted'}">${a.statut}</span></div></div><div class="blog-footer"><div class="blog-stats"><span><i class="fas fa-eye"></i> ${Math.floor(Math.random()*500)+50}</span><span><i class="fas fa-comment"></i> ${Math.floor(Math.random()*20)}</span><span><i class="fas fa-share-alt"></i> ${Math.floor(Math.random()*30)}</span></div><div class="blog-actions" onclick="event.stopPropagation()"><button class="btn btn-sm btn-facebook" onclick="shareFromBlog('facebook','${a.titre.replace(/'/g,"\\'")}')"><i class="fab fa-facebook-f"></i></button><button class="btn btn-sm btn-twitter" onclick="shareFromBlog('twitter','${a.titre.replace(/'/g,"\\'")}')"><i class="fab fa-x-twitter"></i></button><button class="btn btn-sm btn-whatsapp" onclick="shareFromBlog('whatsapp','${a.titre.replace(/'/g,"\\'")}')"><i class="fab fa-whatsapp"></i></button></div></div></div>`).join('')}</div>${articles.length===0?`<div class="card" style="text-align:center;padding:60px"><i class="fas fa-newspaper" style="font-size:4rem;color:var(--muted-light)"></i><h3>Aucun article</h3><button class="btn btn-primary" onclick="openArticleModal()"><i class="fas fa-pen"></i> Créer</button></div>`:''}`}
-function shareFromBlog(platform,titre){const url=encodeURIComponent(`https://cejec.edu.ht/blog/${titre.toLowerCase().replace(/\s+/g,'-')}`),text=encodeURIComponent(titre),urls={facebook:`https://www.facebook.com/sharer/sharer.php?u=${url}`,twitter:`https://x.com/intent/tweet?text=${text}&url=${url}`,whatsapp:`https://wa.me/?text=${text}%20${url}`};window.open(urls[platform],'_blank','width=600,height=500');showToast(`Partagé sur ${platform}`,'info')}
-function filterBlog(v){document.querySelectorAll('.blog-card').forEach(c=>c.style.display=c.innerText.toLowerCase().includes(v.toLowerCase())?'':'none')}
-function filterBlogByCat(v){document.querySelectorAll('.blog-card').forEach(c=>c.style.display=v==='tous'||c.innerText.includes(v)?'':'none')}
-function filterBlogByStatus(v){document.querySelectorAll('.blog-card').forEach(c=>c.style.display=v==='tous'||c.innerText.includes(v)?'':'none')}
-
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded',()=>{
-    renderPage('mediatheque');
-    const dz=document.getElementById('dropZone');
-    if(dz){dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');document.getElementById('mediaFile').files=e.dataTransfer.files;handleFileSelect({target:{files:e.dataTransfer.files}})})}
-    const coverDZ=document.getElementById('coverDropZone');
-    if(coverDZ){coverDZ.addEventListener('dragover',e=>{e.preventDefault();coverDZ.classList.add('dragover')});coverDZ.addEventListener('dragleave',()=>coverDZ.classList.remove('dragover'));coverDZ.addEventListener('drop',e=>{e.preventDefault();coverDZ.classList.remove('dragover');const files=e.dataTransfer.files;if(files.length>0)handleCoverImage({target:{files:[files[0]]}})})}
-    const editor=document.getElementById('articleContent');
-    if(editor){editor.addEventListener('keyup',updateEditorToolbarState);editor.addEventListener('mouseup',updateEditorToolbarState)}
-    document.querySelectorAll('#editorToolbar .editor-btn[data-cmd]').forEach(btn=>{btn.addEventListener('click',function(){formatText(this.dataset.cmd)})});
-});
-</script>
-<script src="js/user-profile.js"></script>
-</body>
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_media.js"></script>
+    <script src="js/user-profile.js"></script>
+  </body>
 </html>

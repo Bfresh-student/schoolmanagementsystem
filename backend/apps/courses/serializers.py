@@ -52,6 +52,7 @@ class CourseListSerializer(serializers.ModelSerializer):
     )
     teacher_name = serializers.CharField(source="teacher.full_name", read_only=True)
     seats_available = serializers.IntegerField(read_only=True)
+    seats_taken = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Course
@@ -64,6 +65,7 @@ class CourseListSerializer(serializers.ModelSerializer):
             "duration_weeks",
             "fees_amount",
             "status",
+            "seats_taken",
             "seats_available",
         ]
 

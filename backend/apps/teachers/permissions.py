@@ -17,6 +17,13 @@ class HasResourcePermission(BasePermission):
         "PATCH": "update",
         "DELETE": "delete",
     }
+    ROLE_PERMISSIONS = {
+        "ADMIN":     {"teachers": {"create", "read", "update", "delete"}},
+        "DIRECTOR":  {"teachers": {"create", "read", "update", "delete"}},
+        "TEACHER":   {"teachers": {"read"}},
+        "SECRETARY": {"teachers": {"read"}},
+        "STUDENT":   {"teachers": set()},
+    }
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
@@ -27,12 +34,8 @@ class HasResourcePermission(BasePermission):
             return False
 
         action = self.ACTION_MAP.get(request.method)
-        role = getattr(request.user, "role", None)
-        if role is None:
-            return False
-
-        return role.permissions.filter(resource=resource, action=action).exists()
-
+        allowed = self.ROLE_PERMISSIONS.get(request.user.role, {}).get(resource, set())
+        return action in allowed
 
 class IsSelfTeacherOrAdmin(BasePermission):
     """

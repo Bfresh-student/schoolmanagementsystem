@@ -10,6 +10,7 @@ from apps.projects.models import (
     InternshipLog,
     Mentorship,
     MentorshipSession,
+    IncubatorMentor,
     Project,
     ProjectDeliverable,
     ProjectMember,
@@ -61,6 +62,8 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "status",
             "final_grade",
             "members_count",
+            "description",
+            "incubator_data",
         ]
 
 
@@ -82,6 +85,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             "final_grade",
             "created_at",
             "updated_at",
+            "incubator_data",
             "members",
             "deliverables",
         ]
@@ -122,14 +126,21 @@ class InternshipLogSerializer(serializers.ModelSerializer):
 
 class InternshipListSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
+    company_sector = serializers.CharField(source="company.sector", read_only=True)
 
     class Meta:
         model = Internship
         fields = [
             "id",
             "student_id",
+            "student_name",
+            "promotion",
             "company",
             "company_name",
+            "company_sector",
+            "position",
+            "supervisor_name",
+            "assessment",
             "start_date",
             "end_date",
             "status",
@@ -147,10 +158,15 @@ class InternshipDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "student_id",
+            "student_name",
+            "promotion",
             "company",
             "company_detail",
             "mentor",
             "mentor_detail",
+            "position",
+            "supervisor_name",
+            "assessment",
             "start_date",
             "end_date",
             "status",
@@ -210,6 +226,13 @@ class MentorshipSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at"]
 
 
+class IncubatorMentorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncubatorMentor
+        fields = ["id", "full_name", "profession", "company", "phone", "email", "specialty", "availability", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
 # --- Business Plan ----------------------------------------------------------
 
 
@@ -242,6 +265,8 @@ class BusinessPlanSerializer(serializers.ModelSerializer):
             "financial_projection",
             "status",
             "final_grade",
+            "bearer_name",
+            "submitted_date",
             "created_at",
             "updated_at",
             "presentations",

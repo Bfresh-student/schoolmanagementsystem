@@ -9,11 +9,13 @@ class PaymentMethod(models.Model):
     """Configuration des moyens de paiement disponibles (App 12 - Système Paiement)."""
 
     class Code(models.TextChoices):
-        STRIPE = "stripe", "Carte bancaire (Stripe)"
-        PAYPAL = "paypal", "PayPal"
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        MONCASH = "moncash", "MonCash"
+        NATCASH = "natcash", "NatCash"
         BANK_TRANSFER = "bank_transfer", "Virement bancaire"
         CASH = "cash", "Espèces"
+        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        STRIPE = "stripe", "Carte bancaire (Stripe)"
+        PAYPAL = "paypal", "PayPal"
 
     name = models.CharField(max_length=50)
     code = models.CharField(max_length=20, choices=Code.choices, unique=True)
@@ -98,8 +100,20 @@ class Invoice(models.Model):
 
     def recompute_status(self, save=True):
         """Recalcule le statut à partir des paiements complétés. Appelé après
-        chaque paiement réussi et par la tâche périodique de détection des retards."""
-        if self.amount_paid >= self.amount and self.amount > 0:
+        chaque paiement réussi et par la tâche périodique de détection des retards.
+
+        BUG CORRIGÉ : l'ancienne condition était
+            if self.amount_paid >= self.amount and self.amount > 0:
+        Le `and self.amount > 0` excluait explicitement les factures à
+        0.00 HTG (formation gratuite, ex. une SchoolClass avec
+        tuition_fee=0.00) : `0 >= 0` est vrai, mais `0 > 0` est faux, donc
+        la condition entière échouait et la facture restait bloquée en
+        PENDING pour toujours, même si rien n'est dû (balance_due=0).
+        On retire ce garde-fou : une facture dont amount_paid >= amount
+        est réglée, que le montant total soit 0 ou non — sémantiquement
+        correct dans les deux cas.
+        """
+        if self.amount_paid >= self.amount:
             self.status = self.Status.PAID
         elif self.amount_paid > 0:
             self.status = self.Status.PARTIALLY_PAID
@@ -120,6 +134,7 @@ class Payment(models.Model):
         COMPLETED = "completed", "Complété"
         FAILED = "failed", "Échoué"
         REFUNDED = "refunded", "Remboursé"
+        CANCELLED = "cancelled", "Annulé"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="payments")
@@ -134,8 +149,11 @@ class Payment(models.Model):
     # order id, transaction Mobile Money, n° de virement...).
     gateway_reference = models.CharField(max_length=255, blank=True, db_index=True)
     # Empêche la double soumission d'un même paiement (saisi hors-ligne
-    # notamment) : clé générée côté client, unique.
-    idempotency_key = models.CharField(max_length=100, unique=True)
+    # notamment) : clé générée automatiquement à la création, unique.
+    # default=uuid.uuid4 (callable) garantit qu'aucune création ne peut
+    # laisser ce champ vide ("") et provoquer une IntegrityError sur la
+    # deuxième ligne créée sans valeur explicite.
+    idempotency_key = models.CharField(max_length=100, unique=True, default=uuid.uuid4, editable=False)
 
     failure_reason = models.TextField(blank=True)
 
@@ -183,7 +201,12 @@ class Receipt(models.Model):
 
 class WebhookEvent(models.Model):
     """Journal des événements webhook reçus des passerelles, pour garantir
-    l'idempotence (un même événement Stripe/PayPal ne doit être traité qu'une fois)."""
+    l'idempotence (un même événement Stripe/PayPal ne doit être traité qu'une fois).
+
+    NOTE : conservé pour compatibilité historique / audit, mais le flux de
+    paiement actuel (100% saisie manuelle) n'écrit plus dans cette table —
+    voir le commentaire en tête de services.py.
+    """
 
     class Provider(models.TextChoices):
         STRIPE = "stripe", "Stripe"

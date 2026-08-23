@@ -3,9 +3,17 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.projects.models import Mentorship, MentorshipSession
+from apps.projects.models import IncubatorMentor, Mentorship, MentorshipSession
 from apps.projects.permissions import HasResourcePermission
-from apps.projects.serializers import MentorshipSerializer, MentorshipSessionSerializer
+from apps.projects.serializers import IncubatorMentorSerializer, MentorshipSerializer, MentorshipSessionSerializer
+
+
+class IncubatorMentorViewSet(viewsets.ModelViewSet):
+    queryset = IncubatorMentor.objects.all()
+    serializer_class = IncubatorMentorSerializer
+    permission_classes = [IsAuthenticated, HasResourcePermission]
+    # Les droits Projects administrent l'ensemble du périmètre incubateur.
+    resource_name = "projects"
 
 
 class MentorshipViewSet(viewsets.ModelViewSet):

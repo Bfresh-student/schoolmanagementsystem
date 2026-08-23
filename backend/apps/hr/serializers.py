@@ -1,8 +1,12 @@
 from rest_framework import serializers
+from django.forms.models import model_to_dict
 
 from apps.hr.models import (
     AuditLog,
+    Candidate,
     Contract,
+    Employee,
+    EmployeeAttendance,
     HRDocument,
     Leave,
     LeaveType,
@@ -11,6 +15,32 @@ from apps.hr.models import (
 )
 
 
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ["id", "employee_number", "first_name", "last_name", "gender", "phone", "email", "address", "job_title", "department", "hire_date", "status", "monthly_salary", "monthly_bonus", "created_at", "updated_at"]
+
+
+class CandidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Candidate
+        fields = ["id", "first_name", "last_name", "phone", "email", "position", "application_date", "status", "interview_date", "interview_time", "interviewer", "notes", "cv_file", "created_at", "updated_at"]
+
+
+class EmployeeAttendanceSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
+
+    class Meta:
+        model = EmployeeAttendance
+        fields = ["id", "employee", "employee_name", "date", "check_in_time", "check_out_time", "status", "notes", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        values = model_to_dict(self.instance) if self.instance else {}
+        instance = EmployeeAttendance(**{**values, **attrs})
+        instance.pk = self.instance.pk if self.instance else None
+        instance.clean()
+        return attrs
+
 class LeaveTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaveType
@@ -18,12 +48,12 @@ class LeaveTypeSerializer(serializers.ModelSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
-    teacher_name = serializers.CharField(source="teacher.__str__", read_only=True)
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
 
     class Meta:
         model = Contract
         fields = [
-            "id", "teacher", "teacher_name", "contract_type", "start_date", "end_date",
+            "id", "employee", "employee_name", "contract_type", "start_date", "end_date",
             "monthly_salary", "currency", "status", "contract_file",
             "notice_period_days", "termination_reason", "termination_date",
             "created_at", "updated_at",
@@ -31,59 +61,68 @@ class ContractSerializer(serializers.ModelSerializer):
         read_only_fields = ["status", "termination_reason", "termination_date"]
 
     def validate(self, attrs):
-        instance = Contract(**{**(self.instance.__dict__ if self.instance else {}), **attrs})
+        values = model_to_dict(self.instance) if self.instance else {}
+        instance = Contract(**{**values, **attrs})
         instance.pk = self.instance.pk if self.instance else None
         instance.clean()
         return attrs
 
 
 class SalarySerializer(serializers.ModelSerializer):
-    teacher_name = serializers.CharField(source="teacher.__str__", read_only=True)
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
 
     class Meta:
         model = Salary
         fields = [
-            "id", "teacher", "teacher_name", "contract", "pay_period_start", "pay_period_end",
+            "id", "employee", "employee_name", "contract", "pay_period_start", "pay_period_end",
             "base_salary", "bonuses", "deductions", "net_salary", "status",
             "payment_date", "payment_reference", "payslip_file",
             "created_at", "updated_at",
         ]
         read_only_fields = ["net_salary", "status", "payment_date"]
 
+    def validate(self, attrs):
+        values = model_to_dict(self.instance) if self.instance else {}
+        instance = Salary(**{**values, **attrs})
+        instance.pk = self.instance.pk if self.instance else None
+        instance.clean()
+        return attrs
+
 
 class LeaveSerializer(serializers.ModelSerializer):
-    teacher_name = serializers.CharField(source="teacher.__str__", read_only=True)
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
     leave_type_name = serializers.CharField(source="leave_type.name", read_only=True)
 
     class Meta:
         model = Leave
         fields = [
-            "id", "teacher", "teacher_name", "leave_type", "leave_type_name",
+            "id", "employee", "employee_name", "leave_type", "leave_type_name",
             "start_date", "end_date", "days_used", "status", "approver",
             "reason", "attachment", "created_at", "updated_at",
         ]
         read_only_fields = ["status", "approver"]
 
     def validate(self, attrs):
-        instance = Leave(**{**(self.instance.__dict__ if self.instance else {}), **attrs})
+        values = model_to_dict(self.instance) if self.instance else {}
+        instance = Leave(**{**values, **attrs})
         instance.pk = self.instance.pk if self.instance else None
         instance.clean()
         return attrs
 
 
 class PerformanceEvaluationSerializer(serializers.ModelSerializer):
-    teacher_name = serializers.CharField(source="teacher.__str__", read_only=True)
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
 
     class Meta:
         model = PerformanceEvaluation
         fields = [
-            "id", "teacher", "teacher_name", "evaluator", "evaluation_date",
+            "id", "employee", "employee_name", "evaluator", "evaluation_date",
             "evaluation_period_start", "evaluation_period_end", "rating",
             "criteria_scores", "strengths", "areas_for_improvement",
-            "evaluation_type", "teacher_acknowledged", "teacher_comments",
+            "evaluation_type", "employee_acknowledged", "employee_comments",
             "created_at", "updated_at",
         ]
-        read_only_fields = ["teacher_acknowledged", "evaluator"]
+        read_only_fields = ["employee_acknowledged", "evaluator"]
 
 
 class HRDocumentSerializer(serializers.ModelSerializer):
@@ -96,7 +135,7 @@ class HRDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = HRDocument
         fields = [
-            "id", "teacher", "document_type", "filename", "file",
+            "id", "employee", "document_type", "filename", "file",
             "expiry_date", "status", "created_at",
         ]
         read_only_fields = ["status"]

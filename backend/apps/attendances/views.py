@@ -35,43 +35,42 @@ class AttendanceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
             return qs.filter(course__teacher__user=user)
         return qs
 
-    @action(detail=False, methods=["post"])
-    def submit_batch(self, request):
-        serializer = AttendanceBatchSubmitSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+    @action(detail=False, methods=["get"], url_path="by_course")
+    def by_course(self, request):
+        """Return attendances for a given course and optional date.
+        Query params:
+          course_id (required) - UUID of the course
+          date (optional) - YYYY-MM-DD filter
+        """
+        course_id = request.query_params.get("course_id")
+        if not course_id:
+            return Response({"detail": "course_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+        date_str = request.query_params.get("date")
+        qs = self.get_queryset().filter(course_id=course_id)
+        if date_str:
+            qs = qs.filter(attendance_date=date_str)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
 
-        teacher_profile = getattr(request.user, "teacher_profile", None)
-        from apps.courses.models import Course
-        course = Course.objects.filter(id=data["course"]).first()
-        if course is None:
-            return Response({"detail": "Cours introuvable."}, status=status.HTTP_404_NOT_FOUND)
-        if course.teacher_id != getattr(teacher_profile, "id", None):
-            return Response(
-                {"detail": "Vous ne pouvez faire l'appel que sur vos propres cours."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        from apps.students.models import Student
-        items = []
-        for item in data["items"]:
-            if not Student.objects.filter(id=item["student"]).exists():
-                return Response(
-                    {"detail": f"Étudiant {item['student']} introuvable."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            items.append(item)
-
-        source = AttendanceSyncEntry.Source.LOCAL if data["offline"] else AttendanceSyncEntry.Source.REMOTE
-        summary = services.submit_attendance_batch(
-            items=items,
-            course=course,
-            teacher=teacher_profile,
-            attendance_date=data["attendance_date"],
-            source=source,
-            submitted_by=request.user,
+    @action(detail=False, methods=["get"], url_path="stats")
+    def stats(self, request):
+        """Return attendance statistics per student for the current user (teacher).
+        For teachers: stats across their courses.
+        For admins: stats across all.
+        """
+        from django.db.models import Count, Q, Sum, Case, When
+        qs = self.get_queryset()
+        role = getattr(request.user, "role", None)
+        if role == "TEACHER":
+            teacher_profile = getattr(request.user, "teacher_profile", None)
+            qs = qs.filter(course__teacher_id=getattr(teacher_profile, "id", None))
+        # Aggregate counts per student
+        stats_qs = qs.values("student_id").annotate(
+            total=Count("id"),
+            present=Count(Case(When(present=True, then=1))),
+            absent=Count(Case(When(present=False, then=1))),
         )
-        return Response(summary, status=status.HTTP_200_OK)
+        return Response(stats_qs)
 
 
 class AttendanceConflictViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

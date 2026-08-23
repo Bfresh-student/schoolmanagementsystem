@@ -52,9 +52,6 @@ class EventViewSet(viewsets.ModelViewSet):
             qs = qs.filter(event_type=event_type)
         if status_filter:
             qs = qs.filter(status=status_filter)
-        else:
-            # par défaut, masque les brouillons aux non-créateurs
-            qs = qs.exclude(status="draft")
         return qs
 
     def perform_create(self, serializer):

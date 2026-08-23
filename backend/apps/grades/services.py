@@ -19,15 +19,15 @@ def process_sync_entry(entry: GradeSyncEntry) -> dict:
     if entry.status != SyncEntryStatus.PENDING:
         return {"outcome": "discarded", "reason": "already processed"}
 
-    existing = Grade.objects.select_for_update().filter(
-        student=entry.student, course=entry.course
-    ).first()
+    lookup = {"student": entry.student, "assessment": entry.assessment} if entry.assessment_id else {"student": entry.student, "course": entry.course}
+    existing = Grade.objects.select_for_update().filter(**lookup).first()
 
     # CAS A : pas de note existante -> application directe (Phase 3, cas A)
     if existing is None:
         grade = Grade.objects.create(
             student=entry.student,
             course=entry.course,
+            assessment=entry.assessment,
             teacher=entry.teacher,
             value=entry.value,
             date_graded=entry.local_timestamp.date(),
@@ -46,6 +46,19 @@ def process_sync_entry(entry: GradeSyncEntry) -> dict:
         entry.save(update_fields=["status"])
         grade_recorded.send(sender=Grade, grade=existing, entry=entry)
         return {"outcome": "applied", "grade_id": existing.id, "note": "valeur identique"}
+
+    # Une correction en ligne est séquentielle ; seuls les rejouements
+    # hors-ligne contradictoires doivent passer par l'arbitrage manuel.
+    if entry.source == GradeSyncEntry.Source.REMOTE:
+        existing.value = entry.value
+        existing.teacher = entry.teacher or existing.teacher
+        existing.date_graded = entry.local_timestamp.date()
+        existing.synced = True
+        existing.save(update_fields=["value", "teacher", "date_graded", "synced", "updated_at"])
+        entry.status = SyncEntryStatus.APPLIED
+        entry.save(update_fields=["status"])
+        grade_recorded.send(sender=Grade, grade=existing, entry=entry)
+        return {"outcome": "applied", "grade_id": existing.id, "note": "note mise à jour"}
 
     # CAS B : CONFLIT — deux valeurs différentes pour le même (student, course).
     # Volontairement PAS d'auto-résolution par Last-Write-Wins, même si
@@ -88,7 +101,7 @@ def process_pending_queue(queryset=None) -> list[dict]:
     return results
 
 
-def submit_grade(*, student, course, teacher, value, source, submitted_by, local_timestamp, local_uuid=None):
+def submit_grade(*, student, course, teacher, value, source, submitted_by, local_timestamp, local_uuid=None, assessment=None):
     """
     Point d'entrée unique pour saisir une note, que ce soit online ou
     offline. Crée une `GradeSyncEntry` puis la traite immédiatement
@@ -105,6 +118,7 @@ def submit_grade(*, student, course, teacher, value, source, submitted_by, local
     entry_kwargs = dict(
         student=student,
         course=course,
+        assessment=assessment,
         teacher=teacher,
         value=value,
         source=source,

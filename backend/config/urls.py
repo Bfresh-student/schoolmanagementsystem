@@ -25,7 +25,12 @@ urlpatterns = [
     path("api/v1/payments/", include("apps.payments.urls")),
     path("api/v1/media-center/", include("apps.media_center.urls")),
     path("api/v1/ai-insights/", include("apps.ai_insights.urls")),
+    path("api/v1/sync/", include("apps.sync.urls")),
     # path('api/v1/library/', include('apps.library.urls')),
     # path('api/v1/reports/', include('apps.reports.urls')),
     # path('api/v1/settings/', include('apps.settings.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -11,7 +11,10 @@ from apps.hr.models import (
     AuditAction,
     AuditEntityType,
     AuditLog,
+    Candidate,
     Contract,
+    Employee,
+    EmployeeAttendance,
     HRDocument,
     Leave,
     LeaveStatus,
@@ -22,7 +25,10 @@ from apps.hr.models import (
 from apps.hr.permissions import HR_STAFF_ROLES, IsHRStaff, IsHRStaffOrOwnerReadOnly
 from apps.hr.serializers import (
     AuditLogSerializer,
+    CandidateSerializer,
     ContractSerializer,
+    EmployeeAttendanceSerializer,
+    EmployeeSerializer,
     HRDocumentSerializer,
     LeaveSerializer,
     LeaveTypeSerializer,
@@ -32,7 +38,10 @@ from apps.hr.serializers import (
 
 
 def _role_name(user):
-    return getattr(getattr(user, "role", None), "name", None)
+    role = getattr(user, "role", None)
+    if isinstance(role, str):
+        return role.lower()
+    return getattr(role, "name", "").lower()
 
 
 class AuditLogMixin:
@@ -92,7 +101,7 @@ class TeacherScopedQuerysetMixin:
         user = self.request.user
         if _role_name(user) in HR_STAFF_ROLES:
             return qs
-        return qs.filter(teacher__user_id=user.id)
+        return qs.filter(employee__user_id=user.id)
 
 
 class LeaveTypeViewSet(viewsets.ModelViewSet):
@@ -101,8 +110,28 @@ class LeaveTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsHRStaff]
 
 
+class EmployeeViewSet(AuditLogMixin, viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    permission_classes = [IsHRStaff]
+    audit_entity_type = AuditEntityType.EMPLOYEE
+
+
+class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
+    queryset = Candidate.objects.all()
+    serializer_class = CandidateSerializer
+    permission_classes = [IsHRStaff]
+    audit_entity_type = AuditEntityType.CANDIDATE
+
+
+class EmployeeAttendanceViewSet(AuditLogMixin, viewsets.ModelViewSet):
+    queryset = EmployeeAttendance.objects.select_related("employee").all()
+    serializer_class = EmployeeAttendanceSerializer
+    permission_classes = [IsHRStaff]
+    audit_entity_type = AuditEntityType.ATTENDANCE
+
 class ContractViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = Contract.objects.select_related("teacher").all()
+    queryset = Contract.objects.select_related("employee").all()
     serializer_class = ContractSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.CONTRACT
@@ -125,7 +154,7 @@ class ContractViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelV
 
 
 class SalaryViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = Salary.objects.select_related("teacher", "contract").all()
+    queryset = Salary.objects.select_related("employee", "contract").all()
     serializer_class = SalarySerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.SALARY
@@ -156,7 +185,7 @@ class SalaryViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelVie
 
 
 class LeaveViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = Leave.objects.select_related("teacher", "leave_type", "approver").all()
+    queryset = Leave.objects.select_related("employee", "leave_type", "approver").all()
     serializer_class = LeaveSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.LEAVE
@@ -192,10 +221,10 @@ class LeaveViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelView
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def balance(self, request):
         """Solde de congés du teacher connecté, par type de congé, pour l'année en cours."""
-        teacher = getattr(request.user, "teacher", None)
-        if teacher is None:
+        employee = getattr(request.user, "employee_profile", None)
+        if employee is None:
             return Response(
-                {"detail": "Cet utilisateur n'est pas un formateur."},
+                {"detail": "Cet utilisateur n'est pas un employé/formateur."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         year = int(request.query_params.get("year", timezone.now().year))
@@ -203,7 +232,7 @@ class LeaveViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelView
             {
                 "leave_type": lt.name,
                 "days_per_year": lt.days_per_year,
-                "remaining": Leave.remaining_balance(teacher, lt, year),
+                "remaining": Leave.remaining_balance(employee, lt, year),
             }
             for lt in LeaveType.objects.all()
         ]
@@ -213,7 +242,7 @@ class LeaveViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelView
 class PerformanceEvaluationViewSet(
     AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet
 ):
-    queryset = PerformanceEvaluation.objects.select_related("teacher", "evaluator").all()
+    queryset = PerformanceEvaluation.objects.select_related("employee", "evaluator").all()
     serializer_class = PerformanceEvaluationSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.EVALUATION
@@ -232,15 +261,15 @@ class PerformanceEvaluationViewSet(
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def acknowledge(self, request, pk=None):
         evaluation = self.get_object()
-        teacher = getattr(request.user, "teacher", None)
-        if teacher is None or evaluation.teacher_id != teacher.id:
+        employee = getattr(request.user, "employee_profile", None)
+        if employee is None or evaluation.employee_id != employee.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
         evaluation.acknowledge(comments=request.data.get("comments", ""))
         return Response(PerformanceEvaluationSerializer(evaluation).data)
 
 
 class HRDocumentViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = HRDocument.objects.select_related("teacher").all()
+    queryset = HRDocument.objects.select_related("employee").all()
     serializer_class = HRDocumentSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.HR_DOCUMENT
