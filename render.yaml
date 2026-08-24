@@ -1,0 +1,64 @@
+databases:
+  - name: gestion-scolaire-db
+    plan: free
+    databaseName: gestion_scolaire
+    user: gestion_scolaire_user
+
+services:
+  - type: redis
+    name: gestion-scolaire-redis
+    plan: free
+    ipAllowList: []   # only reachable from other Render services in this account
+
+  - type: web
+    name: gestion-scolaire-backend
+    env: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      # Update this once you know your final Render URL and/or custom domain
+      - key: ALLOWED_HOSTS
+        value: "gestion-scolaire-backend.onrender.com"
+      # Update this once your Netlify/Vercel frontend URL is live
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://your-frontend-site.netlify.app"
+      - key: DB_NAME
+        fromDatabase:
+          name: gestion-scolaire-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: gestion-scolaire-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gestion-scolaire-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: gestion-scolaire-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gestion-scolaire-db
+          property: port
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: gestion-scolaire-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: gestion-scolaire-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: gestion-scolaire-redis
+          property: connectionString

@@ -2,7 +2,7 @@
 // Node‑compatible API manager for offline‑queue tests
 import { db } from "./dbNode.js";
 
-const DJANGO_API_URL = "https://your-django-backend.com/api/v1"; // TODO: replace with real URL
+const DJANGO_API_URL = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1"; // TODO: replace with real URL
 
 /**
  * Save data locally and attempt to push to the Django API.

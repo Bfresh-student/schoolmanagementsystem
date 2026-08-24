@@ -9,8 +9,8 @@ let medias = [];
 let articles = [];
 let articleTags = [];
 
-const API_BASE = "https://schoolmanagementsystem-pe99.onrender.com/api/v1/media-center";
-const REFRESH_URL = "https://schoolmanagementsystem-pe99.onrender.com/api/v1/auth/users/refresh/";
+const API_BASE = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/media-center";
+const REFRESH_URL = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/auth/users/refresh/";
 
 // ── Auth helpers ────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('authToken'); }

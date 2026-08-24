@@ -2,7 +2,7 @@
 // Simple wrapper for authenticated GET requests using authFetch.
 // Allows other modules to fetch data without handling auth details directly.
 
-import { authFetch } from "./auth.js";
+import { authFetch } from "../auth.js";
 
 /**
  * Perform an authenticated GET request to the given endpoint.

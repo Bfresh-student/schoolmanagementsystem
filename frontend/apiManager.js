@@ -1,7 +1,7 @@
 // apiManager.js
 import { db } from "./db.js";
 
-const DJANGO_API_URL = "https://schoolmanagementsystem-pe99.onrender.com/api/v1";
+const DJANGO_API_URL = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1";
 
 /**
  * Save data locally and try to push to the Django API.

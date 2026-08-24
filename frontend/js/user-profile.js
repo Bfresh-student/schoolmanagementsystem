@@ -65,7 +65,7 @@
       const token = localStorage.getItem('authToken');
       if (token) {
         try {
-          const resp = await fetch('https://schoolmanagementsystem-pe99.onrender.com/api/v1/auth/users/me/', {
+          const resp = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/auth/users/me/', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (resp.ok) {

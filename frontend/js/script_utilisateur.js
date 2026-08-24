@@ -170,7 +170,7 @@ function isDuplicateEmail(email, type, excludeId) {
 }
 
 // ==================== DJANGO API LAYER ====================
-const API_BASE = "https://schoolmanagementsystem-pe99.onrender.com/api/v1";
+const API_BASE = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1";
 
 // Role mapping: frontend display value <-> Django ROLE_CHOICES code
 const ROLE_TO_API = {

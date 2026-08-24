@@ -47,7 +47,7 @@
       const reportList = data => Array.isArray(data) ? data : (data.results || []);
       async function reportApi(path) {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('https://schoolmanagementsystem-pe99.onrender.com/api/v1' + path, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+        const response = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1' + path, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
         if (!response.ok) throw new Error('API_ERROR_' + response.status);
         return response.json();
       }
