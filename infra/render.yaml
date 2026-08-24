@@ -26,7 +26,7 @@ services:
         value: "schoolmanagementsystem-pe99.onrender.com"
       # Update this once your Netlify/Vercel frontend URL is live
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://your-frontend-site.netlify.app"
+        value: "https://ceject.netlify.app/"
       - key: DB_NAME
         fromDatabase:
           name: gestion-scolaire-db
