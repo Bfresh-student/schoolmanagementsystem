@@ -518,8 +518,16 @@
                     onchange="applyFilter()" />
                 </div>
                 <div class="filter-item">
+                  <i class="fas fa-users"></i
+                  ><select id="schoolClassFilter" onchange="renderCourseSelect(); applyFilter()">
+                    <option value="">Sélectionnez une classe</option>
+                  </select>
+                </div>
+                <div class="filter-item">
                   <i class="fas fa-book-open"></i
-                  ><select id="courseFilter" onchange="applyFilter()"></select>
+                  ><select id="courseFilter" onchange="applyFilter()">
+                    <option value="">Sélectionnez une matière</option>
+                  </select>
                 </div>
                 <button class="btn-primary" onclick="savePresences()">
                   <i class="fas fa-save"></i> Enregistrer l'appel
@@ -657,7 +665,8 @@
     </script>
     <script src="js/Script_Ad.js"></script>
     <script src="js/AI_Script.js"></script>
-    <script src="js/script_utilisateur.js"></script>
+    <script src="js/api-client.js?v=4"></script>
+    <script src="js/script_utilisateur.js?v=4"></script>
     <script src="js/user-profile.js"></script>
   </body>
 </html>

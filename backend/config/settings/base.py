@@ -64,14 +64,21 @@ INSTALLED_APPS = [
     'apps.dashboard',
 ]
 
-# ── CORS (allow the live-server frontend to call the API) ──────────────────
-CORS_ALLOW_ALL_ORIGINS = True          # dev only — restrict in production
+# ── CORS ─────────────────────────────────────────────────────────────────
+# Set CORS_ALLOWED_ORIGINS env var to a comma-separated list in production,
+# e.g. "https://your-site.netlify.app,https://your-site.vercel.app"
+_cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if _cors_origins:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+else:
+    CORS_ALLOW_ALL_ORIGINS = True      # fallback for quick testing — restrict once frontend URL is known
 CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -105,6 +112,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')

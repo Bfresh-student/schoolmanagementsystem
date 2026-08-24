@@ -52,25 +52,87 @@ class AttendanceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["post"], url_path="submit_batch")
+    def submit_batch(self, request):
+        """Submit a full class attendance batch."""
+        from django.shortcuts import get_object_or_404
+        from apps.courses.models import Course
+
+        serializer = AttendanceBatchSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        data = serializer.validated_data
+        course_id = data["course"]
+        course = get_object_or_404(Course, id=course_id)
+        
+        teacher = getattr(request.user, "teacher_profile", None)
+        if getattr(request.user, "role", None) != "TEACHER" and getattr(request.user, "role", None) != "ADMIN":
+             return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Determine teacher from course if not a teacher
+        if not teacher:
+             teacher = course.teacher
+             
+        source = "offline_sync" if data.get("offline") else "web_ui"
+        
+        summary = services.submit_attendance_batch(
+            items=data["items"],
+            course=course,
+            teacher=teacher,
+            attendance_date=data["attendance_date"],
+            source=source,
+            submitted_by=request.user,
+        )
+        return Response(summary, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=["get"], url_path="stats")
     def stats(self, request):
         """Return attendance statistics per student for the current user (teacher).
         For teachers: stats across their courses.
         For admins: stats across all.
+        Accepts optional ?school_class=<id> and ?course_id=<uuid> filters.
         """
-        from django.db.models import Count, Q, Sum, Case, When
+        from django.db.models import Count
+
         qs = self.get_queryset()
         role = getattr(request.user, "role", None)
         if role == "TEACHER":
             teacher_profile = getattr(request.user, "teacher_profile", None)
             qs = qs.filter(course__teacher_id=getattr(teacher_profile, "id", None))
-        # Aggregate counts per student
-        stats_qs = qs.values("student_id").annotate(
-            total=Count("id"),
-            present=Count(Case(When(present=True, then=1))),
-            absent=Count(Case(When(present=False, then=1))),
-        )
-        return Response(stats_qs)
+
+        # Optional filters
+        school_class_id = request.query_params.get("school_class")
+        course_id = request.query_params.get("course_id")
+        if school_class_id:
+            qs = qs.filter(student__school_class_id=school_class_id)
+        if course_id:
+            qs = qs.filter(course_id=course_id)
+
+        # Two separate annotated queries merged in Python
+        # (avoids SQLite limitations with conditional aggregates)
+        totals = {
+            r["student_id"]: r["total"]
+            for r in qs.values("student_id").annotate(total=Count("id"))
+        }
+        presents = {
+            r["student_id"]: r["cnt"]
+            for r in qs.filter(present=True).values("student_id").annotate(cnt=Count("id"))
+        }
+        absents = {
+            r["student_id"]: r["cnt"]
+            for r in qs.filter(present=False).values("student_id").annotate(cnt=Count("id"))
+        }
+
+        result = [
+            {
+                "student_id": sid,
+                "total": totals[sid],
+                "present": presents.get(sid, 0),
+                "absent": absents.get(sid, 0),
+            }
+            for sid in totals
+        ]
+        return Response(result)
 
 
 class AttendanceConflictViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

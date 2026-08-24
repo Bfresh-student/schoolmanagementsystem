@@ -55,7 +55,7 @@ class AttendanceBatchSubmitSerializer(serializers.Serializer):
       ]
     }
     """
-    course = serializers.IntegerField()
+    course = serializers.UUIDField()
     attendance_date = serializers.DateField()
     offline = serializers.BooleanField(default=False)
     items = AttendanceItemSerializer(many=True, allow_empty=False)

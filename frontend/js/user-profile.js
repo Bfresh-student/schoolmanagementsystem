@@ -65,7 +65,7 @@
       const token = localStorage.getItem('authToken');
       if (token) {
         try {
-          const resp = await fetch('http://localhost:8000/api/v1/auth/users/me/', {
+          const resp = await fetch('https://gestion-scolaire-backend.onrender.com/api/v1/auth/users/me/', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (resp.ok) {

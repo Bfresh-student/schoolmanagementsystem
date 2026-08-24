@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api/v1';
+const API_BASE = 'https://gestion-scolaire-backend.onrender.com/api/v1';
 
 let coursCEJEC=[];
 let profsCEJEC=[];         // gardé pour compat (liste de noms), plus utilisé pour l'éditeur

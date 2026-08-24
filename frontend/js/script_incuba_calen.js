@@ -364,7 +364,7 @@ async function incubatorApiFetch(path, options) {
   if (token) headers.Authorization = "Bearer " + token;
   let response;
   try {
-    response = await fetch("http://localhost:8000/api/v1" + path, {
+    response = await fetch("https://gestion-scolaire-backend.onrender.com/api/v1" + path, {
       method: config.method || "GET",
       headers,
       body: config.body ? JSON.stringify(config.body) : undefined,

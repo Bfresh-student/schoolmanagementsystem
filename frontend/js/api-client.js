@@ -5,7 +5,7 @@
 // résolu par rapport à la version précédente.
 
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:8000/api/v1',
+    BASE_URL: 'https://gestion-scolaire-backend.onrender.com/api/v1',
     TOKEN_KEY: 'authToken',
     REFRESH_KEY: 'refreshToken',
     OFFLINE_QUEUE_KEY: 'cejec_offline_queue_inscriptions',

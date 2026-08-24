@@ -68,6 +68,8 @@ class StudentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(status=status_filter)
         if spec_id := params.get("specialization"):
             qs = qs.filter(specialization_id=spec_id)
+        if class_id := params.get("school_class"):
+            qs = qs.filter(school_class_id=class_id)
         return qs
 
     @action(detail=False, methods=["get"], url_path="me")

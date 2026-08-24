@@ -1,7 +1,7 @@
 // apiManager.js
 import { db } from "./db.js";
 
-const DJANGO_API_URL = "http://localhost:8000/api/v1";
+const DJANGO_API_URL = "https://gestion-scolaire-backend.onrender.com/api/v1";
 
 /**
  * Save data locally and try to push to the Django API.

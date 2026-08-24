@@ -2,7 +2,7 @@
 // Connection system for the backend: sign‑up, sign‑in, logout, role handling, and JWT auto-refresh.
 // Uses the same DJANGO_API_URL as other API managers.
 
-const DJANGO_API_URL = "http://localhost:8000/api/v1"; // Local dev backend
+const DJANGO_API_URL = "https://gestion-scolaire-backend.onrender.com/api/v1"; // Local dev backend
 const TOKEN_KEY = "authToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_KEY = "authUser"; // Stores full user object from login/register response

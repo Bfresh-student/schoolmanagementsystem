@@ -9,8 +9,8 @@ let medias = [];
 let articles = [];
 let articleTags = [];
 
-const API_BASE = "http://localhost:8000/api/v1/media-center";
-const REFRESH_URL = "http://localhost:8000/api/v1/auth/users/refresh/";
+const API_BASE = "https://gestion-scolaire-backend.onrender.com/api/v1/media-center";
+const REFRESH_URL = "https://gestion-scolaire-backend.onrender.com/api/v1/auth/users/refresh/";
 
 // ── Auth helpers ────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('authToken'); }

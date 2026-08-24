@@ -60,6 +60,7 @@ class CourseListSerializer(serializers.ModelSerializer):
             "id",
             "code",
             "name",
+            "specialization",
             "specialization_name",
             "teacher_name",
             "duration_weeks",
