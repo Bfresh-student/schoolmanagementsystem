@@ -14,7 +14,7 @@ services:
     name: gestion-scolaire-backend
     env: docker
     plan: free
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: backend
     envVars:
       - key: SECRET_KEY

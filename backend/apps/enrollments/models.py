@@ -6,7 +6,7 @@ Représente le lien Student <-> Course, avec support offline-first
 et une machine à états explicite :
 
     pending -> approved -> active -> (suspended) -> validated
-                 \-> rejected
+                 -> rejected
 
 Toute transition de statut passe par `Inscription.transition_to()` afin
 de garantir la traçabilité (AUDIT_LOG) et le déclenchement des signaux

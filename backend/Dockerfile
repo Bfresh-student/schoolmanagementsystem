@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 COPY requirements/ requirements/
 RUN pip install --no-cache-dir -r requirements/production.txt
 
