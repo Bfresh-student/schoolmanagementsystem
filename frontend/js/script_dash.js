@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
                 const token = localStorage.getItem('cejec_token');
                 if (token) {
-                    const evtRes = await fetch('https://gestion-scolaire-backend.onrender.com/api/v1/events/events/', {
+                    const evtRes = await fetch('https://schoolmanagementsystem-pe99.onrender.com/api/v1/events/events/', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (evtRes.ok) {
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 try {
                     const token = localStorage.getItem('authToken');
                     if (!token) return;
-                    const res = await fetch('https://gestion-scolaire-backend.onrender.com/api/v1/dashboard/stats/', {
+                    const res = await fetch('https://schoolmanagementsystem-pe99.onrender.com/api/v1/dashboard/stats/', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     if (!res.ok) return;
@@ -533,4 +533,3 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.log('🔗 Titre cliquable avec href="incubateur_calendrier.html"');
 
         });
-

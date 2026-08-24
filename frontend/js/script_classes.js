@@ -1,4 +1,4 @@
-const API_BASE = 'https://gestion-scolaire-backend.onrender.com/api/v1';
+const API_BASE = 'https://schoolmanagementsystem-pe99.onrender.com/api/v1';
 
 let coursCEJEC=[];
 let profsCEJEC=[];         // gardé pour compat (liste de noms), plus utilisé pour l'éditeur
@@ -513,5 +513,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     loadDataFromApi();
 });
-
-

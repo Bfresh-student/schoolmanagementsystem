@@ -23,7 +23,7 @@ services:
         value: "False"
       # Update this once you know your final Render URL and/or custom domain
       - key: ALLOWED_HOSTS
-        value: "gestion-scolaire-backend.onrender.com"
+        value: "schoolmanagementsystem-pe99.onrender.com"
       # Update this once your Netlify/Vercel frontend URL is live
       - key: CORS_ALLOWED_ORIGINS
         value: "https://your-frontend-site.netlify.app"
