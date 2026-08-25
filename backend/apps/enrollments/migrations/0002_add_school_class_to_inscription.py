@@ -15,16 +15,13 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # SQLite never created the partial index as a real DB constraint,
-        # so we update Django state only (database_operations=[]).
-        migrations.SeparateDatabaseAndState(
-            database_operations=[],
-            state_operations=[
-                migrations.RemoveConstraint(
-                    model_name='inscription',
-                    name='uniq_active_inscription_per_student_course',
-                ),
-            ],
+        # On Postgres this constraint was actually created by 0001_initial
+        # (partial/conditional unique indexes are fully supported there),
+        # so it must be dropped for real, not just in Django's migration
+        # state, or migration 0003 will fail with "already exists".
+        migrations.RemoveConstraint(
+            model_name='inscription',
+            name='uniq_active_inscription_per_student_course',
         ),
         migrations.AddField(
             model_name='inscription',
