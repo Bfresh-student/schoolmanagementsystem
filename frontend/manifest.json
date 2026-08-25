@@ -2,7 +2,7 @@
   "name": "CEJEC ERP - Système de Gestion Scolaire",
   "short_name": "CEJEC ERP",
   "description": "Plateforme de Gestion Scolaire et Académique du CEJEC",
-  "start_url": "./Se%20connecter%20-%20Admin.html",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#052440",
