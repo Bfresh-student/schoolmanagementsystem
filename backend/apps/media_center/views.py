@@ -1,4 +1,5 @@
-from django.db.migrations import serializer
+import logging
+
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,6 +9,21 @@ from rest_framework.authentication import SessionAuthentication
 from .models import MediaAsset, Tag, Article
 from .serializers import MediaAssetSerializer, TagSerializer, ArticleSerializer
 from .tasks import process_media_upload_task
+
+logger = logging.getLogger(__name__)
+
+
+def _enqueue_processing(asset_id):
+    """Enqueue the post-processing task without letting a broker outage
+    (e.g. Redis not configured/reachable) turn a successful upload into
+    a 500 response to the client."""
+    try:
+        process_media_upload_task.delay(asset_id)
+    except Exception:
+        logger.exception(
+            "Could not enqueue process_media_upload_task for asset %s "
+            "(is CELERY_BROKER_URL set and reachable?)", asset_id
+        )
 
 
 class MediaAssetViewSet(viewsets.ModelViewSet):
@@ -21,13 +37,20 @@ class MediaAssetViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         uploaded_by = self.request.user if self.request.user.is_authenticated else None
         asset = serializer.save(uploaded_by=uploaded_by)
-        process_media_upload_task.delay(asset.id)   # still unguarded in your live repo
+        _enqueue_processing(asset.id)
 
     @action(detail=True, methods=['post'], url_path='reprocess')
     def reprocess(self, request, pk=None):
         """Trigger reprocessing of an existing media asset."""
         asset = self.get_object()
-        task = process_media_upload_task.delay(asset.id)
+        try:
+            task = process_media_upload_task.delay(asset.id)
+        except Exception:
+            logger.exception("Could not enqueue reprocessing for asset %s", asset.id)
+            return Response(
+                {"message": "Reprocessing could not be queued (task broker unavailable)."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         return Response(
             {"message": f"Reprocessing enqueued for asset {asset.id}", "task_id": task.id},
             status=status.HTTP_202_ACCEPTED

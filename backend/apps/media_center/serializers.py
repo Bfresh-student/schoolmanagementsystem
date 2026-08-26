@@ -3,8 +3,11 @@ from .models import MediaAsset, Tag, Article
 
 
 class MediaAssetSerializer(serializers.ModelSerializer):
-    uploaded_by_name = serializers.ReadOnlyField(source="uploaded_by.get_full_name")
+    uploaded_by_name = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
+
+    def get_uploaded_by_name(self, obj):
+        return obj.uploaded_by.get_full_name() if obj.uploaded_by else None
 
     class Meta:
         model = MediaAsset
@@ -48,7 +51,10 @@ class TagSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     cover_image = MediaAssetSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    author_name = serializers.ReadOnlyField(source='author.get_full_name')
+    author_name = serializers.SerializerMethodField()
+
+    def get_author_name(self, obj):
+        return obj.author.get_full_name() if obj.author else None
 
     class Meta:
         model = Article
