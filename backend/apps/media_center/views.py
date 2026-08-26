@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -20,7 +21,7 @@ class MediaAssetViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         uploaded_by = self.request.user if self.request.user.is_authenticated else None
         asset = serializer.save(uploaded_by=uploaded_by)
-        process_media_upload_task.delay(asset.id)
+        process_media_upload_task.delay(asset.id)   # still unguarded in your live repo
 
     @action(detail=True, methods=['post'], url_path='reprocess')
     def reprocess(self, request, pk=None):

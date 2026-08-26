@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
@@ -913,7 +913,7 @@
         console.log(
           "Utilisateur déjà connecté. Redirection vers la page d'accueil...",
         );
-        window.location.href = "./Home - Admin_Panel.html";
+        window.location.href = "./index.html";
       }
 
       function togglePassword(id, btn) {
@@ -980,7 +980,7 @@
           const result = await signIn({ email, password, role });
           console.log("Connexion réussie:", result);
           showToast("✅ Authentifié ! Redirection...", "success");
-          window.location.href = "./Home - Admin_Panel.html";
+          window.location.href = "./index.html";
         } catch (err) {
           console.error("Erreur de connexion:", err);
           showToast(err.message || "Erreur de connexion", "error");
@@ -1044,7 +1044,7 @@
           const result = await signUp(data);
           console.log("Inscription réussie:", result);
           showToast("✅ Inscription réussie ! Redirection...", "success");
-          window.location.href = "./Home - Admin_Panel.html";
+          window.location.href = "./index.html";
         } catch (err) {
           console.error("Erreur d'inscription:", err);
           showToast(err.message || "Erreur d'inscription", "error");
