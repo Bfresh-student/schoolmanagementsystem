@@ -1675,19 +1675,39 @@ function renderCourseSelect() {
 const ENROLLED_INSCRIPTION_STATUSES = ["approved", "active", "validated"];
 
 function getFilteredElevesPresence() {
-  // Returns clients réellement inscrits (Inscription.student <-> Inscription.course)
-  // au cours sélectionné, narrowed further to the selected class when one is chosen.
+  // Returns clients réellement inscrits (via Inscription) au cours sélectionné,
+  // narrowed further to the selected class when one is chosen.
   const courseId = document.getElementById("courseFilter")?.value;
   if (!courseId) return [];
+
+  const courseObj = coursesRaw.find((c) => c.id === courseId);
+  const courseSpecializationId = courseObj
+    ? (typeof courseObj.specialization === "object"
+        ? courseObj.specialization?.id
+        : courseObj.specialization)
+    : null;
 
   const enrolledStudentIds = new Set(
     inscriptionsRaw
       .filter((insc) => {
+        if (!ENROLLED_INSCRIPTION_STATUSES.includes(insc.status)) return false;
+
         const inscCourseId =
           typeof insc.course === "object" ? insc.course?.id : insc.course;
+        if (inscCourseId && inscCourseId === courseId) return true;
+
+        // Un élève inscrit à une CLASSE (school_class) est automatiquement
+        // inscrit à TOUS les cours de la filière de cette classe — c'est le
+        // mode d'inscription normal (cf. Inscription.school_class:
+        // "Remplace le champ 'course' au niveau macro.").
+        const inscSpecializationId =
+          typeof insc.specialization_id === "object"
+            ? insc.specialization_id?.id
+            : insc.specialization_id;
         return (
-          inscCourseId === courseId &&
-          ENROLLED_INSCRIPTION_STATUSES.includes(insc.status)
+          insc.school_class != null &&
+          courseSpecializationId != null &&
+          inscSpecializationId === courseSpecializationId
         );
       })
       .map((insc) =>
@@ -1696,7 +1716,6 @@ function getFilteredElevesPresence() {
   );
 
   const selectedClasse = document.getElementById("schoolClassFilter")?.value;
-  const courseObj = coursesRaw.find((c) => c.id === courseId);
   const courseName = courseObj ? courseObj.name : "";
 
   return clients

@@ -40,6 +40,14 @@ class InscriptionSerializer(serializers.ModelSerializer):
     tuition_fee = serializers.SerializerMethodField()
     course_name = serializers.SerializerMethodField()
     fees_amount = serializers.SerializerMethodField()
+    # Une inscription se fait normalement au niveau "classe" (school_class),
+    # PAS par cours individuel (cf. help_text de Inscription.school_class :
+    # "Remplace le champ 'course' au niveau macro."). Un élève inscrit à une
+    # classe est donc automatiquement considéré inscrit à TOUS les cours de
+    # la filière de cette classe. On expose l'id de filière ici pour que les
+    # consommateurs (ex: feuille d'appel) puissent faire ce rattachement
+    # sans avoir à créer une Inscription par cours.
+    specialization_id = serializers.SerializerMethodField()
 
     # BUG CORRIGÉ (#4 — celui qui cause "montant payé reste à 0") :
     # amount_paid / balance_due sont des champs du modèle Invoice, PAS
@@ -65,7 +73,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
             "id", "local_uuid", "student", "course", "school_class",
             "student_name", "student_first_name", "student_last_name",
             "student_phone", "student_email", "student_user_id",
-            "class_name", "specialization_name", "tuition_fee",
+            "class_name", "specialization_name", "specialization_id", "tuition_fee",
             "course_name", "fees_amount",
             "amount_paid", "balance_due", "invoice_id", "invoice_status",
             "status", "rejection_reason",
@@ -96,6 +104,13 @@ class InscriptionSerializer(serializers.ModelSerializer):
             return obj.course.name
         if obj.school_class:
             return obj.school_class.specialization.name
+        return None
+
+    def get_specialization_id(self, obj):
+        if obj.school_class_id:
+            return obj.school_class.specialization_id
+        if obj.course_id:
+            return obj.course.specialization_id
         return None
 
     def get_fees_amount(self, obj):
