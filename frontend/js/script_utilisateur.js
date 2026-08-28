@@ -1627,28 +1627,55 @@ function renderClients() {
   }
 }
 
+function populateSchoolClassFilter() {
+  const select = document.getElementById("schoolClassFilter");
+  if (!select) return;
+  const previousValue = select.value;
+  select.innerHTML =
+    `<option value="">Sélectionnez une classe</option>` +
+    classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  if (previousValue && classes.includes(previousValue)) {
+    select.value = previousValue;
+  }
+}
+
 function renderCourseSelect() {
+  populateSchoolClassFilter();
+
   const select = document.getElementById("courseFilter");
   if (!select) return;
   const previousValue = select.value;
-  select.innerHTML = coursesRaw
+
+  // "classe" est stockée sous la forme "<Filière> <niveau>" (ex: "Développement Web 2").
+  // Course n'a pas de FK directe vers Class, seulement vers Specialization :
+  // on filtre donc les cours par nom de filière déduit de la classe choisie.
+  const selectedClasse = document.getElementById("schoolClassFilter")?.value;
+  let filteredCourses = coursesRaw;
+  if (selectedClasse) {
+    const match = selectedClasse.match(/^(.+?)\s*(\d+)$/);
+    const filiereName = match ? match[1].trim() : selectedClasse;
+    filteredCourses = coursesRaw.filter((c) => c.specialization_name === filiereName);
+  }
+
+  select.innerHTML = filteredCourses
     .map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`)
     .join("");
-  if (previousValue && coursesRaw.some(c => c.id === previousValue)) {
+  if (previousValue && filteredCourses.some(c => c.id === previousValue)) {
     select.value = previousValue;
   }
 }
 
 function getFilteredElevesPresence() {
-  // Returns clients who are enrolled in the selected course/filiere.
-  // In the real system, we should filter based on enrollments,
-  // but for now, we'll map `clients` based on their course name.
+  // Returns clients who are enrolled in the selected course/filiere,
+  // narrowed further to the selected class when one is chosen.
   const courseId = document.getElementById("courseFilter")?.value;
   const courseObj = coursesRaw.find(c => c.id === courseId);
   const courseName = courseObj ? courseObj.name : "";
-  // Map clients to elevesPresence format
+  const selectedClasse = document.getElementById("schoolClassFilter")?.value;
+
   return clients
     .filter((u) => u.cours === courseName || u.filiere === courseName)
+    .filter((u) => !selectedClasse || u.classe === selectedClasse)
     .map(c => ({
       id: c.student_id || c.id,
       nom: c.name,

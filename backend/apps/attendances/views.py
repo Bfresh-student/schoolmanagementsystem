@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from . import services
 from .models import Attendance, AttendanceConflict, AttendanceSyncEntry
-from .permissions import AttendancePermission
+from .permissions import AttendanceConflictPermission, AttendancePermission
 from .serializers import (
     AttendanceBatchSubmitSerializer,
     AttendanceConflictResolveSerializer,
@@ -64,19 +64,24 @@ class AttendanceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         data = serializer.validated_data
         course_id = data["course"]
         course = get_object_or_404(Course, id=course_id)
-        
-        try:
-            teacher = request.user.teacher_profile
-        except Exception:
-            teacher = None
-            
-        if getattr(request.user, "role", None) != "TEACHER" and getattr(request.user, "role", None) != "ADMIN":
-             return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Determine teacher from course if not a teacher
-        if not teacher:
-             teacher = course.teacher
-             
+
+        role_name = getattr(request.user, "role", None)
+        if role_name not in ("TEACHER", "ADMIN"):
+            return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
+
+        teacher = getattr(request.user, "teacher_profile", None)
+
+        if role_name == "TEACHER":
+            # Un enseignant ne peut saisir que sur SES PROPRES cours.
+            if not teacher or course.teacher_id != teacher.id:
+                return Response(
+                    {"detail": "Vous n'êtes pas autorisé à saisir la présence pour ce cours."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        elif not teacher:
+            # Admin sans profil enseignant : on rattache l'appel au prof titulaire du cours.
+            teacher = course.teacher
+
         source = "offline_sync" if data.get("offline") else "web_ui"
         
         summary = services.submit_attendance_batch(
@@ -146,7 +151,7 @@ class AttendanceConflictViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin
     """Réservé aux admins. GET liste/détail + POST /{id}/resolve/."""
     queryset = AttendanceConflict.objects.select_related("attendance", "sync_entry").all()
     serializer_class = AttendanceConflictSerializer
-    permission_classes = [AttendancePermission]
+    permission_classes = [AttendanceConflictPermission]
 
     def get_queryset(self):
         qs = super().get_queryset()

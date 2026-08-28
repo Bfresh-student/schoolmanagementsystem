@@ -32,3 +32,22 @@ class AttendancePermission(BasePermission):
             teacher_profile_id = getattr(teacher_profile, "id", None) if teacher_profile else getattr(request.user, "teacher_profile_id", None)
             return obj.course.teacher_id == teacher_profile_id
         return False
+
+
+class AttendanceConflictPermission(BasePermission):
+    """
+    Réservé aux admins : liste, détail et résolution des conflits de
+    synchronisation d'appel. `AttendanceConflict` n'a pas de `.course`/
+    `.student` (seulement `.attendance.course`/`.attendance.student`),
+    donc il ne doit jamais partager `AttendancePermission`.
+    """
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, "role", None) == "ADMIN"
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and getattr(request.user, "role", None) == "ADMIN")
