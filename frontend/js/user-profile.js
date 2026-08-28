@@ -61,7 +61,7 @@
     let user = getStoredUser();
     
     // Si on a décodé un JWT mais qu'il manque le role ou le full_name, on tente de le fetch
-    if (user && (!user.full_name && !user.role)) {
+    if (user && (!user.full_name || !user.role)) {
       const token = localStorage.getItem('authToken');
       if (token) {
         try {

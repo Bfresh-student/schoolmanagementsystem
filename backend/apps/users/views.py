@@ -171,8 +171,11 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            # L'utilisateur peut se connecter avec son email ou son téléphone
+            user = User.objects.filter(Q(email=email) | Q(phone=email)).first()
+            if not user:
+                user = None
+        except Exception:
             user = None
 
         if user is None or not user.check_password(password):

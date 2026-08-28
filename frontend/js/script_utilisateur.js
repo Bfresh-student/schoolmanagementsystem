@@ -222,6 +222,7 @@ function mapApiUserToLocal(u, type) {
   const localStatus = API_STATUS_TO_LOCAL[u.status] || "actif";
   return {
     id: u.id,
+    student_id: u.student_id,
     name: fullName,
     role: localRole,
     status: localStatus,
@@ -1649,7 +1650,7 @@ function getFilteredElevesPresence() {
   return clients
     .filter((u) => u.cours === courseName || u.filiere === courseName)
     .map(c => ({
-      id: c.id,
+      id: c.student_id || c.id,
       nom: c.name,
       filiere: courseName,
       presences: 0,

@@ -53,6 +53,10 @@ class Migration(migrations.Migration):
             name='submitted_by_student_id',
             field=models.BigIntegerField(blank=True, null=True),
         ),
+        migrations.AlterUniqueTogether(
+            name='projectmember',
+            unique_together=set(),
+        ),
         migrations.RemoveField(
             model_name='projectmember',
             name='student_id',
@@ -61,5 +65,9 @@ class Migration(migrations.Migration):
             model_name='projectmember',
             name='student_id',
             field=models.BigIntegerField(),
+        ),
+        migrations.AlterUniqueTogether(
+            name='projectmember',
+            unique_together={('project', 'student_id')},
         ),
     ]

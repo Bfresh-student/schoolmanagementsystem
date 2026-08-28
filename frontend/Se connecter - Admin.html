@@ -1007,13 +1007,13 @@
         const confirm = document.getElementById("confirmPassword")?.value;
 
         if (
-          !firstName ||
-          !lastName ||
-          !email ||
-          !phone ||
-          !role ||
-          !password ||
-          !confirm
+          (!firstName ||
+            !lastName ||
+            (!email && role !== "STUDENT") ||
+            !phone ||
+            !role ||
+            !password ||
+            !confirm)
         ) {
           showToast("❌ Veuillez remplir tous les champs requis", "error");
           return;

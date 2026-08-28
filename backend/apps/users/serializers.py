@@ -22,11 +22,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     """Serializer simplifié pour les listes"""
     full_name = serializers.CharField(source='get_full_name', read_only=True)
+    student_id = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'role', 'status', 'is_active', 'date_joined', 'phone']
+        fields = ['id', 'email', 'full_name', 'role', 'status', 'is_active', 'date_joined', 'phone', 'student_id']
         read_only_fields = ['id', 'date_joined']
+
+    def get_student_id(self, obj):
+        if hasattr(obj, 'student_profile'):
+            return obj.student_profile.id
+        return None
 
 
 class UserDetailSerializer(serializers.ModelSerializer):

@@ -280,7 +280,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // ============================================
             let eventsDatabase = [];
             try {
-                const token = localStorage.getItem('cejec_token');
+                const token = localStorage.getItem('authToken');
                 if (token) {
                     const evtRes = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/events/events/', {
                         headers: { 'Authorization': 'Bearer ' + token }

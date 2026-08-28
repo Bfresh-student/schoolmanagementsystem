@@ -67,7 +67,7 @@
       async function loadReportData() {
         try {
           const [studentsData, coursesData, teachersData, invoicesData, paymentsData, companiesData, eventsData, internshipsData] = await Promise.all([
-            reportApi('/students/students/'), reportApi('/courses/'), reportApi('/teachers/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/')
+            reportApi('/students/students/'), reportApi('/courses/courses/'), reportApi('/teachers/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/')
           ]);
           const students = reportList(studentsData);
           const courses = reportList(coursesData);
@@ -78,7 +78,7 @@
           employesRH = reportList(teachersData).map(teacher => ({ nom: teacher.full_name, fonction: 'Professeur', presences: 0, absences: 0, conges: 0, salaire: 0 }));
           const internships = reportList(internshipsData);
           partenaires = reportList(companiesData).map(company => ({ nom: company.name, type: company.sector || '—', contrats: 0, stages: internships.filter(internship => internship.company === company.id).length }));
-          evenements = reportList(eventsData).map(event => ({ nom: event.name, date: event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : '—', participants: event.confirmed_participants_count || 0, cout: 0, retombees: event.status }));
+          evenements = reportList(eventsData).map(event => ({ nom: event.title || event.name || '—', date: (event.calendar_metadata?.dateDebut) || (event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : (event.created_at ? new Date(event.created_at).toLocaleDateString('fr-FR') : '—')), participants: event.confirmed_participants_count || 0, cout: 0, retombees: event.status }));
           renderPage(currentPage);
         } catch (error) { showToast('Chargement des rapports impossible : ' + error.message, 'error'); }
       }

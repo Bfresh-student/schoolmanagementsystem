@@ -65,7 +65,11 @@ class AttendanceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         course_id = data["course"]
         course = get_object_or_404(Course, id=course_id)
         
-        teacher = getattr(request.user, "teacher_profile", None)
+        try:
+            teacher = request.user.teacher_profile
+        except Exception:
+            teacher = None
+            
         if getattr(request.user, "role", None) != "TEACHER" and getattr(request.user, "role", None) != "ADMIN":
              return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
         
@@ -97,8 +101,11 @@ class AttendanceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         qs = self.get_queryset()
         role = getattr(request.user, "role", None)
         if role == "TEACHER":
-            teacher_profile = getattr(request.user, "teacher_profile", None)
-            qs = qs.filter(course__teacher_id=getattr(teacher_profile, "id", None))
+            try:
+                teacher_profile = request.user.teacher_profile
+                qs = qs.filter(course__teacher_id=teacher_profile.id)
+            except Exception:
+                qs = qs.none()
 
         # Optional filters
         school_class_id = request.query_params.get("school_class")

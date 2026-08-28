@@ -652,10 +652,15 @@
       window.addEventListener("offline", updateSyncStatus);
       document.addEventListener("DOMContentLoaded", updateSyncStatus);
     </script>
+    <script>
+      // Guard d'authentification — redirige vers le login si pas de token
+      if (!localStorage.getItem('authToken')) {
+        window.location.replace('Se connecter - Admin.html');
+      }
+    </script>
     <script src="js/Script_Ad.js"></script>
     <script src="js/AI_Script.js"></script>
     <script src="js/script_dash.js"></script>
     <script src="js/user-profile.js"></script>
   </body>
 </html>
-
