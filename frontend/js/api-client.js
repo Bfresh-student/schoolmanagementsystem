@@ -34,7 +34,7 @@ function redirectToLogin() {
     window.location.href = 'Se connecter - Admin.html';
 }
 
-async function apiFetch(path, { method = 'GET', body = null, retry = true } = {}) {
+async function apiClientRequest(path, { method = 'GET', body = null, retry = true } = {}) {
     const url = path.startsWith('http') ? path : `${API_CONFIG.BASE_URL}${path}`;
     const headers = { 'Content-Type': 'application/json' };
     const token = getAccessToken();
@@ -55,7 +55,7 @@ async function apiFetch(path, { method = 'GET', body = null, retry = true } = {}
 
     if (response.status === 401 && retry) {
         const refreshed = await tryRefreshToken();
-        if (refreshed) return apiFetch(path, { method, body, retry: false });
+        if (refreshed) return apiClientRequest(path, { method, body, retry: false });
         redirectToLogin();
         throw new Error('UNAUTHORIZED');
     }
@@ -78,6 +78,30 @@ async function apiFetch(path, { method = 'GET', body = null, retry = true } = {}
 
     if (response.status === 204) return null;
     return response.json();
+}
+
+// 🔧 FIX collision de nom globale : ce fichier s'appelait auparavant
+// `apiFetch`, un nom AUSSI déclaré par script_utilisateur.js et
+// script_classes.js (chacun avec un contrat différent pour `body` :
+// ceux-ci attendent un body déjà JSON.stringify()'d, celui-ci stringifie
+// lui-même un objet brut). Sur les pages qui chargent api-client.js PUIS
+// un de ces fichiers (ex: gestion_utilisateurs.html), la déclaration
+// `function apiFetch` chargée en dernier écrasait silencieusement
+// l'autre en portée globale, cassant tous les appels de l'un des deux
+// contrats — c'est ce qui causait les erreurs "JSON parse error:
+// Expecting value..." (un objet JS non stringifié envoyé tel quel,
+// devenant la chaîne "[object Object]" côté fetch()).
+// On renomme donc la fonction interne en `apiClientRequest`, et on
+// n'expose `window.apiFetch` que comme ALIAS de compatibilité pour les
+// pages qui ne chargent QUE api-client.js (gestion_inscriptions.html,
+// gestion_notes.html, rh.html) et appellent encore `apiFetch(...)` sans
+// préfixe. Si un autre script déclare aussi `function apiFetch`, sa
+// propre déclaration (évaluée après celle-ci si son <script> est chargé
+// plus tard) reprendra la main sans que ce fichier ne soit affecté,
+// puisque AttendanceAPI/AuthAPI/etc. n'appellent plus que
+// `apiClientRequest` en interne.
+if (!window.apiFetch) {
+    window.apiFetch = apiClientRequest;
 }
 
 async function tryRefreshToken() {
@@ -103,15 +127,15 @@ async function tryRefreshToken() {
 // ------------------------------------------
 const AuthAPI = {
     async login(email, password) {
-        const data = await apiFetch('/auth/users/login/', { method: 'POST', body: { email, password } });
+        const data = await apiClientRequest('/auth/users/login/', { method: 'POST', body: { email, password } });
         setTokens({ access: data.access, refresh: data.refresh });
         return data;
     },
     async me() {
-        return apiFetch('/auth/users/me/');
+        return apiClientRequest('/auth/users/me/');
     },
     async registerStudent({ first_name, last_name, phone = '', password }) {
-        return apiFetch('/auth/users/register/', {
+        return apiClientRequest('/auth/users/register/', {
             method: 'POST',
             body: {
                 first_name,
@@ -124,17 +148,17 @@ const AuthAPI = {
         });
     },
     async listStudents() {
-        const data = await apiFetch('/auth/users/?role=STUDENT');
+        const data = await apiClientRequest('/auth/users/?role=STUDENT');
         return data.results || data;
     },
     async createUser(body) {
-        return apiFetch('/auth/users/', { method: 'POST', body });
+        return apiClientRequest('/auth/users/', { method: 'POST', body });
     },
     async updateUser(id, body) {
-        return apiFetch(`/auth/users/${id}/`, { method: 'PATCH', body });
+        return apiClientRequest(`/auth/users/${id}/`, { method: 'PATCH', body });
     },
     async deleteUser(id) {
-        return apiFetch(`/auth/users/${id}/`, { method: 'DELETE' });
+        return apiClientRequest(`/auth/users/${id}/`, { method: 'DELETE' });
     },
 };
 window.AuthAPI = AuthAPI;
@@ -171,10 +195,10 @@ function extractStudentId(registerResponse) {
 // ------------------------------------------
 const StudentsAPI = {
     async get(id) {
-        return apiFetch(`/students/students/${id}/`);
+        return apiClientRequest(`/students/students/${id}/`);
     },
     async list() {
-        const data = await apiFetch('/students/students/?page_size=1000');
+        const data = await apiClientRequest('/students/students/?page_size=1000');
         return data.results || data;
     },
 };
@@ -184,11 +208,11 @@ const StudentsAPI = {
 // ------------------------------------------
 const ClassesAPI = {
     async list() {
-        const data = await apiFetch('/students/classes/?page_size=1000');
+        const data = await apiClientRequest('/students/classes/?page_size=1000');
         return data.results || data;
     },
     async update(id, payload) {
-        return apiFetch('/students/classes/' + id + '/', { method: 'PATCH', body: payload });
+        return apiClientRequest('/students/classes/' + id + '/', { method: 'PATCH', body: payload });
     },
 };
 
@@ -197,7 +221,7 @@ const ClassesAPI = {
 // ------------------------------------------
 const CoursesAPI = {
     async list() {
-        const data = await apiFetch('/courses/courses/');
+        const data = await apiClientRequest('/courses/courses/');
         return data.results || data;
     },
 };
@@ -207,7 +231,7 @@ const CoursesAPI = {
 // ------------------------------------------
 const GradesAPI = {
     async list() {
-        const data = await apiFetch('/grades/grades/?page_size=1000');
+        const data = await apiClientRequest('/grades/grades/?page_size=1000');
         return data.results || data;
     },
     async submit({ student, course, assessment, value, date, local_uuid }) {
@@ -218,7 +242,7 @@ const GradesAPI = {
             local_timestamp: `${date || new Date().toISOString().slice(0, 10)}T12:00:00Z`,
         };
         if (local_uuid) body.local_uuid = local_uuid;
-        return apiFetch('/grades/grades/submit/', { method: 'POST', body });
+        return apiClientRequest('/grades/grades/submit/', { method: 'POST', body });
     },
 };
 const AssessmentsAPI = {
@@ -226,14 +250,14 @@ const AssessmentsAPI = {
         const params = new URLSearchParams();
         if (schoolClass) params.set('school_class', schoolClass);
         if (academicYear) params.set('academic_year', academicYear);
-        const data = await apiFetch(`/grades/assessments/${params.toString() ? `?${params}` : ''}`);
+        const data = await apiClientRequest(`/grades/assessments/${params.toString() ? `?${params}` : ''}`);
         return data.results || data;
     },
     async create(payload) {
-        return apiFetch('/grades/assessments/', { method: 'POST', body: payload });
+        return apiClientRequest('/grades/assessments/', { method: 'POST', body: payload });
     },
     async update(id, payload) {
-        return apiFetch(`/grades/assessments/${id}/`, { method: 'PATCH', body: payload });
+        return apiClientRequest(`/grades/assessments/${id}/`, { method: 'PATCH', body: payload });
     },
 };
 // ------------------------------------------
@@ -267,73 +291,73 @@ async function apiFetchMultipart(path, formData, method = 'POST') {
 const HRAPI = {
     // --- Lecture générique ---
     async list(path) {
-        const data = await apiFetch(`/hr/${path}/?page_size=1000`);
+        const data = await apiClientRequest(`/hr/${path}/?page_size=1000`);
         return data.results || data;
     },
 
     // --- Teachers (pour l'onglet Professeurs) ---
     teachers() {
-        return apiFetch('/teachers/?page_size=1000').then(data => data.results || data);
+        return apiClientRequest('/teachers/?page_size=1000').then(data => data.results || data);
     },
     updateTeacher(id, body) {
-        return apiFetch(`/teachers/${id}/`, { method: 'PATCH', body });
+        return apiClientRequest(`/teachers/${id}/`, { method: 'PATCH', body });
     },
 
     // --- Personnel administratif ---
     employees() { return this.list('employees'); },
-    createEmployee(body) { return apiFetch('/hr/employees/', { method: 'POST', body }); },
-    updateEmployee(id, body) { return apiFetch(`/hr/employees/${id}/`, { method: 'PATCH', body }); },
-    deleteEmployee(id) { return apiFetch(`/hr/employees/${id}/`, { method: 'DELETE' }); },
+    createEmployee(body) { return apiClientRequest('/hr/employees/', { method: 'POST', body }); },
+    updateEmployee(id, body) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'PATCH', body }); },
+    deleteEmployee(id) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'DELETE' }); },
 
     // --- Présences du personnel ---
     attendances() { return this.list('attendances'); },
-    createAttendance(body) { return apiFetch('/hr/attendances/', { method: 'POST', body }); },
-    updateAttendance(id, body) { return apiFetch(`/hr/attendances/${id}/`, { method: 'PATCH', body }); },
-    deleteAttendance(id) { return apiFetch(`/hr/attendances/${id}/`, { method: 'DELETE' }); },
+    createAttendance(body) { return apiClientRequest('/hr/attendances/', { method: 'POST', body }); },
+    updateAttendance(id, body) { return apiClientRequest(`/hr/attendances/${id}/`, { method: 'PATCH', body }); },
+    deleteAttendance(id) { return apiClientRequest(`/hr/attendances/${id}/`, { method: 'DELETE' }); },
 
     // --- Recrutement ---
     candidates() { return this.list('candidates'); },
     createCandidate(formData) { return apiFetchMultipart('/hr/candidates/', formData); },
     updateCandidate(id, formData) { return apiFetchMultipart(`/hr/candidates/${id}/`, formData, 'PATCH'); },
-    deleteCandidate(id) { return apiFetch(`/hr/candidates/${id}/`, { method: 'DELETE' }); },
+    deleteCandidate(id) { return apiClientRequest(`/hr/candidates/${id}/`, { method: 'DELETE' }); },
     // --- Contrats ---
     contracts() { return this.list('contracts'); },
-    createContract(body) { return apiFetch('/hr/contracts/', { method: 'POST', body }); },
-    updateContract(id, body) { return apiFetch(`/hr/contracts/${id}/`, { method: 'PATCH', body }); },
-    deleteContract(id) { return apiFetch(`/hr/contracts/${id}/`, { method: 'DELETE' }); },
-    terminateContract(id, body) { return apiFetch(`/hr/contracts/${id}/terminate/`, { method: 'POST', body }); },
+    createContract(body) { return apiClientRequest('/hr/contracts/', { method: 'POST', body }); },
+    updateContract(id, body) { return apiClientRequest(`/hr/contracts/${id}/`, { method: 'PATCH', body }); },
+    deleteContract(id) { return apiClientRequest(`/hr/contracts/${id}/`, { method: 'DELETE' }); },
+    terminateContract(id, body) { return apiClientRequest(`/hr/contracts/${id}/terminate/`, { method: 'POST', body }); },
 
     // --- Salaires ---
     salaries() { return this.list('salaries'); },
-    createSalary(body) { return apiFetch('/hr/salaries/', { method: 'POST', body }); },
-    updateSalary(id, body) { return apiFetch(`/hr/salaries/${id}/`, { method: 'PATCH', body }); },
-    deleteSalary(id) { return apiFetch(`/hr/salaries/${id}/`, { method: 'DELETE' }); },
-    markSalaryPaid(id, body) { return apiFetch(`/hr/salaries/${id}/mark_paid/`, { method: 'POST', body }); },
-    salaryBalance(teacherId) { return apiFetch(`/hr/salaries/?teacher=${teacherId}&page_size=100`).then(d => d.results || d); },
+    createSalary(body) { return apiClientRequest('/hr/salaries/', { method: 'POST', body }); },
+    updateSalary(id, body) { return apiClientRequest(`/hr/salaries/${id}/`, { method: 'PATCH', body }); },
+    deleteSalary(id) { return apiClientRequest(`/hr/salaries/${id}/`, { method: 'DELETE' }); },
+    markSalaryPaid(id, body) { return apiClientRequest(`/hr/salaries/${id}/mark_paid/`, { method: 'POST', body }); },
+    salaryBalance(teacherId) { return apiClientRequest(`/hr/salaries/?teacher=${teacherId}&page_size=100`).then(d => d.results || d); },
 
     // --- Congés ---
     leaves() { return this.list('leaves'); },
     leaveTypes() { return this.list('leave-types'); },
-    createLeave(body) { return apiFetch('/hr/leaves/', { method: 'POST', body }); },
-    updateLeave(id, body) { return apiFetch(`/hr/leaves/${id}/`, { method: 'PATCH', body }); },
-    deleteLeave(id) { return apiFetch(`/hr/leaves/${id}/`, { method: 'DELETE' }); },
-    approveLeave(id) { return apiFetch(`/hr/leaves/${id}/approve/`, { method: 'POST' }); },
-    rejectLeave(id) { return apiFetch(`/hr/leaves/${id}/reject/`, { method: 'POST' }); },
-    leaveBalance() { return apiFetch('/hr/leaves/balance/'); },
+    createLeave(body) { return apiClientRequest('/hr/leaves/', { method: 'POST', body }); },
+    updateLeave(id, body) { return apiClientRequest(`/hr/leaves/${id}/`, { method: 'PATCH', body }); },
+    deleteLeave(id) { return apiClientRequest(`/hr/leaves/${id}/`, { method: 'DELETE' }); },
+    approveLeave(id) { return apiClientRequest(`/hr/leaves/${id}/approve/`, { method: 'POST' }); },
+    rejectLeave(id) { return apiClientRequest(`/hr/leaves/${id}/reject/`, { method: 'POST' }); },
+    leaveBalance() { return apiClientRequest('/hr/leaves/balance/'); },
 
     // --- Évaluations ---
     evaluations() { return this.list('evaluations'); },
-    createEvaluation(body) { return apiFetch('/hr/evaluations/', { method: 'POST', body }); },
-    updateEvaluation(id, body) { return apiFetch(`/hr/evaluations/${id}/`, { method: 'PATCH', body }); },
-    deleteEvaluation(id) { return apiFetch(`/hr/evaluations/${id}/`, { method: 'DELETE' }); },
-    acknowledgeEvaluation(id, comments) { return apiFetch(`/hr/evaluations/${id}/acknowledge/`, { method: 'POST', body: { comments } }); },
+    createEvaluation(body) { return apiClientRequest('/hr/evaluations/', { method: 'POST', body }); },
+    updateEvaluation(id, body) { return apiClientRequest(`/hr/evaluations/${id}/`, { method: 'PATCH', body }); },
+    deleteEvaluation(id) { return apiClientRequest(`/hr/evaluations/${id}/`, { method: 'DELETE' }); },
+    acknowledgeEvaluation(id, comments) { return apiClientRequest(`/hr/evaluations/${id}/acknowledge/`, { method: 'POST', body: { comments } }); },
 
     // --- Documents RH ---
     documents() { return this.list('documents'); },
     createDocument(formData) { return apiFetchMultipart('/hr/documents/', formData); },
     updateDocument(id, formData) { return apiFetchMultipart(`/hr/documents/${id}/`, formData, 'PATCH'); },
-    deleteDocument(id) { return apiFetch(`/hr/documents/${id}/`, { method: 'DELETE' }); },
-    getDocument(id) { return apiFetch(`/hr/documents/${id}/`); },
+    deleteDocument(id) { return apiClientRequest(`/hr/documents/${id}/`, { method: 'DELETE' }); },
+    getDocument(id) { return apiClientRequest(`/hr/documents/${id}/`); },
 
     // --- Audit Log ---
     auditLog() { return this.list('audit-log'); },
@@ -355,11 +379,11 @@ const InscriptionStatus = {
 
 const InscriptionsAPI = {
     async list() {
-        const data = await apiFetch('/enrollments/inscriptions/');
+        const data = await apiClientRequest('/enrollments/inscriptions/');
         return data.results || data;
     },
     async get(id) {
-        return apiFetch(`/enrollments/inscriptions/${id}/`);
+        return apiClientRequest(`/enrollments/inscriptions/${id}/`);
     },
     async create({ student, school_class, requested_at, created_offline = false, local_uuid = null }) {
         // 🔧 FIX #1 — bug principal du CRUD cassé.
@@ -373,22 +397,22 @@ const InscriptionsAPI = {
         // a pas de local_uuid réel à envoyer.
         const body = { student, school_class, requested_at, created_offline };
         if (local_uuid) body.local_uuid = local_uuid;
-        return apiFetch('/enrollments/inscriptions/', { method: 'POST', body });
+        return apiClientRequest('/enrollments/inscriptions/', { method: 'POST', body });
     },
     async delete(id) {
-        return apiFetch(`/enrollments/inscriptions/${id}/`, { method: 'DELETE' });
+        return apiClientRequest(`/enrollments/inscriptions/${id}/`, { method: 'DELETE' });
     },
     async approve(id) {
-        return apiFetch(`/enrollments/inscriptions/${id}/approve/`, { method: 'POST' });
+        return apiClientRequest(`/enrollments/inscriptions/${id}/approve/`, { method: 'POST' });
     },
     async reject(id, reason) {
-        return apiFetch(`/enrollments/inscriptions/${id}/reject/`, {
+        return apiClientRequest(`/enrollments/inscriptions/${id}/reject/`, {
             method: 'POST',
             body: { reason },
         });
     },
     async transition(id, targetStatus) {
-        return apiFetch(`/enrollments/inscriptions/${id}/transition/`, {
+        return apiClientRequest(`/enrollments/inscriptions/${id}/transition/`, {
             method: 'POST',
             body: { status: targetStatus },
         });
@@ -397,7 +421,7 @@ const InscriptionsAPI = {
         // Chaque item de la file offline porte déjà un vrai local_uuid
         // généré par generateLocalUuid() — ce chemin n'était pas concerné
         // par le bug #1, on ne touche donc à rien ici.
-        return apiFetch('/enrollments/inscriptions/sync_batch/', {
+        return apiClientRequest('/enrollments/inscriptions/sync_batch/', {
             method: 'POST',
             body: { items },
         });
@@ -409,28 +433,28 @@ const InscriptionsAPI = {
 // ------------------------------------------
 const PreInscriptionsAPI = {
     async list() {
-        const data = await apiFetch('/enrollments/pre-inscriptions/');
+        const data = await apiClientRequest('/enrollments/pre-inscriptions/');
         return data.results || data;
     },
     async create(data) {
-        return apiFetch('/enrollments/pre-inscriptions/', {
+        return apiClientRequest('/enrollments/pre-inscriptions/', {
             method: 'POST',
             body: data,
         });
     },
     async update(id, data) {
-        return apiFetch(`/enrollments/pre-inscriptions/${id}/`, {
+        return apiClientRequest(`/enrollments/pre-inscriptions/${id}/`, {
             method: 'PATCH',
             body: data,
         });
     },
     async delete(id) {
-        return apiFetch(`/enrollments/pre-inscriptions/${id}/`, {
+        return apiClientRequest(`/enrollments/pre-inscriptions/${id}/`, {
             method: 'DELETE',
         });
     },
     async convert(id, payload = {}) {
-        return apiFetch(`/enrollments/pre-inscriptions/${id}/convert/`, {
+        return apiClientRequest(`/enrollments/pre-inscriptions/${id}/convert/`, {
             method: 'POST',
             body: payload,
         });
@@ -444,13 +468,13 @@ const AttendanceAPI = {
     async byCourse(courseId, date) {
         let url = `/attendances/attendances/by_course/?course_id=${courseId}`;
         if (date) url += `&date=${date}`;
-        return apiFetch(url);
+        return apiClientRequest(url);
     },
     async stats() {
-        return apiFetch('/attendances/attendances/stats/');
+        return apiClientRequest('/attendances/attendances/stats/');
     },
     async submitBatch(course, attendanceDate, offline, items) {
-        return apiFetch('/attendances/attendances/submit_batch/', {
+        return apiClientRequest('/attendances/attendances/submit_batch/', {
             method: 'POST',
             body: {
                 course,
@@ -468,19 +492,19 @@ window.AttendanceAPI = AttendanceAPI;
 // ------------------------------------------
 const FinanceAPI = {
     async listInvoices(studentId) {
-        const data = await apiFetch(`/finance/invoices/?student=${studentId}`);
+        const data = await apiClientRequest(`/finance/invoices/?student=${studentId}`);
         return data.results || data;
     },
     async listPaymentMethods() {
-        const data = await apiFetch('/finance/payment-methods/');
+        const data = await apiClientRequest('/finance/payment-methods/');
         return data.results || data;
     },
     async listPayments() {
-        const data = await apiFetch('/finance/payments/');
+        const data = await apiClientRequest('/finance/payments/');
         return data.results || data;
     },
     async addPayment({ invoice, amount, payment_method, reference, payment_date }) {
-        return apiFetch('/finance/payments/', {
+        return apiClientRequest('/finance/payments/', {
             method: 'POST',
             body: { invoice, amount, payment_method, reference, payment_date },
         });
