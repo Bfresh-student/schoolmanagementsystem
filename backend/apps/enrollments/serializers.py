@@ -62,7 +62,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inscription
         fields = [
-            "id", "local_uuid", "student", "school_class",
+            "id", "local_uuid", "student", "course", "school_class",
             "student_name", "student_first_name", "student_last_name",
             "student_phone", "student_email", "student_user_id",
             "class_name", "specialization_name", "tuition_fee",

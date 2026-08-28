@@ -418,15 +418,17 @@ let specializationsRaw = []; // objets bruts venant de /students/specializations
 let classesRaw = []; // objets bruts venant de /students/classes/
 let coursesRaw = []; // objets bruts venant de /courses/courses/
 let studentProfilesRaw = []; // objets bruts venant de /students/students/ (id du PROFIL, distinct de user)
+let inscriptionsRaw = []; // objets bruts venant de /enrollments/inscriptions/ (lien réel student <-> course)
 
 async function fetchAcademicDataFromApi() {
   if (!navigator.onLine) return false;
   try {
-    const [specsRes, classesRes, coursesRes, studentsRes] = await Promise.all([
+    const [specsRes, classesRes, coursesRes, studentsRes, inscriptionsRes] = await Promise.all([
       apiFetch("/students/specializations/"),
       apiFetch("/students/classes/"),
       apiFetch("/courses/courses/"),
       apiFetch("/students/students/?page_size=1000"),
+      apiFetch("/enrollments/inscriptions/?page_size=1000"),
     ]);
 
     specializationsRaw =
@@ -437,6 +439,8 @@ async function fetchAcademicDataFromApi() {
       coursesRes?.results ?? (Array.isArray(coursesRes) ? coursesRes : []);
     studentProfilesRaw =
       studentsRes?.results ?? (Array.isArray(studentsRes) ? studentsRes : []);
+    inscriptionsRaw =
+      inscriptionsRes?.results ?? (Array.isArray(inscriptionsRes) ? inscriptionsRes : []);
 
     if (specializationsRaw.length > 0) {
       filieres = specializationsRaw.map((s) => s.name);
@@ -463,7 +467,7 @@ async function fetchAcademicDataFromApi() {
 
     saveToLocalStorage();
     console.log(
-      `✅ API: ${filieres.length} filières, ${classes.length} classes, ${courses.length} cours, ${studentProfilesRaw.length} profils élèves chargés`,
+      `✅ API: ${filieres.length} filières, ${classes.length} classes, ${courses.length} cours, ${studentProfilesRaw.length} profils élèves, ${inscriptionsRaw.length} inscriptions chargés`,
     );
     return true;
   } catch (err) {
@@ -1665,23 +1669,45 @@ function renderCourseSelect() {
   }
 }
 
+// Statuts d'inscription considérés comme "élève actuellement inscrit au
+// cours" pour la feuille d'appel : pending/rejected/suspended en sont
+// exclus (un élève en attente ou refusé n'assiste pas au cours).
+const ENROLLED_INSCRIPTION_STATUSES = ["approved", "active", "validated"];
+
 function getFilteredElevesPresence() {
-  // Returns clients who are enrolled in the selected course/filiere,
-  // narrowed further to the selected class when one is chosen.
+  // Returns clients réellement inscrits (Inscription.student <-> Inscription.course)
+  // au cours sélectionné, narrowed further to the selected class when one is chosen.
   const courseId = document.getElementById("courseFilter")?.value;
-  const courseObj = coursesRaw.find(c => c.id === courseId);
-  const courseName = courseObj ? courseObj.name : "";
+  if (!courseId) return [];
+
+  const enrolledStudentIds = new Set(
+    inscriptionsRaw
+      .filter((insc) => {
+        const inscCourseId =
+          typeof insc.course === "object" ? insc.course?.id : insc.course;
+        return (
+          inscCourseId === courseId &&
+          ENROLLED_INSCRIPTION_STATUSES.includes(insc.status)
+        );
+      })
+      .map((insc) =>
+        typeof insc.student === "object" ? insc.student?.id : insc.student,
+      ),
+  );
+
   const selectedClasse = document.getElementById("schoolClassFilter")?.value;
+  const courseObj = coursesRaw.find((c) => c.id === courseId);
+  const courseName = courseObj ? courseObj.name : "";
 
   return clients
-    .filter((u) => u.cours === courseName || u.filiere === courseName)
+    .filter((u) => enrolledStudentIds.has(u.student_id ?? u.id))
     .filter((u) => !selectedClasse || u.classe === selectedClasse)
-    .map(c => ({
+    .map((c) => ({
       id: c.student_id || c.id,
       nom: c.name,
       filiere: courseName,
       presences: 0,
-      total: 0
+      total: 0,
     }));
 }
 
@@ -1731,8 +1757,9 @@ function setAttendance(studentId, status) {
 
 function renderAttendanceTable() {
   const filtered = getFilteredElevesPresence();
-  const cf =
-    document.getElementById("courseFilter")?.value || "Entrepreneuriat";
+  const courseId = document.getElementById("courseFilter")?.value;
+  const courseObj = coursesRaw.find((c) => c.id === courseId);
+  const cf = courseObj ? courseObj.name : "Entrepreneuriat";
   const display = document.getElementById("courseDisplay");
   if (display) display.textContent = cf;
   const tbody = document.getElementById("attendanceBody");
