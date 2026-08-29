@@ -22,7 +22,7 @@ SECURE_HSTS_PRELOAD = True
 # ── Supabase S3-compatible storage ──────────────────────────────
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
+        "BACKEND": "backend.storage_backends.SupabasePublicStorage",
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
