@@ -28,7 +28,7 @@
         let _apiErrorMessage = '';
 
         // Données locales de secours (candidats, présences, documents locaux)
-        let candidatsData=[{prenom:'Pierre',nom:'Dubois',tel:'+509 44 11 22 33',email:'pierre@email.com',poste:'Professeur Marketing',cv:'Reçu',statut:'Entretien',dateCandidature:'01/06/2026',dateEntretien:'',heureEntretien:'',interviewer:'',notes:'Bon profil, à suivre',cvFileName:'CV_Pierre_Dubois.pdf'},{prenom:'Mireille',nom:'Dumont',tel:'+509 33 22 11 00',email:'mireille@email.com',poste:'Secrétaire',cv:'Reçu',statut:'En attente',dateCandidature:'05/06/2026',dateEntretien:'',heureEntretien:'',interviewer:'',notes:'',cvFileName:'CV_Mireille_Dumont.pdf'}];
+        let candidatsData=[];
         // documentsData est désormais un alias vers documentsFromAPI (rempli par l'API ou fallback)
         let documentsData = [];
         let presencesData=[];
@@ -1759,7 +1759,7 @@ async function generatePreviewPDF(docName) {
         async function loadAndRenderDocuments() {
             showTabSpinner();
             try {
-                const raw = await HRAPI.documents();
+                const [raw, candidates] = await Promise.all([HRAPI.documents(), HRAPI.candidates()]);
                 documentsFromAPI = raw.map(d => ({
                     _apiId: d.id,
                     nom: d.filename || `doc_${d.id}`,
@@ -1767,9 +1767,25 @@ async function generatePreviewPDF(docName) {
                     type: _mapDocType(d.document_type),
                     date: d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '—',
                     taille: '—',
-                    fileUrl: d.file || null
+                    fileUrl: d.file || null,
+                    source: 'employee'
                 }));
-                documentsData = documentsFromAPI;
+                const candidateDocuments = candidates.flatMap(candidate => {
+                    const owner = `${candidate.first_name} ${candidate.last_name} (Candidat)`;
+                    const cv = candidate.cv_file ? [{
+                        _candidateId: candidate.id, nom: String(candidate.cv_file).split('/').pop(), employe: owner,
+                        type: 'CV', date: candidate.created_at ? new Date(candidate.created_at).toLocaleDateString('fr-FR') : '—',
+                        taille: '—', fileUrl: candidate.cv_file, source: 'candidate-cv'
+                    }] : [];
+                    const attachments = (candidate.documents || []).map(doc => ({
+                        _candidateDocumentId: doc.id, _candidateId: candidate.id, nom: doc.filename || `doc_${doc.id}`,
+                        employe: owner, type: _mapDocType(doc.document_type),
+                        date: doc.created_at ? new Date(doc.created_at).toLocaleDateString('fr-FR') : '—',
+                        taille: '—', fileUrl: doc.file || null, source: 'candidate'
+                    }));
+                    return [...cv, ...attachments];
+                });
+                documentsData = [...documentsFromAPI, ...candidateDocuments];
                 _apiReady = true;
             } catch (e) {
                 console.warn('[RH] Impossible de charger les documents:', e);
@@ -1799,7 +1815,7 @@ async function generatePreviewPDF(docName) {
                 <td><div class="btn-group">
                     <button class="btn btn-sm btn-outline btn-icon" title="Voir" onclick="voirDoc('${d.nom}')"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-sm btn-outline" onclick="telechargerDocAPI(${idx})"><i class="fas fa-download"></i> Télécharger</button>
-                    <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="supprimerDocAPI(${idx})"><i class="fas fa-trash"></i></button>
+                    ${d.source === 'candidate-cv' ? '' : `<button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="supprimerDocAPI(${idx})"><i class="fas fa-trash"></i></button>`}
                 </div></td></tr>`).join('');
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>Documents</span><h2>${documentsData.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-folder-open"></i></div></div>
@@ -1841,6 +1857,18 @@ async function generatePreviewPDF(docName) {
                     showToast('❌ Erreur suppression document', 'error');
                     return;
                 }
+            }
+            if (d._candidateDocumentId) {
+                try {
+                    await HRAPI.deleteCandidateDocument(d._candidateDocumentId);
+                    documentsData.splice(idx, 1);
+                    document.getElementById('mainContent').innerHTML = renderDocuments();
+                    showToast(`🗑️ ${d.nom} supprimé de la base`, 'error');
+                } catch (err) {
+                    console.warn('[RH] deleteCandidateDocument échoué:', err);
+                    showToast('❌ Erreur suppression document', 'error');
+                }
+                return;
             }
             documentsData.splice(idx, 1);
             document.getElementById('mainContent').innerHTML = renderDocuments();
@@ -2381,6 +2409,7 @@ async function generatePreviewPDF(docName) {
             );
 
             const recruitedEmployees = (candidatsData || [])
+                .filter(c => c.statut === 'Embauché')
                 .filter(c => {
                     const email = (c.email || '').toLowerCase();
                     const name = `${(c.prenom || '').trim().toLowerCase()} ${(c.nom || '').trim().toLowerCase()}`;

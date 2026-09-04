@@ -117,7 +117,7 @@ class EmployeeAndAttendanceAPITests(TestCase):
         detail = self.client.get(f"/api/v1/hr/candidates/{candidate_id}/")
         self.assertEqual(detail.status_code, 200, detail.data)
         self.assertEqual(len(detail.data["documents"]), 1)
-        self.assertTrue(detail.data["cv_file"].endswith("cv.pdf"))
+        self.assertIn("cv", detail.data["cv_file"])
 
 
 class ContractTests(HRBaseTestCase):

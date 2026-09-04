@@ -66,7 +66,8 @@ async function apiFetch(url, options = {}) {
 // ── Engagement tracking ─────────────────────────────────────────────────────
 async function incrementView(articleId) {
   try {
-    await fetch(API_BASE + "/articles/" + articleId + "/increment_view/", { method: "POST" });
+    const response = await apiFetch(API_BASE + "/articles/" + articleId + "/increment_view/", { method: "POST" });
+    if (!response.ok) return;
     const a = articles.find(x => x.id === articleId);
     if (a) a.views_count = (a.views_count || 0) + 1;
   } catch (e) { /* silent */ }
@@ -241,41 +242,31 @@ async function saveMedia() {
   if (!titre) { showToast("Titre obligatoire", "error"); return; }
   
   const fileInput = document.getElementById("mediaFile");
-  const file = fileInput.files[0];
+  const files = Array.from(fileInput.files || []);
 
-  if (!editId && !file) {
+  if (!editId && !files.length) {
     showToast("Veuillez sélectionner un fichier", "error"); return;
   }
 
-  const formData = new FormData();
-  formData.append('title', titre);
-  formData.append('media_type', type);
-  formData.append('description', desc);
-  // Optional fields backend mapping (if supported, otherwise ignore or store in desc)
-  if (file) {
-    formData.append('file', file);
-  }
-
   try {
-    let url = `${API_BASE}/media-assets/`;
-    let method = "POST";
-    
-    if (editId) {
-      url = `${API_BASE}/media-assets/${editId}/`;
-      method = "PATCH";
-    }
-
-    const res = await apiFetch(url, {
-      method,
-      body: formData
-    });
-
-    if (res.ok) {
+    const saveOne = async (file, index = 0) => {
+      const formData = new FormData();
+      formData.append('title', files.length > 1 ? `${titre} (${index + 1})` : titre);
+      formData.append('media_type', file?.type.startsWith('video/') ? 'video' : type);
+      formData.append('description', desc);
+      formData.append('promotion', promo);
+      formData.append('album', album);
+      if (file) formData.append('file', file);
+      const url = editId ? `${API_BASE}/media-assets/${editId}/` : `${API_BASE}/media-assets/`;
+      return apiFetch(url, { method: editId ? 'PATCH' : 'POST', body: formData });
+    };
+    const responses = editId ? [await saveOne(files[0])] : await Promise.all(files.map(saveOne));
+    if (responses.every(response => response.ok)) {
       showToast(editId ? "Média mis à jour" : "Média ajouté");
       closeModal("mediaModal");
       fetchMedias();
     } else {
-      const err = await res.json();
+      const err = await responses.find(response => !response.ok).json();
       showToast(err.detail || "Erreur lors de la sauvegarde", "error");
     }
   } catch (err) {
@@ -395,6 +386,7 @@ async function saveArticle(statusStr) {
   if (articleTags && articleTags.length > 0) formData.append("tags_list", JSON.stringify(articleTags));
   const coverInput = document.getElementById("coverImageInput");
   if (coverInput && coverInput.files[0]) formData.append("cover_image", coverInput.files[0]);
+  galleryFiles.forEach(item => formData.append("gallery_files", item.file));
   const editId = document.getElementById("articleEditId").value;
   try {
     let url = API_BASE + "/articles/", method = "POST";
@@ -603,8 +595,9 @@ function shareFromBlog(platform, articleId) {
   if (shareUrls[platform]) {
     window.open(shareUrls[platform], "_blank", "width=600,height=500");
     // Increment share count silently
-    fetch(API_BASE + "/articles/" + articleId + "/increment_share/", { method: "POST" })
-      .then(() => {
+    apiFetch(API_BASE + "/articles/" + articleId + "/increment_share/", { method: "POST" })
+      .then(response => {
+        if (!response.ok) return;
         const a = articles.find(x => x.id === articleId);
         if (a) { a.shares_count = (a.shares_count || 0) + 1; }
       }).catch(() => {});
@@ -716,7 +709,7 @@ function addGalleryMedia(event) {
     if (f.size > 10 * 1024 * 1024) { showToast(`${f.name} dépasse 10MB`, "error"); return; }
     const reader = new FileReader();
     reader.onload = function (e) {
-      galleryFiles.push({ name: f.name, type: f.type, data: e.target.result });
+      galleryFiles.push({ name: f.name, type: f.type, data: e.target.result, file: f });
       renderGallery();
     };
     reader.readAsDataURL(f);
@@ -783,8 +776,8 @@ function shareArticle(platform) {
   }
   // Track share
   if (editId) {
-    fetch(API_BASE + "/articles/" + editId + "/increment_share/", { method: "POST" })
-      .then(() => { const a = articles.find(x => String(x.id) === String(editId)); if (a) a.shares_count = (a.shares_count||0)+1; }).catch(() => {});
+    apiFetch(API_BASE + "/articles/" + editId + "/increment_share/", { method: "POST" })
+      .then(response => { if (!response.ok) return; const a = articles.find(x => String(x.id) === String(editId)); if (a) a.shares_count = (a.shares_count||0)+1; }).catch(() => {});
   }
   showToast("Partagé sur " + platform, "success");
 }

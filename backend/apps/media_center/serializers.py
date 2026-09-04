@@ -13,7 +13,7 @@ class MediaAssetSerializer(serializers.ModelSerializer):
         model = MediaAsset
         fields = [
             "id", "title", "description", "file", "file_url",
-            "media_type", "uploaded_by", "uploaded_by_name",
+            "media_type", "promotion", "album", "uploaded_by", "uploaded_by_name",
             "file_size", "synced", "updated_at", "created_at",
         ]
         read_only_fields = ["id", "file_size", "synced", "created_at", "updated_at"]
@@ -49,6 +49,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     cover_image = MediaAssetSerializer(read_only=True)
+    gallery = MediaAssetSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     author_name = serializers.SerializerMethodField()
     share_url = serializers.SerializerMethodField()
@@ -74,7 +75,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = [
             "id", "title", "slug", "description", "content",
-            "cover_image", "tags", "category",
+            "cover_image", "gallery", "tags", "category",
             "author", "author_name", "status", "publication_date",
             "promotion", "views_count", "shares_count", "comments_count",
             "share_url", "recent_comments", "created_at", "updated_at",

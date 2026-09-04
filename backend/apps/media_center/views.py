@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import SessionAuthentication
-from django.db import transaction
+from django.db import models, transaction
 
 from .models import MediaAsset, Tag, Article, Comment
 from .serializers import MediaAssetSerializer, TagSerializer, ArticleSerializer, CommentSerializer
@@ -80,6 +80,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
                 file=cover_file,
                 media_type="image",
                 uploaded_by=uploaded_by,
+                file_size=cover_file.size,
             )
             return asset
         cover_id = request.data.get("cover_image_id")
@@ -89,6 +90,20 @@ class ArticleViewSet(viewsets.ModelViewSet):
             except MediaAsset.DoesNotExist:
                 pass
         return None
+
+    def _handle_gallery_files(self, request, article):
+        """Persist all gallery uploads and relate them to their article."""
+        uploaded_by = request.user if request.user.is_authenticated else None
+        for uploaded_file in request.FILES.getlist("gallery_files"):
+            media_type = "video" if uploaded_file.content_type.startswith("video/") else "image"
+            asset = MediaAsset.objects.create(
+                title=uploaded_file.name,
+                file=uploaded_file,
+                media_type=media_type,
+                uploaded_by=uploaded_by,
+                file_size=uploaded_file.size,
+            )
+            article.gallery.add(asset)
 
     def _handle_tags(self, article, request):
         import json
@@ -116,6 +131,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         else:
             article = serializer.save(author=author)
         self._handle_tags(article, self.request)
+        self._handle_gallery_files(self.request, article)
 
     def perform_update(self, serializer):
         asset = self._handle_cover_image(self.request)
@@ -124,6 +140,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         else:
             article = serializer.save()
         self._handle_tags(article, self.request)
+        self._handle_gallery_files(self.request, article)
 
     # ------------------------------------------------------------------ #
     # Engagement actions                                                   #
