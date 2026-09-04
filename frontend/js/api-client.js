@@ -316,7 +316,11 @@ const HRAPI = {
     deleteEmployee(id) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'DELETE' }); },
 
     // --- Présences du personnel ---
-    attendances() { return this.list('attendances'); },
+    attendances(todayOnly = true) {
+        const suffix = todayOnly ? `?date=${new Date().toISOString().slice(0, 10)}&page_size=1000` : '?page_size=1000';
+        return apiClientRequest(`/hr/attendances/${suffix}`).then(data => data.results || data);
+    },
+    attendanceReport(start, end) { return apiClientRequest(`/hr/attendances/report-summary/?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`); },
     createAttendance(body) { return apiClientRequest('/hr/attendances/', { method: 'POST', body }); },
     updateAttendance(id, body) { return apiClientRequest(`/hr/attendances/${id}/`, { method: 'PATCH', body }); },
     deleteAttendance(id) { return apiClientRequest(`/hr/attendances/${id}/`, { method: 'DELETE' }); },
@@ -326,6 +330,9 @@ const HRAPI = {
     createCandidate(formData) { return apiFetchMultipart('/hr/candidates/', formData); },
     updateCandidate(id, formData) { return apiFetchMultipart(`/hr/candidates/${id}/`, formData, 'PATCH'); },
     deleteCandidate(id) { return apiClientRequest(`/hr/candidates/${id}/`, { method: 'DELETE' }); },
+    scheduleInterview(id, body) { return apiClientRequest(`/hr/candidates/${id}/schedule_interview/`, { method: 'POST', body }); },
+    hireCandidate(id, body = {}) { return apiClientRequest(`/hr/candidates/${id}/hire/`, { method: 'POST', body }); },
+    rejectCandidate(id) { return apiClientRequest(`/hr/candidates/${id}/reject_after_interview/`, { method: 'POST' }); },
     // --- Contrats ---
     contracts() { return this.list('contracts'); },
     createContract(body) { return apiClientRequest('/hr/contracts/', { method: 'POST', body }); },

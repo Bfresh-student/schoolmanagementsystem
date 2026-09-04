@@ -1,5 +1,9 @@
 from datetime import date
 
+from django.db import transaction
+from django.db.models import Count, Q, Sum
+from django.utils.dateparse import parse_date
+
 from django.http import FileResponse, Http404
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -123,12 +127,101 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
     permission_classes = [IsHRStaff]
     audit_entity_type = AuditEntityType.CANDIDATE
 
+    @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
+    def schedule_interview(self, request, pk=None):
+        candidate = self.get_object()
+        if candidate.status != "pending":
+            return Response({"detail": "Seul un candidat en attente peut être convoqué en entretien."}, status=status.HTTP_400_BAD_REQUEST)
+        interview_date = parse_date(request.data.get("interview_date", ""))
+        interview_time = request.data.get("interview_time")
+        if not interview_date or not interview_time:
+            return Response({"detail": "La date et l'heure de l'entretien sont obligatoires."}, status=status.HTTP_400_BAD_REQUEST)
+        candidate.status = "interview"
+        candidate.interview_date = interview_date
+        candidate.interview_time = interview_time
+        # L'intervieweur est toujours l'administrateur connecté : le client
+        # ne peut pas usurper son identité.
+        candidate.interviewer = request.user.get_full_name() or request.user.email
+        if request.data.get("notes"):
+            candidate.notes = request.data["notes"]
+        candidate.save(update_fields=["status", "interview_date", "interview_time", "interviewer", "notes", "updated_at"])
+        return Response(CandidateSerializer(candidate).data)
+
+    @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
+    def hire(self, request, pk=None):
+        candidate = self.get_object()
+        if candidate.status != "interview" or not candidate.interview_date:
+            return Response({"detail": "Un candidat doit avoir passé un entretien avant son embauche."}, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            candidate = Candidate.objects.select_for_update().get(pk=candidate.pk)
+            if candidate.status == "hired":
+                return Response({"detail": "Ce candidat est déjà employé."}, status=status.HTTP_400_BAD_REQUEST)
+            if candidate.status != "interview" or not candidate.interview_date:
+                return Response({"detail": "Le candidat n'est plus éligible à l'embauche."}, status=status.HTTP_400_BAD_REQUEST)
+            if Employee.objects.filter(email__iexact=candidate.email).exists():
+                return Response({"detail": "Un employé existe déjà avec cette adresse e-mail."}, status=status.HTTP_400_BAD_REQUEST)
+            employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
+            employee = Employee.objects.create(
+                employee_number=employee_number,
+                first_name=candidate.first_name,
+                last_name=candidate.last_name,
+                phone=candidate.phone,
+                email=candidate.email,
+                job_title=candidate.position,
+                department=request.data.get("department") or "Administration",
+                hire_date=timezone.localdate(),
+            )
+            candidate.status = "hired"
+            candidate.save(update_fields=["status", "updated_at"])
+        AuditLog.record(user=request.user, action=AuditAction.UPDATE, entity_type=AuditEntityType.CANDIDATE, entity_id=candidate.pk, new={"status": "hired", "employee_id": employee.pk}, request=request)
+        return Response({"candidate": CandidateSerializer(candidate).data, "employee": EmployeeSerializer(employee).data}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
+    def reject_after_interview(self, request, pk=None):
+        candidate = self.get_object()
+        if candidate.status != "interview":
+            return Response({"detail": "Seul un candidat reçu en entretien peut être rejeté."}, status=status.HTTP_400_BAD_REQUEST)
+        candidate.status = "rejected"
+        candidate.save(update_fields=["status", "updated_at"])
+        return Response(CandidateSerializer(candidate).data)
+
 
 class EmployeeAttendanceViewSet(AuditLogMixin, viewsets.ModelViewSet):
     queryset = EmployeeAttendance.objects.select_related("employee").all()
     serializer_class = EmployeeAttendanceSerializer
     permission_classes = [IsHRStaff]
     audit_entity_type = AuditEntityType.ATTENDANCE
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        requested_date = parse_date(self.request.query_params.get("date", ""))
+        # Le module Présences affiche par défaut uniquement la journée courante.
+        return qs.filter(date=requested_date or timezone.localdate())
+
+    @action(detail=False, methods=["get"], permission_classes=[IsHRStaff], url_path="report-summary")
+    def report_summary(self, request):
+        start = parse_date(request.query_params.get("start", "")) or timezone.localdate().replace(day=1)
+        end = parse_date(request.query_params.get("end", "")) or timezone.localdate()
+        if end < start:
+            return Response({"detail": "La date de fin doit être postérieure à la date de début."}, status=status.HTTP_400_BAD_REQUEST)
+        attendance = EmployeeAttendance.objects.filter(date__range=(start, end)).values("employee_id").annotate(
+            present=Count("id", filter=Q(status__in=["present", "late"])),
+            absent=Count("id", filter=Q(status__in=["absent", "excused"])),
+        )
+        attendance_by_employee = {row["employee_id"]: row for row in attendance}
+        leave = Leave.objects.filter(status=LeaveStatus.APPROVED, start_date__lte=end, end_date__gte=start).values("employee_id").annotate(days=Sum("days_used"))
+        leave_by_employee = {row["employee_id"]: row["days"] for row in leave}
+        employees = Employee.objects.all()
+        rows = [{
+            "employee_id": employee.id,
+            "name": str(employee),
+            "job_title": employee.job_title,
+            "present_days": attendance_by_employee.get(employee.id, {}).get("present", 0),
+            "absent_days": attendance_by_employee.get(employee.id, {}).get("absent", 0),
+            "leave_days": float(leave_by_employee.get(employee.id, 0) or 0),
+            "monthly_salary": str(employee.monthly_salary),
+        } for employee in employees]
+        return Response({"start": start, "end": end, "employees": rows})
 
 class ContractViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = Contract.objects.select_related("employee").all()

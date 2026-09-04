@@ -576,41 +576,20 @@ async function generatePreviewPDF(docName) {
                 case 'fichepaie': mc.innerHTML = renderFichePaie(); break;
                 case 'recrutement': loadAndRenderRecrutement(); break;
                 case 'documents': loadAndRenderDocuments(); break;
-                case 'evaluations': loadAndRenderEvaluations(); break;
                 default: mc.innerHTML = renderEmployes();
             }
-        }
-
-        function initPresences() {
-            const today = new Date().toISOString().split('T')[0];
-            employees.forEach(e => {
-                const nom = e.prenom + ' ' + e.nom;
-                if (!presencesData.some(p => p.employe === nom && p.date === today)) {
-                    presencesData.push({
-                        employe: nom,
-                        date: today,
-                        entree: '—',
-                        sortie: '—',
-                        statut: 'Absent',
-                        notes: '',
-                        _apiId: null,
-                        _employeeId: e._hrEmployeeId || null
-                    });
-                }
-            });
         }
 
         async function loadAndRenderPresences() {
             showTabSpinner();
             try {
                 await ensureAuth();
-                const raw = await HRAPI.attendances();
+                const raw = await HRAPI.attendances(true);
                 presencesData = raw.map(mapAttendanceFromAPI);
             } catch (e) {
                 console.warn('[RH] Impossible de charger les présences:', e);
                 presencesData = [];
             }
-            initPresences();
             document.getElementById('mainContent').innerHTML = renderPresences();
         }
 
@@ -910,8 +889,9 @@ async function generatePreviewPDF(docName) {
         }
 
         function renderPresences() {
-            initPresences();
-            let rows = presencesData.map(p => {
+            const today = new Date().toISOString().slice(0, 10);
+            const todayPresences = presencesData.filter(p => p.date === today);
+            let rows = todayPresences.map(p => {
                 const empIndex = employees.findIndex(e => (e.prenom + ' ' + e.nom) === p.employe);
                 return `<tr><td class="emp-name">${p.employe}</td><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.entree}</td><td>${p.sortie}</td>
                 <td><span class="pill ${p.statut==='Retard'?'pill-warning':p.statut==='Absent'?'pill-danger':'pill-success'}">${p.statut}</span></td>
@@ -921,16 +901,16 @@ async function generatePreviewPDF(docName) {
                     <button class="btn btn-sm btn-outline btn-icon" onclick="corrigerHeureModal(${empIndex})"><i class="fas fa-edit"></i></button>
                 </div></td></tr>`;
             }).join('');
-            const presents = presencesData.filter(p => p.statut === 'Présent' || p.statut === 'Retard').length;
-            const retards = presencesData.filter(p => p.statut === 'Retard').length;
-            const absents = presencesData.filter(p => p.statut === 'Absent').length;
+            const presents = todayPresences.filter(p => p.statut === 'Présent' || p.statut === 'Retard').length;
+            const retards = todayPresences.filter(p => p.statut === 'Retard').length;
+            const absents = todayPresences.filter(p => p.statut === 'Absent').length;
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>Présents</span><h2>${presents}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-user-check"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Retards</span><h2>${retards}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-clock"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Absents</span><h2>${absents}</h2></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-user-times"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Taux</span><h2>${employees.length>0?Math.round((presents/employees.length)*100):0}%</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-percentage"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-clock"></i> Présences</h2><button class="btn btn-sm btn-outline" onclick="exportPresencesCSV()"><i class="fas fa-file-excel"></i> Excel</button></div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-clock"></i> Présences — Aujourd’hui</h2><button class="btn btn-sm btn-outline" onclick="exportPresencesCSV()"><i class="fas fa-file-excel"></i> Excel</button></div>
             <div class="table-wrap"><table><thead><tr><th>Nom</th><th>Date</th><th>Entrée</th><th>Sortie</th><th>Statut</th><th>Présence</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
         }
 
@@ -940,6 +920,7 @@ async function generatePreviewPDF(docName) {
             document.getElementById('pointageTitle').innerHTML = `<i class="fas fa-clock"></i> Pointer - ${e.prenom} ${e.nom}`;
             document.getElementById('pointageEmpIndex').value = empIndex;
             document.getElementById('pointageDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pointageDate').disabled = true;
             document.getElementById('pointageEntree').value = '08:00';
             document.getElementById('pointageSortie').value = '16:00';
             document.getElementById('pointageStatut').value = 'Présent';
@@ -953,7 +934,8 @@ async function generatePreviewPDF(docName) {
             const existing = presencesData.find(p => p.employe === (e.prenom + ' ' + e.nom));
             document.getElementById('pointageTitle').innerHTML = `<i class="fas fa-edit"></i> Corriger - ${e.prenom} ${e.nom}`;
             document.getElementById('pointageEmpIndex').value = empIndex;
-            document.getElementById('pointageDate').value = existing ? existing.date : new Date().toISOString().split('T')[0];
+            document.getElementById('pointageDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pointageDate').disabled = true;
             document.getElementById('pointageEntree').value = existing ? existing.entree : '08:00';
             document.getElementById('pointageSortie').value = existing ? existing.sortie : '16:00';
             document.getElementById('pointageStatut').value = existing ? (existing.statut === 'Retard' ? 'Retard' : existing.statut === 'Absent' ? 'Absent' : 'Présent') : 'Présent';
@@ -1078,7 +1060,7 @@ async function generatePreviewPDF(docName) {
         function openCongeModal() {
             const persistedEmployees = employees.filter(e => e._hrEmployeeId);
             document.getElementById('congeEmp').innerHTML = persistedEmployees.map(e =>
-                `<option>${e.prenom} ${e.nom}</option>`
+                `<option value="${e._hrEmployeeId}">${e.prenom} ${e.nom}</option>`
             ).join('');
             document.getElementById('congeType').innerHTML = leaveTypesFromAPI.map(lt =>
                 `<option value="${lt.id}">${lt.name}</option>`
@@ -1087,10 +1069,10 @@ async function generatePreviewPDF(docName) {
         }
 
         async function soumettreConge() {
-            const emp = document.getElementById('congeEmp').value;
+            const employeeId = document.getElementById('congeEmp').value;
             const debut = document.getElementById('congeDebut').value;
             const fin = document.getElementById('congeFin').value;
-            if (!emp || !debut || !fin) { showToast('⚠️ Champs requis', 'error'); return; }
+            if (!employeeId || !debut || !fin) { showToast('⚠️ Champs requis', 'error'); return; }
             const d1 = new Date(debut), d2 = new Date(fin);
             const jours = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
             const leaveTypeId = document.getElementById('congeType').value;
@@ -1098,7 +1080,6 @@ async function generatePreviewPDF(docName) {
             const typeConge = leaveType?.name || '';
             const motif = document.getElementById('congeMotif').value;
 
-            const employeeId = resolveHrEmployeeId(emp);
             if (employeeId && leaveType) {
                 try {
                     const body = {
@@ -1370,9 +1351,8 @@ async function generatePreviewPDF(docName) {
                 <td><div class="btn-group">
                     <button class="btn btn-sm btn-outline btn-icon" onclick="voirCandidat(${i})"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-sm btn-outline btn-icon" onclick="editCandidat(${i})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline" onclick="programmerEntretien(${i})"><i class="fas fa-calendar-check"></i> Entretien</button>
-                    <button class="btn btn-sm btn-success btn-icon" onclick="accepterCandidat(${i})"><i class="fas fa-check"></i></button>
-                    <button class="btn btn-sm btn-danger btn-icon" onclick="refuserCandidat(${i})"><i class="fas fa-times"></i></button>
+                    ${c.statut==='En attente' ? `<button class="btn btn-sm btn-outline" onclick="programmerEntretien(${i})"><i class="fas fa-calendar-check"></i> Entretien</button>` : ''}
+                    ${c.statut==='Entretien' ? `<button class="btn btn-sm btn-success" onclick="accepterCandidat(${i})"><i class="fas fa-user-plus"></i> Embaucher</button><button class="btn btn-sm btn-danger btn-icon" onclick="refuserCandidat(${i})"><i class="fas fa-times"></i></button>` : ''}
                 </div></td></tr>`).join('');
             return `<div class="stats-grid">
                 <div class="stat-card"><div class="stat-info"><span>Candidats</span><h2>${candidatsData.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-briefcase"></i></div></div>
@@ -1493,7 +1473,9 @@ async function generatePreviewPDF(docName) {
             document.getElementById('entretienCandidatNom').value = `${c.prenom} ${c.nom} - ${c.poste}`;
             document.getElementById('entretienDate').value = '';
             document.getElementById('entretienHeure').value = '10:00';
-            document.getElementById('entretienInterviewer').innerHTML = '<option value="">— Sélectionner —</option>' + employees.filter(e => e.fonction === 'Directeur' || e.fonction === 'Coordinateur' || e.fonction === 'Administrateur').map(e => `<option>${e.prenom} ${e.nom}</option>`).join('');
+            const admin = JSON.parse(localStorage.getItem('authUser') || '{}');
+            document.getElementById('entretienInterviewer').innerHTML = `<option selected>${admin.first_name || ''} ${admin.last_name || admin.email || 'Administrateur connecté'}</option>`;
+            document.getElementById('entretienInterviewer').disabled = true;
             openModal('entretienModal');
         }
 
@@ -1501,20 +1483,12 @@ async function generatePreviewPDF(docName) {
             const i = parseInt(document.getElementById('entretienCandidatIndex').value);
             const date = document.getElementById('entretienDate').value;
             const heure = document.getElementById('entretienHeure').value;
-            const interviewer = document.getElementById('entretienInterviewer').value;
             const notes = document.getElementById('entretienNotes')?.value || '';
             if (!date) { showToast('⚠️ Sélectionnez une date', 'error'); return; }
-            if (!interviewer) { showToast('⚠️ Sélectionnez un intervieweur', 'error'); return; }
             const c = candidatsData[i];
             if (!c?._apiId) { showToast('⚠️ Candidat non synchronisé', 'error'); return; }
-            const formData = new FormData();
-            formData.append('status', 'interview');
-            formData.append('interview_date', date);
-            formData.append('interview_time', heure);
-            formData.append('interviewer', interviewer);
-            if (notes) formData.append('notes', notes);
             try {
-                await HRAPI.updateCandidate(c._apiId, formData);
+                await HRAPI.scheduleInterview(c._apiId, { interview_date: date, interview_time: heure, notes });
                 closeModal('entretienModal');
                 await loadAndRenderRecrutement();
                 showToast(`📅 Entretien programmé`, 'success');
@@ -1525,14 +1499,36 @@ async function generatePreviewPDF(docName) {
         }
 
         async function accepterCandidat(i) {
-            if (confirm(`✅ Accepter ${candidatsData[i].prenom} ${candidatsData[i].nom} ?`)) {
-                await _updateCandidateStatus(i, 'selected', '✅ Candidat accepté', 'success');
+            const candidate = candidatsData[i];
+            if (!candidate?._apiId || candidate.statut !== 'Entretien') {
+                showToast('⚠️ Le candidat doit passer un entretien avant l’embauche', 'error');
+                return;
+            }
+            if (confirm(`✅ Embaucher ${candidate.prenom} ${candidate.nom} comme employé ?`)) {
+                try {
+                    await HRAPI.hireCandidate(candidate._apiId);
+                    await Promise.all([syncAllEmployees(), loadAndRenderRecrutement()]);
+                    showToast(`✅ ${candidate.prenom} ${candidate.nom} est maintenant employé`, 'success');
+                } catch (err) {
+                    showToast('❌ Embauche impossible : ' + (err.detail ? JSON.stringify(err.detail) : err.message), 'error');
+                }
             }
         }
 
         async function refuserCandidat(i) {
-            if (confirm(`❌ Refuser ${candidatsData[i].prenom} ${candidatsData[i].nom} ?`)) {
-                await _updateCandidateStatus(i, 'rejected', '❌ Candidat refusé', 'error');
+            const candidate = candidatsData[i];
+            if (!candidate?._apiId || candidate.statut !== 'Entretien') {
+                showToast('⚠️ Le candidat doit passer un entretien avant le rejet', 'error');
+                return;
+            }
+            if (confirm(`❌ Refuser ${candidate.prenom} ${candidate.nom} ?`)) {
+                try {
+                    await HRAPI.rejectCandidate(candidate._apiId);
+                    await loadAndRenderRecrutement();
+                    showToast('❌ Candidat refusé', 'success');
+                } catch (err) {
+                    showToast('❌ Rejet impossible : ' + (err.detail ? JSON.stringify(err.detail) : err.message), 'error');
+                }
             }
         }
 

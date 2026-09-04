@@ -43,6 +43,7 @@
       let chartInstances = {};
       let invoices = [];
       let payments = [];
+      let hrReport = [];
 
       const reportList = data => Array.isArray(data) ? data : (data.results || []);
       async function reportApi(path) {
@@ -66,8 +67,10 @@
       }
       async function loadReportData() {
         try {
-          const [studentsData, coursesData, teachersData, invoicesData, paymentsData, companiesData, eventsData, internshipsData] = await Promise.all([
-            reportApi('/students/students/'), reportApi('/courses/courses/'), reportApi('/teachers/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/')
+          const today = new Date().toISOString().slice(0, 10);
+          const monthStart = `${today.slice(0, 8)}01`;
+          const [studentsData, coursesData, invoicesData, paymentsData, companiesData, eventsData, internshipsData, hrData] = await Promise.all([
+            reportApi('/students/students/'), reportApi('/courses/courses/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/'), reportApi(`/hr/attendances/report-summary/?start=${monthStart}&end=${today}`)
           ]);
           const students = reportList(studentsData);
           const courses = reportList(coursesData);
@@ -75,12 +78,19 @@
           const invoicesByStudent = new Map(invoices.map(invoice => [String(invoice.student), invoice]));
           etudiantsListe = students.map(student => { const invoice = invoicesByStudent.get(String(student.id)); return { id: student.registration_number || student.id, nom: student.full_name, sexe: '—', cours: student.school_class_name || student.specialization_name || '—', statut: student.status, moyenne: 0, presences: 0, solde: Number(invoice ? invoice.balance_due : 0), nouvelInscrit: false }; });
           coursCEJEC = courses.map(course => course.name); coursStats = courses.map(courseStat);
-          employesRH = reportList(teachersData).map(teacher => ({ nom: teacher.full_name, fonction: 'Professeur', presences: 0, absences: 0, conges: 0, salaire: 0 }));
+          hrReport = hrData.employees || [];
+          employesRH = hrReport.map(employee => ({ nom: employee.name, fonction: employee.job_title, presences: employee.present_days, absences: employee.absent_days, conges: Number(employee.leave_days), salaire: Number(employee.monthly_salary) }));
           const internships = reportList(internshipsData);
           partenaires = reportList(companiesData).map(company => ({ nom: company.name, type: company.sector || '—', contrats: 0, stages: internships.filter(internship => internship.company === company.id).length }));
           evenements = reportList(eventsData).map(event => ({ nom: event.title || event.name || '—', date: (event.calendar_metadata?.dateDebut) || (event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : (event.created_at ? new Date(event.created_at).toLocaleDateString('fr-FR') : '—')), participants: event.confirmed_participants_count || 0, cout: 0, retombees: event.status }));
           renderPage(currentPage);
-        } catch (error) { showToast('Chargement des rapports impossible : ' + error.message, 'error'); }
+        } catch (error) {
+          // Un rapport indisponible ne doit jamais afficher les chiffres de démonstration.
+          etudiantsListe = []; coursCEJEC = []; coursStats = []; partenaires = [];
+          evenements = []; employesRH = []; invoices = []; payments = []; hrReport = [];
+          renderPage(currentPage);
+          showToast('Chargement des rapports impossible : ' + error.message, 'error');
+        }
       }
 
       // ----- TOAST SYSTEM -----
@@ -148,11 +158,12 @@
           rows: acadRows
         });
         // Section 2: Financier
-        const revenusMensuels = [185000, 220000, 250000, 280000, 300000, 285000];
-        const depensesMensuels = [120000, 140000, 155000, 170000, 180000, 175000];
-        const mois = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février'];
+        const series = financialSeries();
+        const revenusMensuels = series.revenus;
+        const depensesMensuels = series.depenses;
+        const mois = series.labels;
         const finRows = revenusMensuels.map((r, i) => [
-          mois[i] + ' 2025', r.toLocaleString() + ' HTG', depensesMensuels[i].toLocaleString() + ' HTG',
+          mois[i], r.toLocaleString() + ' HTG', depensesMensuels[i].toLocaleString() + ' HTG',
           (r - depensesMensuels[i]).toLocaleString() + ' HTG', Math.round((r - depensesMensuels[i]) / r * 100) + '%'
         ]);
         sections.push({
@@ -387,10 +398,10 @@
           <tr><td class="emp-name">${e.nom}</td><td>${e.fonction}</td><td><span class="pill pill-success">${e.presences}j</span></td><td><span class="pill ${e.absences>0?'pill-danger':'pill-muted'}">${e.absences}j</span></td><td><span class="pill pill-info">${e.conges}j</span></td><td>${e.salaire.toLocaleString()} HTG</td></tr>`).join('');
         return `
           <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
-            <div class="stat-card"><div class="stat-info"><span>Personnel total</span><h2>38</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-users"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Professeurs</span><h2>12</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-chalkboard-teacher"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Présents</span><h2>35</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Masse salariale</span><h2>950K</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-money-bill-wave"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Personnel total</span><h2>${employesRH.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-users"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Professeurs</span><h2>${employesRH.filter(e => /professeur/i.test(e.fonction)).length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-chalkboard-teacher"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Présents</span><h2>${employesRH.reduce((total, employee) => total + employee.presences, 0)}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Masse salariale</span><h2>${(employesRH.reduce((total, employee) => total + employee.salaire, 0) / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-money-bill-wave"></i></div></div>
           </div>
           <div class="card">
             <div class="card-header"><h2><i class="fas fa-users"></i> Rapport RH</h2><div class="btn-group">
