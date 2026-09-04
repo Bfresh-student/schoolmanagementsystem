@@ -567,13 +567,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                         });
                     };
                     
-                    updateKpiByTitle('tudiants', data.students_count); // matches Étudiants or étudiants
+                    updateKpiByTitle('tudiants', data.students_count); // matches étudiants or étudiants
                     updateKpiByTitle('promotions', data.students_count);
                     updateKpiByTitle('professeurs', data.teachers_count);
                     updateKpiByTitle('cours', data.courses_count);
                     updateKpiByTitle('revenus', Number(data.revenue).toLocaleString('fr-FR') + ' $');
-                    updateKpiByTitle('taux de réussite', data.success_rate + '%');
-                    updateKpiByTitle('diplômes', data.diplomas_delivered);
+                    updateKpiByTitle('ussite', data.success_rate + '%'); // Taux de réussite
+                    updateKpiByTitle('dipl', data.diplomas_delivered); // Diplômes
+                    updateKpiByTitle('projets', data.projects_count);
+                    updateKpiByTitle('actualit', data.articles_count); // Publications & Actualités
+                    
+                    if (data.success_rate_history) createSparkline('spark-6', data.success_rate_history, '#10b981');
+                    if (data.projects_history) createSparkline('spark-8', data.projects_history, '#10b981');
+                    if (data.articles_history) createSparkline('spark-9', data.articles_history, '#d62828'); // Publications & Actualités
                 } catch (e) {
                     console.warn('Impossible de charger les stats:', e);
                 }
