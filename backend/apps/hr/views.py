@@ -16,6 +16,7 @@ from apps.hr.models import (
     AuditEntityType,
     AuditLog,
     Candidate,
+    CandidateDocument,
     Contract,
     Employee,
     EmployeeStatus,
@@ -27,10 +28,17 @@ from apps.hr.models import (
     PerformanceEvaluation,
     Salary,
 )
-from apps.hr.permissions import HR_STAFF_ROLES, IsHRStaff, IsHRStaffOrOwnerReadOnly
+from apps.hr.permissions import (
+    HR_STAFF_ROLES,
+    IsHRStaff,
+    IsHRStaffOrOwnerReadOnly,
+    _is_hr_staff,
+    _role_name,
+)
 from apps.hr.serializers import (
     AuditLogSerializer,
     CandidateSerializer,
+    CandidateDocumentSerializer,
     ContractSerializer,
     EmployeeAttendanceSerializer,
     EmployeeSerializer,
@@ -103,13 +111,6 @@ def _sync_teacher_account(employee: Employee):
         teacher.save(update_fields=["hire_date", "status", "monthly_salary", "updated_at"])
 
 
-def _role_name(user):
-    role = getattr(user, "role", None)
-    if isinstance(role, str):
-        return role.lower()
-    return getattr(role, "name", "").lower()
-
-
 class AuditLogMixin:
     """
     Journalise automatiquement create/update/delete dans AUDIT_LOG.
@@ -165,7 +166,7 @@ class TeacherScopedQuerysetMixin:
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
-        if _role_name(user) in HR_STAFF_ROLES:
+        if _is_hr_staff(user):
             return qs
         return qs.filter(employee__user_id=user.id)
 
@@ -285,6 +286,18 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
         candidate.status = "rejected"
         candidate.save(update_fields=["status", "updated_at"])
         return Response(CandidateSerializer(candidate).data)
+
+
+class CandidateDocumentViewSet(AuditLogMixin, viewsets.ModelViewSet):
+    queryset = CandidateDocument.objects.select_related("candidate").all()
+    serializer_class = CandidateDocumentSerializer
+    permission_classes = [IsHRStaff]
+    audit_entity_type = AuditEntityType.CANDIDATE
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        candidate_id = self.request.query_params.get("candidate")
+        return queryset.filter(candidate_id=candidate_id) if candidate_id else queryset
 
 
 class EmployeeAttendanceViewSet(AuditLogMixin, viewsets.ModelViewSet):

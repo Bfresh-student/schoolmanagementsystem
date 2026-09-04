@@ -4,6 +4,7 @@ from django.forms.models import model_to_dict
 from apps.hr.models import (
     AuditLog,
     Candidate,
+    CandidateDocument,
     Contract,
     Employee,
     EmployeeAttendance,
@@ -28,10 +29,25 @@ class EmployeeSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class CandidateDocumentSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        uploaded = validated_data.get("file")
+        if uploaded and not validated_data.get("filename"):
+            validated_data["filename"] = uploaded.name
+        return super().create(validated_data)
+
+    class Meta:
+        model = CandidateDocument
+        fields = ["id", "candidate", "document_type", "filename", "file", "created_at"]
+        read_only_fields = ["created_at"]
+
+
 class CandidateSerializer(serializers.ModelSerializer):
+    documents = CandidateDocumentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Candidate
-        fields = ["id", "first_name", "last_name", "phone", "email", "position", "application_date", "status", "interview_date", "interview_time", "interviewer", "notes", "cv_file", "created_at", "updated_at"]
+        fields = ["id", "first_name", "last_name", "phone", "email", "position", "application_date", "status", "interview_date", "interview_time", "interviewer", "notes", "cv_file", "documents", "created_at", "updated_at"]
 
 
 class EmployeeAttendanceSerializer(serializers.ModelSerializer):

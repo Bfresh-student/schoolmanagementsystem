@@ -146,7 +146,9 @@
                 heureEntretien: c.interview_time ? String(c.interview_time).slice(0, 5) : '',
                 interviewer: c.interviewer || '',
                 notes: c.notes || '',
-                cvFileName: c.cv_file ? String(c.cv_file).split('/').pop() : ''
+                cvFileName: c.cv_file ? String(c.cv_file).split('/').pop() : '',
+                cvFileUrl: c.cv_file || '',
+                documents: Array.isArray(c.documents) ? c.documents : []
             };
         }
 
@@ -214,6 +216,18 @@
             if (input) input.value = '';
             window._tempCVFile = null;
             window._tempCVFileName = '';
+            window._tempCandidateDocuments = [];
+            const additionalInput = document.getElementById('candDocumentsInput');
+            const additionalName = document.getElementById('candDocumentsFileName');
+            if (additionalInput) additionalInput.value = '';
+            if (additionalName) additionalName.textContent = '';
+        }
+
+        function handleCandidateDocuments(input) {
+            const files = Array.from(input.files || []);
+            window._tempCandidateDocuments = files;
+            const display = document.getElementById('candDocumentsFileName');
+            if (display) display.textContent = files.length ? `${files.length} pièce(s) sélectionnée(s)` : '';
         }
 
         // ==================== PREVIEW PDF (VÈSYON KORIJE) ====================
@@ -1576,6 +1590,10 @@ async function generatePreviewPDF(docName) {
                 <div class="detail-item"><div class="d-label">Date</div><div class="d-value">${c.dateCandidature}</div></div>
                 ${c.dateEntretien?`<div class="detail-item"><div class="d-label">Entretien</div><div class="d-value">${c.dateEntretien} à ${c.heureEntretien}</div></div>`:''}
                 ${c.interviewer?`<div class="detail-item"><div class="d-label">Intervieweur</div><div class="d-value">${c.interviewer}</div></div>`:''}
+                <div class="detail-item" style="grid-column:1/-1"><div class="d-label">Documents du postulant</div><div class="d-value">${[
+                    c.cvFileUrl ? `<a href="${c.cvFileUrl}" target="_blank" rel="noopener"><i class="fas fa-file"></i> ${c.cvFileName || 'CV'}</a>` : '',
+                    ...(c.documents || []).map(doc => `<a href="${doc.file}" target="_blank" rel="noopener" style="margin-left:12px"><i class="fas fa-paperclip"></i> ${doc.filename}</a>`)
+                ].filter(Boolean).join('') || 'Aucun document'}</div></div>
                 <div class="detail-item" style="grid-column:1/-1"><div class="d-label">Notes</div><div class="d-value">${c.notes||'Aucune'}</div></div>
             </div>`;
             openModal('detailsCandidatModal');
@@ -1620,12 +1638,22 @@ async function generatePreviewPDF(docName) {
             if (window._tempCVFile) formData.append('cv_file', window._tempCVFile);
 
             try {
+                let savedCandidate;
                 if (existing?._apiId) {
-                    await HRAPI.updateCandidate(existing._apiId, formData);
+                    savedCandidate = await HRAPI.updateCandidate(existing._apiId, formData);
                     showToast(`✅ ${p} ${n} modifié`, 'success');
                 } else {
-                    await HRAPI.createCandidate(formData);
+                    savedCandidate = await HRAPI.createCandidate(formData);
                     showToast(`✅ ${p} ${n} ajouté au recrutement`, 'success');
+                }
+                const candidateId = savedCandidate.id || existing?._apiId;
+                for (const file of window._tempCandidateDocuments || []) {
+                    const documentForm = new FormData();
+                    documentForm.append('candidate', candidateId);
+                    documentForm.append('document_type', 'other');
+                    documentForm.append('filename', file.name);
+                    documentForm.append('file', file);
+                    await HRAPI.createCandidateDocument(documentForm);
                 }
                 editingCandidatIndex = null;
                 closeModal('addCandidatModal');
@@ -1633,36 +1661,8 @@ async function generatePreviewPDF(docName) {
                 await Promise.all([syncAllEmployees(), loadAndRenderRecrutement()]);
                 updateBadges();
             } catch (err) {
-                console.warn('[RH] API saveCandidat non disponible, sauvegarde locale:', err);
-                const localCand = {
-                    _apiId: existing?._apiId || null,
-                    prenom: p,
-                    nom: n,
-                    tel: telVal,
-                    email: emailVal,
-                    poste: posteVal,
-                    cv: window._tempCVFile ? 'Reçu' : 'En attente',
-                    statut: existing ? existing.statut : 'En attente',
-                    dateCandidature: new Date(applicationDate).toLocaleDateString('fr-FR'),
-                    dateEntretien: '',
-                    heureEntretien: '',
-                    interviewer: '',
-                    notes: notesVal,
-                    cvFileName: window._tempCVFile ? window._tempCVFile.name : ''
-                };
-                if (editingCandidatIndex !== null) {
-                    candidatsData[editingCandidatIndex] = localCand;
-                } else {
-                    candidatsData.unshift(localCand);
-                }
-                editingCandidatIndex = null;
-                closeModal('addCandidatModal');
-                resetCVUpload();
-                await syncAllEmployees();
-                updateBadges();
-                if (currentPage === 'recrutement') await loadAndRenderRecrutement();
-                else renderPage(currentPage);
-                showToast(`✅ ${p} ${n} enregistré`, 'success');
+                console.error('[RH] Enregistrement du candidat ou de ses documents échoué:', err);
+                showToast('❌ Enregistrement impossible : aucun document n’a été conservé localement.', 'error');
             }
         }
 

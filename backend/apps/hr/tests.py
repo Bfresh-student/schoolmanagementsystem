@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -17,6 +18,8 @@ from apps.hr.models import (
     Currency,
     Employee,
     EmployeeStatus,
+    Candidate,
+    CandidateDocument,
     Leave,
     LeaveStatus,
     LeaveType,
@@ -92,6 +95,29 @@ class EmployeeAndAttendanceAPITests(TestCase):
         }, format="json")
         self.assertEqual(response.status_code, 201, response.data)
         self.assertEqual(employee.attendances.count(), 1)
+
+    def test_recruitment_documents_are_persisted_and_linked_to_candidate(self):
+        candidate_response = self.client.post("/api/v1/hr/candidates/", {
+            "first_name": "Marie", "last_name": "Candidate",
+            "email": "marie.candidate@ecole.ht", "position": "Secrétaire",
+            "cv_file": SimpleUploadedFile("cv.pdf", b"cv content", content_type="application/pdf"),
+        }, format="multipart")
+        self.assertEqual(candidate_response.status_code, 201, candidate_response.data)
+        candidate_id = candidate_response.data["id"]
+
+        document_response = self.client.post("/api/v1/hr/candidate-documents/", {
+            "candidate": candidate_id,
+            "document_type": "diploma",
+            "filename": "diplome.pdf",
+            "file": SimpleUploadedFile("diplome.pdf", b"diploma content", content_type="application/pdf"),
+        }, format="multipart")
+        self.assertEqual(document_response.status_code, 201, document_response.data)
+        self.assertTrue(CandidateDocument.objects.filter(candidate_id=candidate_id, filename="diplome.pdf").exists())
+
+        detail = self.client.get(f"/api/v1/hr/candidates/{candidate_id}/")
+        self.assertEqual(detail.status_code, 200, detail.data)
+        self.assertEqual(len(detail.data["documents"]), 1)
+        self.assertTrue(detail.data["cv_file"].endswith("cv.pdf"))
 
 
 class ContractTests(HRBaseTestCase):

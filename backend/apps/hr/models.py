@@ -186,6 +186,22 @@ class Candidate(models.Model):
         return f"{self.first_name} {self.last_name} — {self.position}"
 
 
+class CandidateDocument(models.Model):
+    """Pièce déposée dans le dossier d'un postulant avant son embauche."""
+
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name="documents")
+    document_type = models.CharField(max_length=20, choices=HRDocumentType.choices, default=HRDocumentType.OTHER)
+    filename = models.CharField(max_length=255)
+    file = models.FileField(upload_to="hr/candidates/documents/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.filename} — {self.candidate}"
+
+
 class AttendanceStatus(models.TextChoices):
     PRESENT = "present", "Présent"
     LATE = "late", "Retard"
