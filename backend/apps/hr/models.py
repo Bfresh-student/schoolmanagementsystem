@@ -445,6 +445,7 @@ class HRDocument(models.Model):
     document_type = models.CharField(max_length=20, choices=HRDocumentType.choices)
     filename = models.CharField(max_length=255)
     file = models.FileField(upload_to="hr/documents/")
+    description = models.TextField(blank=True)
     expiry_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=HRDocumentStatus.choices, default=HRDocumentStatus.PENDING

@@ -275,7 +275,13 @@ async function apiFetchMultipart(path, formData, method = 'POST') {
     } catch (networkErr) {
         const err = new Error('NETWORK_ERROR'); err.cause = networkErr; throw err;
     }
-    if (response.status === 401) { redirectToLogin(); throw new Error('UNAUTHORIZED'); }
+    if (response.status === 401) {
+        // Les téléversements suivent la même politique de session que les
+        // requêtes JSON : renouveler l'access token une seule fois.
+        if (await tryRefreshToken()) return apiFetchMultipart(path, formData, method);
+        redirectToLogin();
+        throw new Error('UNAUTHORIZED');
+    }
     if (!response.ok) {
         let detail = null;
         try { detail = await response.json(); } catch (_) {}
@@ -385,7 +391,7 @@ const InscriptionsAPI = {
     async get(id) {
         return apiClientRequest(`/enrollments/inscriptions/${id}/`);
     },
-    async create({ student, school_class, requested_at, created_offline = false, local_uuid = null }) {
+    async create({ student, school_class, promotion = '', requested_at, created_offline = false, local_uuid = null }) {
         // 🔧 FIX #1 — bug principal du CRUD cassé.
         // InscriptionCreateSerializer déclare :
         //   local_uuid = serializers.UUIDField(required=False)
@@ -395,7 +401,7 @@ const InscriptionsAPI = {
         // une erreur 400 { "local_uuid": ["This field may not be null."] }.
         // On construit maintenant le body sans la clé du tout quand il n'y
         // a pas de local_uuid réel à envoyer.
-        const body = { student, school_class, requested_at, created_offline };
+        const body = { student, school_class, promotion, requested_at, created_offline };
         if (local_uuid) body.local_uuid = local_uuid;
         return apiClientRequest('/enrollments/inscriptions/', { method: 'POST', body });
     },

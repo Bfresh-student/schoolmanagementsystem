@@ -54,4 +54,9 @@ async function runTests() {
   console.log("Token after signUp?", !!localStorage.getItem("authToken"));
 }
 
-runTests().catch(err => console.error("Test error:", err));
+runTests()
+  .then(() => process.exit(0))
+  .catch(err => {
+    console.error("Test error:", err);
+    process.exit(1);
+  });

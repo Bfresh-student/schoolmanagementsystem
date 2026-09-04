@@ -105,15 +105,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
         try:
-            payment = PaymentService.record_manual(
-                invoice=data["invoice"],
-                payment_method=data["payment_method"],
-                amount=data["amount"],
-                user=request.user,
-            )
+            # Le serializer délègue au service métier et transmet aussi la
+            # référence et la date de la transaction.
+            payment = serializer.save()
         except PaymentError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -129,4 +124,3 @@ class PaymentViewSet(viewsets.ModelViewSet):
         except PaymentError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(PaymentSerializer(payment).data)
-

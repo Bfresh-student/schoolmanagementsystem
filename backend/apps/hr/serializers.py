@@ -124,8 +124,19 @@ class PerformanceEvaluationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["employee_acknowledged", "evaluator"]
 
+    def validate(self, attrs):
+        """Validate a complete period on both POST and PATCH."""
+        start = attrs.get("evaluation_period_start", getattr(self.instance, "evaluation_period_start", None))
+        end = attrs.get("evaluation_period_end", getattr(self.instance, "evaluation_period_end", None))
+        if start and end and end < start:
+            raise serializers.ValidationError(
+                {"evaluation_period_end": "La fin de période ne peut pas précéder son début."}
+            )
+        return attrs
+
 
 class HRDocumentSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source="employee.__str__", read_only=True)
     def create(self, validated_data):
         uploaded = validated_data.get('file')
         if uploaded and not validated_data.get('filename'):
@@ -135,7 +146,7 @@ class HRDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = HRDocument
         fields = [
-            "id", "employee", "document_type", "filename", "file",
+            "id", "employee", "employee_name", "document_type", "filename", "file", "description",
             "expiry_date", "status", "created_at",
         ]
         read_only_fields = ["status"]

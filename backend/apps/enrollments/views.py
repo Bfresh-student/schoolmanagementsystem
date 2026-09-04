@@ -235,6 +235,7 @@ class PreInscriptionViewSet(viewsets.ModelViewSet):
                         inscription = Inscription.objects.create(
                             student=student,
                             school_class=school_class,
+                            promotion=pre.promotion,
                             status=InscriptionStatus.APPROVED,
                             approved_by=request.user if request.user.is_authenticated else None,
                         )

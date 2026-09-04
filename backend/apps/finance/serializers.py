@@ -46,7 +46,14 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
         puisque le staff saisit le paiement en personne, en une fois.
     """
 
-    reference = serializers.CharField(source="gateway_reference", required=False, allow_blank=True)
+    reference = serializers.CharField(
+        source="gateway_reference",
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True,
+        max_length=255,
+        error_messages={"required": "La référence de transaction est obligatoire.", "blank": "La référence de transaction est obligatoire."},
+    )
     payment_date = serializers.DateField(required=False, write_only=True)
 
     class Meta:

@@ -83,6 +83,9 @@ class Inscription(models.Model):
         blank=True,
         help_text="Classe dans laquelle l'étudiant s'inscrit. Remplace le champ 'course' au niveau macro.",
     )
+    # Cohorte / promotion suivie. Une même classe peut accueillir des
+    # promotions différentes au fil des années sans écraser l'historique.
+    promotion = models.CharField(max_length=100, blank=True, db_index=True)
 
     # --- État ---
     status = models.CharField(
@@ -277,4 +280,3 @@ class PreInscription(models.Model):
 
     def __str__(self):
         return f"{self.reference} — {self.prenom} {self.nom}"
-

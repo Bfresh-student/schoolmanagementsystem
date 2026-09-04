@@ -32,6 +32,8 @@ class EmergencyContactSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=150)
     relationship = serializers.CharField(max_length=50, required=False, allow_blank=True)
     phone = serializers.CharField(max_length=30)
+    profession = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    address = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
 
 class StudentSerializer(serializers.ModelSerializer):

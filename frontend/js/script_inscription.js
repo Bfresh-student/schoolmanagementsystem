@@ -110,7 +110,7 @@ const STATUT_UI_VERS_TRANSITION = {
 };
 
 // ==========================================
-// CHARGEMENT DES DONNÉES (API réelle avec repli mock)
+// CHARGEMENT DES DONNÉES (API réelle ; aucun dossier fictif en production)
 // ==========================================
 async function chargerDonnees() {
   const [inscriptionsR, classesR, preInscripR] = await Promise.allSettled([
@@ -141,18 +141,16 @@ async function chargerDonnees() {
     await enrichirDetailsEtudiants(etudiants);
     paiements = await chargerPaiementsAPI();
   } else {
-    console.warn("Utilisation des données locales - API non prête");
+    console.error("API d'inscription indisponible : aucune donnée fictive n'est affichée.");
     API_DISPONIBLE = false;
-    etudiants = MOCK_ETUDIANTS.map((e) => ({ ...e }));
-    paiements = MOCK_PAIEMENTS.map((p) => ({ ...p }));
+    etudiants = [];
+    paiements = [];
   }
 
   classesDisponibles =
     classesR.status === "fulfilled" && classesR.value?.length
       ? classesR.value
-      : [
-          { id: 1, name: "Entrepreneuriat 1", specialization_name: "Entrepreneuriat", tuition_fee: 50000 },
-        ];
+      : [];
 
   // Fusionne la file d'attente hors-ligne locale
   OfflineQueue.read().forEach((item) => {
@@ -210,7 +208,7 @@ async function enrichirDetailsEtudiants(list) {
     if (contact) {
       e.parentNom = contact.name || e.parentNom;
       e.parentTel = contact.phone || e.parentTel;
-      e.parentProfession = contact.profession || e.parentProfession;
+      e.parentProfession = contact.profession || contact.relationship || e.parentProfession;
       e.parentAdresse = contact.address || e.parentAdresse;
     }
   });
@@ -245,7 +243,7 @@ function mapInscriptionToEtudiant(insc) {
     parentAdresse: "",
     classe: insc.class_name || insc.course_name || "",
     filiere: insc.specialization_name || "",
-    promo: insc.academic_year ? `Promotion ${insc.academic_year}` : "Promotion 2026",
+    promo: insc.promotion || "",
     statut: STATUT_API_VERS_UI[insc.status] || "Pré-inscrit",
     statutApi: insc.status,
     dateInscription: (insc.requested_at || insc.created_at || "").slice(0, 10),
@@ -1129,7 +1127,9 @@ async function saveInscription() {
       emergency_contacts: document.getElementById("parentNom").value.trim() || document.getElementById("parentTel").value.trim()
         ? [{
             name: document.getElementById("parentNom").value.trim() || "Contact d'urgence",
-            relationship: document.getElementById("parentProfession").value.trim(),
+            relationship: "Responsable",
+            profession: document.getElementById("parentProfession").value.trim(),
+            address: document.getElementById("parentAdresse").value.trim(),
             phone: document.getElementById("parentTel").value.trim() || tel,
           }]
         : [],
@@ -1139,6 +1139,7 @@ async function saveInscription() {
     await InscriptionsAPI.create({
       student: studentId,
       school_class: classeId,
+      promotion: document.getElementById("promotion").value.trim(),
       requested_at: requestedAt,
       created_offline: false,
     });
@@ -1206,6 +1207,7 @@ async function validerPaiement() {
   const observation = document.getElementById("observation").value;
 
   if (montant <= 0) { showToast("Veuillez entrer un montant valide", "error"); return; }
+  if (!ref.trim()) { showToast("La référence de transaction est obligatoire", "error"); return; }
 
   const etudiant = etudiants.find((e) => String(e.id) === String(etudiantId));
   if (!etudiant) { console.error("Impossible de trouver l'étudiant avec l'ID", etudiantId); return; }
