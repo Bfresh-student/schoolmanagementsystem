@@ -172,39 +172,127 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
     };
 
+    const getTypeBadgeStyle = (type) => {
+        switch ((type || "").toLowerCase()) {
+            case "étudiant": return "background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe";
+            case "professeur": return "background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe";
+            case "employé": return "background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0";
+            case "candidat": return "background:#fff7ed;color:#ea580c;border:1px solid #fed7aa";
+            case "article": return "background:#fdf2f8;color:#db2777;border:1px solid #fbcfe8";
+            case "formation": return "background:#ecfeff;color:#0891b2;border:1px solid #a5f3fc";
+            case "événement": return "background:#fefce8;color:#ca8a04;border:1px solid #fef08a";
+            default: return "background:#f1f5f9;color:#475569;border:1px solid #e2e8f0";
+        }
+    };
+
+    const highlightMatch = (text, query) => {
+        if (!text) return "";
+        if (!query) return escapeHtml(text);
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`(${escaped})`, "gi");
+        return escapeHtml(text).replace(regex, "<mark style=\"background:#fef08a;color:#854d0e;border-radius:2px;padding:0 2px\">$1</mark>");
+    };
+
+    const escapeHtml = (str) => {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    };
+
     document.querySelectorAll(".header-center .input-group").forEach((group) => {
         const input = group.querySelector("input");
         const button = group.querySelector(".btn-search");
         if (!input || input.dataset.globalSearchBound) return;
         input.dataset.globalSearchBound = "true";
         group.style.position = "relative";
+
         const results = document.createElement("div");
         results.setAttribute("role", "listbox");
-        results.style.cssText = "display:none;position:absolute;z-index:3000;top:calc(100% + 6px);left:0;right:0;max-height:320px;overflow:auto;background:#fff;border:1px solid #dbe4ee;border-radius:10px;box-shadow:0 12px 28px rgba(15,23,42,.18);padding:6px";
+        results.style.cssText = "display:none;position:absolute;z-index:3000;top:calc(100% + 6px);left:0;right:0;max-height:380px;overflow-y:auto;background:#fff;border:1px solid #dbe4ee;border-radius:12px;box-shadow:0 16px 36px rgba(15,23,42,.18);padding:6px";
         group.append(results);
+
         let timer;
+        let selectedIndex = -1;
+
         const render = (items, query) => {
             results.replaceChildren();
+            selectedIndex = -1;
             if (!items.length) {
                 const empty = document.createElement("div");
-                empty.textContent = `Aucun résultat pour « ${query} »`;
-                empty.style.cssText = "padding:12px;color:#64748b;font-size:.9rem";
+                empty.innerHTML = `<i class="fas fa-search" style="margin-right:6px;color:#94a3b8"></i> Aucun résultat pour « <strong>${escapeHtml(query)}</strong> »`;
+                empty.style.cssText = "padding:14px;color:#64748b;font-size:.88rem;text-align:center";
                 results.append(empty);
+            } else {
+                const header = document.createElement("div");
+                header.innerHTML = `<span style="font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">Résultats (${items.length})</span>`;
+                header.style.cssText = "padding:6px 10px 4px;border-bottom:1px solid #f1f5f9;margin-bottom:4px";
+                results.append(header);
+
+                items.forEach((item, idx) => {
+                    const row = document.createElement("a");
+                    row.href = item.href ? (item.href.includes("?") ? item.href : item.href + "?search=" + encodeURIComponent(query)) : "#";
+                    row.className = "search-result-item";
+                    row.dataset.index = idx;
+                    row.style.cssText = "display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;text-decoration:none;color:#172033;transition:background .15s ease;cursor:pointer";
+
+                    const iconBox = document.createElement("div");
+                    const iconName = item.icon || "fa-circle-dot";
+                    iconBox.innerHTML = `<i class="fas ${iconName}"></i>`;
+                    iconBox.style.cssText = "width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;background:#f8fafc;color:#475569;flex-shrink:0";
+
+                    const infoBox = document.createElement("div");
+                    infoBox.style.cssText = "flex:1;min-width:0";
+
+                    const titleLine = document.createElement("div");
+                    titleLine.style.cssText = "display:flex;align-items:center;gap:8px;justify-content:space-between";
+
+                    const titleText = document.createElement("strong");
+                    titleText.style.cssText = "font-size:0.88rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+                    titleText.innerHTML = highlightMatch(item.title, query);
+
+                    const badge = document.createElement("span");
+                    badge.textContent = item.type;
+                    badge.style.cssText = `font-size:0.7rem;font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap;${getTypeBadgeStyle(item.type)}`;
+
+                    titleLine.append(titleText, badge);
+
+                    const detailText = document.createElement("span");
+                    detailText.innerHTML = highlightMatch(item.subtitle || "", query);
+                    detailText.style.cssText = "display:block;font-size:0.76rem;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+
+                    infoBox.append(titleLine, detailText);
+
+                    const arrow = document.createElement("div");
+                    arrow.innerHTML = `<i class="fas fa-arrow-right" style="font-size:0.75rem;color:#94a3b8"></i>`;
+
+                    row.append(iconBox, infoBox, arrow);
+
+                    row.addEventListener("mouseenter", () => {
+                        updateSelection(idx);
+                    });
+
+                    row.addEventListener("mouseleave", () => {
+                        row.style.background = "transparent";
+                    });
+
+                    results.append(row);
+                });
             }
-            items.forEach((item) => {
-                const row = document.createElement("a");
-                row.href = item.href + "?search=" + encodeURIComponent(query);
-                row.style.cssText = "display:block;padding:9px 10px;border-radius:7px;text-decoration:none;color:#172033";
-                const title = document.createElement("strong");
-                title.textContent = item.title;
-                const detail = document.createElement("span");
-                detail.textContent = `${item.type} · ${item.subtitle || ""}`;
-                detail.style.cssText = "display:block;font-size:.78rem;color:#64748b;margin-top:2px";
-                row.append(title, detail);
-                results.append(row);
-            });
             results.style.display = "block";
         };
+
+        const updateSelection = (idx) => {
+            const rows = results.querySelectorAll(".search-result-item");
+            rows.forEach((r, i) => {
+                if (i === idx) {
+                    r.style.background = "#f1f5f9";
+                    selectedIndex = i;
+                } else {
+                    r.style.background = "transparent";
+                }
+            });
+        };
+
         const search = async () => {
             const query = input.value.trim();
             if (query.length < 2) { results.style.display = "none"; return; }
@@ -216,8 +304,34 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Recherche globale impossible", error);
             }
         };
-        input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(search, 250); });
+
+        input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(search, 200); });
         button?.addEventListener("click", (event) => { event.preventDefault(); clearTimeout(timer); search(); });
+
+        input.addEventListener("keydown", (e) => {
+            const rows = results.querySelectorAll(".search-result-item");
+            if (!rows.length || results.style.display === "none") return;
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % rows.length;
+                updateSelection(selectedIndex);
+                rows[selectedIndex]?.scrollIntoView({ block: "nearest" });
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + rows.length) % rows.length;
+                updateSelection(selectedIndex);
+                rows[selectedIndex]?.scrollIntoView({ block: "nearest" });
+            } else if (e.key === "Enter") {
+                if (selectedIndex >= 0 && rows[selectedIndex]) {
+                    e.preventDefault();
+                    rows[selectedIndex].click();
+                }
+            } else if (e.key === "Escape") {
+                results.style.display = "none";
+            }
+        });
+
         document.addEventListener("click", (event) => { if (!group.contains(event.target)) results.style.display = "none"; });
     });
 });

@@ -1841,9 +1841,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!API_DISPONIBLE) {
     showToast("Backend non joignable : mode démo activé", "info");
   }
+
+  // Auto-open target student details if specified in URL
+  const params = new URLSearchParams(window.location.search);
+  const targetStudentId = params.get("studentId") || params.get("matricule");
+  if (targetStudentId) {
+    const student = etudiants.find(e => String(e.id) === String(targetStudentId) || String(e._apiId) === String(targetStudentId) || String(e.registrationNumber) === String(targetStudentId));
+    if (student) {
+      setTimeout(() => voirDetailsEtudiant(student.id), 150);
+    }
+  }
 });
-
-
-
-
-

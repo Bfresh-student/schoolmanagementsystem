@@ -137,6 +137,9 @@ const AuthAPI = {
     async updateMe(body) {
         return apiClientRequest('/auth/users/me/update/', { method: 'PATCH', body });
     },
+    async changePassword(body) {
+        return apiClientRequest('/auth/users/me/change-password/', { method: 'POST', body });
+    },
     async registerStudent({ first_name, last_name, phone = '', password }) {
         return apiClientRequest('/auth/users/register/', {
             method: 'POST',

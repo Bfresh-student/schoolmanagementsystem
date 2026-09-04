@@ -7,6 +7,35 @@ from apps.events.models import Event, EventReminderDispatch
 
 
 @shared_task
+def progress_event_lifecycle():
+    """Fait passer automatiquement un événement publié à en cours puis terminé."""
+    now = timezone.now()
+    started = Event.objects.filter(status="published", start_datetime__lte=now, end_datetime__gt=now)
+    completed = Event.objects.filter(status__in=("published", "ongoing"), end_datetime__lte=now)
+
+    def notify(events, trigger_type, priority):
+        count = 0
+        for event in events.select_related("creator"):
+            event.status = "ongoing" if trigger_type == "event_started" else "completed"
+            event.save(update_fields=["status", "updated_at"])
+            count += 1
+            if event.creator_id:
+                try:
+                    from apps.notifications.services import enqueue_notification
+                    enqueue_notification(
+                        recipient_id=event.creator_id,
+                        trigger_type=trigger_type,
+                        context={"event_name": event.name, "start_datetime": event.start_datetime.isoformat()},
+                        priority=priority,
+                    )
+                except Exception:
+                    pass
+        return count
+
+    return {"started": notify(started, "event_started", "normal"), "completed": notify(completed, "event_completed", "normal")}
+
+
+@shared_task
 def send_upcoming_event_reminders():
     """
     Tâche Celery beat (toutes les minutes) : dépose un rappel au moment

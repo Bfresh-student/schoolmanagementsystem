@@ -131,6 +131,18 @@ async function loadDataFromApi() {
         });
 
         renderDashboard();
+
+        // Check for URL query params (e.g. courseId or classId)
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetCourseId = urlParams.get('courseId');
+        const targetClassId = urlParams.get('classId') || urlParams.get('classeId');
+        if (targetClassId) {
+            const cls = classesData.find(c => String(c.id) === String(targetClassId));
+            if (cls) setTimeout(() => editClass(cls.id), 150);
+        } else if (targetCourseId) {
+            const cls = classesData.find(c => (c.coursProfesseurs || []).some(cp => String(cp.courseId) === String(targetCourseId)));
+            if (cls) setTimeout(() => editClass(cls.id), 150);
+        }
     } catch (err) {
         console.error("Error loading data from API", err);
         showToast("Erreur de chargement des données depuis l'API : " + err.message, "error");

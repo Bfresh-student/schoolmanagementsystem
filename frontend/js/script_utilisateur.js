@@ -2266,5 +2266,20 @@ async function initialize() {
     `📚 ${filieres.length} filières, ${classes.length} classes disponibles`,
   );
   console.log("💾 Sauvegarde automatique activée (30s)");
+
+  // 3. Auto-open target user if specified in URL
+  const params = new URLSearchParams(window.location.search);
+  const targetUserId = params.get("userId");
+  if (targetUserId) {
+    const isPersonnel = personnel.find(u => String(u.id) === String(targetUserId) || String(u.apiUserId) === String(targetUserId));
+    const isClient = clients.find(u => String(u.id) === String(targetUserId) || String(u.apiUserId) === String(targetUserId));
+    if (isPersonnel) {
+      switchMainTab("personnel");
+      setTimeout(() => openModal("edit", isPersonnel.id), 150);
+    } else if (isClient) {
+      switchMainTab("clients");
+      setTimeout(() => openModal("edit", isClient.id), 150);
+    }
+  }
 }
 initialize();

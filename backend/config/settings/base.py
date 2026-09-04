@@ -124,9 +124,18 @@ STORAGES = {
 }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+PUBLIC_SITE_URL = os.environ.get('PUBLIC_SITE_URL', 'https://cejec.edu.ht')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_BEAT_SCHEDULE = {
+    "media-center-publish-scheduled-articles": {
+        "task": "apps.media_center.tasks.publish_scheduled_articles",
+        "schedule": crontab(minute="*"),
+    },
+    "events-progress-lifecycle": {
+        "task": "apps.events.tasks.progress_event_lifecycle",
+        "schedule": crontab(minute="*"),
+    },
     "events-send-configured-reminders": {
         "task": "apps.events.tasks.send_upcoming_event_reminders",
         "schedule": crontab(minute="*"),

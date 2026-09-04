@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from apps.events.models import Event, EventParticipant, EventReminderDispatch
-from apps.events.tasks import send_upcoming_event_reminders
+from apps.events.tasks import progress_event_lifecycle, send_upcoming_event_reminders
 
 User = get_user_model()
 
@@ -74,3 +74,19 @@ class EventModelTests(TestCase):
         self.assertTrue(
             all(call.kwargs["trigger_type"] == "event_reminder" for call in enqueue.call_args_list)
         )
+
+    @patch("apps.notifications.services.enqueue_notification")
+    def test_event_lifecycle_is_progressed_and_notified(self, enqueue):
+        self.event.start_datetime = timezone.now() - timedelta(minutes=5)
+        self.event.end_datetime = timezone.now() + timedelta(minutes=5)
+        self.event.save()
+        progress_event_lifecycle()
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, "ongoing")
+        self.assertEqual(enqueue.call_args.kwargs["trigger_type"], "event_started")
+
+        self.event.end_datetime = timezone.now() - timedelta(minutes=1)
+        self.event.save()
+        progress_event_lifecycle()
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, "completed")

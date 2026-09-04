@@ -1061,7 +1061,25 @@
         updatePagination(startIndex + 1, endIndex, totalItems, totalPages);
     }
 
-    function initAudit() {
+    async function initAudit() {
+        try {
+            const response = await apiClientRequest('/notifications/notifications/?page_size=200');
+            const notifications = Array.isArray(response) ? response : (response.results || []);
+            auditData = notifications.map(notification => ({
+                id: notification.id,
+                timestamp: notification.created_at ? new Date(notification.created_at).toLocaleString('fr-FR') : '—',
+                user: 'Système CEJEC', role: 'Notification', roleDot: 'dot-admin',
+                category: 'Système', action: notification.title || 'Notification',
+                target: notification.content || '',
+                severity: notification.priority === 'urgent' || notification.priority === 'high' ? 'warning' : 'info'
+            }));
+        } catch (error) {
+            console.error('Chargement du journal de notifications impossible', error);
+            auditData = [];
+            showToast('⚠️ Journal indisponible : connexion serveur requise.', 'warning');
+        }
+        currentFilteredData = [...auditData];
+        currentPage = 1;
         updateStats(auditData);
         renderTable(auditData);
     }
@@ -1285,7 +1303,7 @@
         // Change password
         const btnChangePwd = document.getElementById('btn-change-pwd');
         if (btnChangePwd) {
-            btnChangePwd.addEventListener('click', function() {
+            btnChangePwd.addEventListener('click', async function() {
                 const currentPwd = document.getElementById('current-pwd')?.value || '';
                 const newPwd = document.getElementById('new-pwd')?.value || '';
                 const confirmPwd = document.getElementById('confirm-pwd')?.value || '';
@@ -1294,8 +1312,13 @@
                 if (newPwd.length < 8) { showToast('❌ 8 caractères minimum', 'error'); return; }
                 if (newPwd !== confirmPwd) { showToast('❌ Les mots de passe ne correspondent pas', 'error'); return; }
 
-                showToast('✅ Mot de passe changé !', 'success');
-                resetPasswordForm();
+                try {
+                    await AuthAPI.changePassword({ old_password: currentPwd, new_password: newPwd });
+                    showToast('✅ Mot de passe changé !', 'success');
+                    resetPasswordForm();
+                } catch (error) {
+                    showToast('❌ ' + (error.detail || 'Mot de passe non modifié.'), 'error');
+                }
             });
         }
 

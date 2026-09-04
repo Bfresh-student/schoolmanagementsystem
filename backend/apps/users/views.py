@@ -116,23 +116,44 @@ class UserViewSet(viewsets.ModelViewSet):
         setting.value = payload
         setting.updated_by = request.user
         setting.save(update_fields=["value", "updated_by", "updated_at"])
+        # Les interrupteurs de la page Paramètre pilotent aussi les canaux
+        # effectivement utilisés par la file de notifications.
+        preferences = payload.get("notifications", {})
+        if isinstance(preferences, dict):
+            try:
+                from apps.notifications.models import NotificationChannel
+                channel_values = {
+                    "email": preferences.get("notif-email"),
+                    "sms": preferences.get("notif-sms"),
+                    "in_app": preferences.get("notif-system"),
+                }
+                for name, enabled in channel_values.items():
+                    if enabled is not None:
+                        NotificationChannel.objects.update_or_create(
+                            name=name, defaults={"is_active": bool(enabled)}
+                        )
+            except ImportError:
+                pass
         return Response({"settings": setting.value, "updated_at": setting.updated_at})
 
     @action(detail=False, methods=['get'], url_path='global-search', permission_classes=[IsAdministrator])
     def global_search(self, request):
-        """Recherche unifiée, limitée aux données visibles par l'administration."""
+        """Recherche unifiée, limitée aux données visibles par l'administration avec liens directs."""
         query = (request.query_params.get("q") or "").strip()
         if len(query) < 2:
             return Response({"results": []})
 
         from apps.courses.models import Course
         from apps.events.models import Event
-        from apps.hr.models import Employee
+        from apps.hr.models import Employee, Candidate
         from apps.students.models import Student
         from apps.teachers.models import Teacher
+        from apps.media_center.models import Article
 
         limit = 5
         results = []
+
+        # 1. Étudiants
         students = Student.objects.select_related("user").filter(
             Q(user__first_name__icontains=query)
             | Q(user__last_name__icontains=query)
@@ -140,12 +161,15 @@ class UserViewSet(viewsets.ModelViewSet):
             | Q(registration_number__icontains=query)
         )[:limit]
         results.extend({
-            "type": "Étudiant", "id": student.id,
+            "type": "Étudiant",
+            "id": str(student.id),
             "title": student.user.get_full_name() or student.user.email,
-            "subtitle": student.registration_number,
-            "href": "gestion_inscriptions.html",
+            "subtitle": f"Matricule: {student.registration_number}",
+            "href": f"gestion_inscriptions.html?studentId={student.id}",
+            "icon": "fa-user-graduate",
         } for student in students)
 
+        # 2. Professeurs
         teachers = Teacher.objects.select_related("user").filter(
             Q(user__first_name__icontains=query)
             | Q(user__last_name__icontains=query)
@@ -153,12 +177,15 @@ class UserViewSet(viewsets.ModelViewSet):
             | Q(teacher_id__icontains=query)
         )[:limit]
         results.extend({
-            "type": "Professeur", "id": str(teacher.id),
+            "type": "Professeur",
+            "id": str(teacher.id),
             "title": teacher.full_name or teacher.email,
-            "subtitle": teacher.teacher_id,
-            "href": "rh.html",
+            "subtitle": f"ID: {teacher.teacher_id or teacher.id}",
+            "href": f"rh.html?teacherId={teacher.id}",
+            "icon": "fa-chalkboard-teacher",
         } for teacher in teachers)
 
+        # 3. Employés RH
         employees = Employee.objects.filter(
             Q(first_name__icontains=query)
             | Q(last_name__icontains=query)
@@ -167,32 +194,88 @@ class UserViewSet(viewsets.ModelViewSet):
             | Q(job_title__icontains=query)
         )[:limit]
         results.extend({
-            "type": "Employé", "id": employee.id,
+            "type": "Employé",
+            "id": str(employee.id),
             "title": f"{employee.first_name} {employee.last_name}",
             "subtitle": f"{employee.employee_number} · {employee.job_title}",
-            "href": "rh.html",
+            "href": f"rh.html?empId={employee.id}",
+            "icon": "fa-id-badge",
         } for employee in employees)
 
+        # 4. Candidats RH
+        candidates = Candidate.objects.filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+            | Q(position__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Candidat",
+            "id": str(candidate.id),
+            "title": f"{candidate.first_name} {candidate.last_name}",
+            "subtitle": f"Poste: {candidate.position} · {candidate.status}",
+            "href": f"rh.html?candidatId={candidate.id}",
+            "icon": "fa-user-tie",
+        } for candidate in candidates)
+
+        # 5. Articles de blog & Médias
+        articles = Article.objects.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(category__icontains=query)
+            | Q(tags__name__icontains=query)
+        ).distinct()[:limit]
+        results.extend({
+            "type": "Article",
+            "id": str(article.id),
+            "title": article.title,
+            "subtitle": f"{article.category or 'Blog'} · {article.status}",
+            "href": f"gestion_medias.html?articleId={article.id}",
+            "icon": "fa-newspaper",
+        } for article in articles)
+
+        # 6. Formations / Cours
         courses = Course.objects.filter(
             Q(name__icontains=query) | Q(code__icontains=query)
         )[:limit]
         results.extend({
-            "type": "Formation", "id": str(course.id),
+            "type": "Formation",
+            "id": str(course.id),
             "title": course.name,
             "subtitle": course.code,
-            "href": "gestion_classes.html",
+            "href": f"gestion_classes.html?courseId={course.id}",
+            "icon": "fa-book",
         } for course in courses)
 
+        # 7. Événements
         events = Event.objects.filter(
             Q(name__icontains=query) | Q(location__icontains=query)
         )[:limit]
         results.extend({
-            "type": "Événement", "id": str(event.id),
+            "type": "Événement",
+            "id": str(event.id),
             "title": event.name,
-            "subtitle": event.location or event.start_datetime.strftime("%d/%m/%Y %H:%M"),
-            "href": "incubateur_calendrier.html",
+            "subtitle": event.location or (event.start_datetime.strftime("%d/%m/%Y %H:%M") if event.start_datetime else ""),
+            "href": f"incubateur_calendrier.html?eventId={event.id}",
+            "icon": "fa-calendar-alt",
         } for event in events)
-        return Response({"results": results[:25]})
+
+        # 8. Utilisateurs / Comptes
+        users = User.objects.filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Utilisateur",
+            "id": str(user.id),
+            "title": user.get_full_name() or user.email,
+            "subtitle": f"{user.role} · {user.email}",
+            "href": f"gestion_utilisateurs.html?userId={user.id}",
+            "icon": "fa-user-circle",
+        } for user in users)
+
+        return Response({"results": results[:30]})
     
     @action(detail=False, methods=['post'])
     def register(self, request):

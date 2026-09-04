@@ -1,8 +1,12 @@
 import pytest
+from datetime import timedelta
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from apps.users.models import User
 from apps.media_center.models import MediaAsset, MediaType
+from apps.media_center.models import Article
+from apps.media_center.tasks import publish_scheduled_articles
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -40,6 +44,7 @@ class TestMediaCenterAPI:
         assert response.status_code == 201, response.data
         article_id = response.data["id"]
         assert len(response.data["gallery"]) == 1
+        assert response.data["share_url"] == "https://cejec.edu.ht/blog/article-avec-galerie"
 
         view = self.client.post(f"/api/v1/media-center/articles/{article_id}/increment_view/")
         share = self.client.post(f"/api/v1/media-center/articles/{article_id}/increment_share/")
@@ -55,3 +60,12 @@ class TestMediaCenterAPI:
         assert detail.data["shares_count"] == 1
         assert detail.data["comments_count"] == 1
         assert detail.data["recent_comments"][0]["content"] == "Très bon article"
+
+    def test_due_scheduled_article_is_published(self):
+        article = Article.objects.create(
+            title="Publication programmée", content="Contenu", author=self.user,
+            status="scheduled", publication_date=timezone.now() - timedelta(minutes=1),
+        )
+        assert publish_scheduled_articles() == 1
+        article.refresh_from_db()
+        assert article.status == "published"

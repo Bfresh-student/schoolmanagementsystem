@@ -95,6 +95,16 @@ async function fetchArticles() {
     if (res.ok) {
       articles = await res.json();
       if (currentPage === "blog") renderPage("blog");
+
+      // Auto-open target article if specified in URL
+      const params = new URLSearchParams(window.location.search);
+      const targetArticleId = params.get("articleId");
+      if (targetArticleId) {
+        navigateTo("blog");
+        setTimeout(() => {
+          openArticleModal(Number(targetArticleId) || targetArticleId);
+        }, 100);
+      }
     } else {
       showToast("Erreur chargement articles", "error");
     }
@@ -105,9 +115,17 @@ async function fetchArticles() {
 
 // Initialization
 document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const targetArticleId = params.get("articleId");
+  const initialPage = targetArticleId ? "blog" : "mediatheque";
+
   fetchMedias();
   fetchArticles();
-  renderPage("mediatheque");
+  if (initialPage === "blog") {
+    navigateTo("blog");
+  } else {
+    renderPage("mediatheque");
+  }
 
   // Drag and drop initializations
   const dz = document.getElementById("dropZone");

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.conf import settings
 from .models import MediaAsset, Tag, Article, Comment
 
 
@@ -59,12 +60,9 @@ class ArticleSerializer(serializers.ModelSerializer):
         return obj.author.get_full_name() if obj.author else None
 
     def get_share_url(self, obj):
-        request = self.context.get("request")
         if obj.slug:
             path = "/blog/" + obj.slug
-            if request:
-                return request.build_absolute_uri(path)
-            return "https://cejec.edu.ht" + path
+            return getattr(settings, "PUBLIC_SITE_URL", "https://cejec.edu.ht").rstrip("/") + path
         return None
 
     def get_recent_comments(self, obj):

@@ -3,6 +3,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from apps.users.models import SystemSetting
+from apps.notifications.models import NotificationChannel
 from apps.students.models import Student
 
 
@@ -32,3 +33,11 @@ class SystemSettingsAPITests(TestCase):
         response = self.client.get("/api/v1/auth/users/global-search/?q=Alice")
         self.assertEqual(response.status_code, 200, response.data)
         self.assertTrue(any(item["title"] == "Alice Recherche" for item in response.data["results"]))
+
+    def test_notification_settings_enable_real_delivery_channels(self):
+        payload = {"settings": {"notifications": {"notif-email": True, "notif-sms": False, "notif-system": True}}}
+        response = self.client.patch("/api/v1/auth/users/settings/", payload, format="json")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertTrue(NotificationChannel.objects.get(name="email").is_active)
+        self.assertFalse(NotificationChannel.objects.get(name="sms").is_active)
+        self.assertTrue(NotificationChannel.objects.get(name="in_app").is_active)

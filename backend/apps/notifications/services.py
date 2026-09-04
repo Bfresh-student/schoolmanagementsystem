@@ -125,6 +125,9 @@ def enqueue_notification(
     resolved_priority = priority or (trigger.default_priority if trigger else "normal")
     template_key = trigger.template_key if trigger else trigger_type
 
+    # L'in-app est le canal minimal garanti : une installation neuve doit
+    # pouvoir alimenter le tableau de bord sans dépendre d'un seed manuel.
+    NotificationChannel.objects.get_or_create(name="in_app", defaults={"is_active": True})
     active_channels = NotificationChannel.objects.filter(is_active=True)
     created_notifications = []
     now_time = timezone.localtime().time()

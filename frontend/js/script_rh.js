@@ -2546,8 +2546,33 @@ async function generatePreviewPDF(docName) {
             if (!_apiReady) _apiErrorMessage = 'Connexion à la base RH indisponible.';
             console.log('✅ Module RH CEJEC prêt ! API:', _apiReady);
             
-            // On rend la page APRES le chargement pour inclure les professeurs de l'API
-            renderPage('employes');
+            // Check target URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetTeacherId = urlParams.get('teacherId');
+            const targetEmpId = urlParams.get('empId');
+            const targetCandidatId = urlParams.get('candidatId');
+
+            if (targetTeacherId) {
+                renderPage('professeurs');
+                const idx = employees.findIndex(e => String(e._teacherId) === String(targetTeacherId) || String(e.id) === String(targetTeacherId));
+                if (idx !== -1) {
+                    setTimeout(() => viewProfil(idx), 150);
+                }
+            } else if (targetEmpId) {
+                renderPage('employes');
+                const idx = employees.findIndex(e => String(e._hrEmployeeId) === String(targetEmpId) || String(e.id) === String(targetEmpId));
+                if (idx !== -1) {
+                    setTimeout(() => viewProfil(idx), 150);
+                }
+            } else if (targetCandidatId) {
+                renderPage('recrutement');
+                const idx = candidatsData.findIndex(c => String(c.id) === String(targetCandidatId));
+                if (idx !== -1) {
+                    setTimeout(() => editCandidat(idx), 150);
+                }
+            } else {
+                renderPage('employes');
+            }
             updateBadges();
         }
 
