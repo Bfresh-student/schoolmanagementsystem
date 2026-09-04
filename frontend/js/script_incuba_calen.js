@@ -725,36 +725,44 @@ function filterByStatus(val, tbodyId) {
 }
 
 // ==================== ALARME SYSTEM ====================
+let realAlarmAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/989/989-preview.mp3');
+realAlarmAudio.loop = true;
+
 function playAlarmSound(type, volume) {
   try {
-    if (!alarmAudioContext)
-      alarmAudioContext = new (
-        window.AudioContext || window.webkitAudioContext
-      )();
-    const ctx = alarmAudioContext;
-    const vol = (volume || 7) / 10;
+    realAlarmAudio.volume = (volume || 7) / 10;
+    realAlarmAudio.play().catch(e => {
+      console.log("Audio autoplay blocked, using fallback...", e);
+      if (!alarmAudioContext)
+        alarmAudioContext = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      const ctx = alarmAudioContext;
+      ctx.resume();
+      const vol = (volume || 7) / 10;
 
-    switch (type) {
-      case "classic":
-        playBeep(ctx, 800, 0.3, vol);
-        setTimeout(() => playBeep(ctx, 1000, 0.3, vol), 300);
-        break;
-      case "digital":
-        playBeep(ctx, 1200, 0.15, vol);
-        setTimeout(() => playBeep(ctx, 1200, 0.15, vol), 200);
-        setTimeout(() => playBeep(ctx, 1200, 0.15, vol), 400);
-        break;
-      case "urgent":
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => playBeep(ctx, 600 + i * 200, 0.1, vol), i * 150);
-        }
-        break;
-      case "gentle":
-        playBeep(ctx, 500, 0.5, vol * 0.5);
-        setTimeout(() => playBeep(ctx, 600, 0.5, vol * 0.5), 500);
-        setTimeout(() => playBeep(ctx, 700, 0.5, vol * 0.5), 1000);
-        break;
-    }
+      switch (type) {
+        case "classic":
+          playBeep(ctx, 800, 0.3, vol);
+          setTimeout(() => playBeep(ctx, 1000, 0.3, vol), 300);
+          break;
+        case "digital":
+          playBeep(ctx, 1200, 0.15, vol);
+          setTimeout(() => playBeep(ctx, 1200, 0.15, vol), 200);
+          setTimeout(() => playBeep(ctx, 1200, 0.15, vol), 400);
+          break;
+        case "urgent":
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => playBeep(ctx, 600 + i * 200, 0.1, vol), i * 150);
+          }
+          break;
+        case "gentle":
+          playBeep(ctx, 500, 0.5, vol * 0.5);
+          setTimeout(() => playBeep(ctx, 600, 0.5, vol * 0.5), 500);
+          setTimeout(() => playBeep(ctx, 700, 0.5, vol * 0.5), 1000);
+          break;
+      }
+    });
   } catch (e) {
     console.log("Audio pas disponible");
   }
@@ -883,6 +891,10 @@ function triggerAlarm(event, config) {
 }
 
 function stopAlarm() {
+  if (typeof realAlarmAudio !== 'undefined') {
+    realAlarmAudio.pause();
+    realAlarmAudio.currentTime = 0;
+  }
   document.getElementById("alarmPopup").classList.remove("open");
   if (window._currentAlarmInterval) {
     clearInterval(window._currentAlarmInterval);
@@ -2174,7 +2186,9 @@ function renderCalendrier() {
         e.couleur +
         '" title="' +
         e.titre +
-        '"></span>';
+        '" onclick="event.stopPropagation(); viewEventDetail(' +
+        e.id +
+        ')"></span>';
     });
     if (dayEvents.length > 0)
       calHTML +=
@@ -2386,6 +2400,24 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function handleDeepLinkModal() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventIdParam = urlParams.get('eventId');
+  
+  if (eventIdParam) {
+    navigateTo("calendrier");
+    const targetId = parseInt(eventIdParam);
+    const evt = events.find((e) => e.id === targetId || e.apiId === targetId);
+    if (evt) {
+      setTimeout(() => viewEventDetail(evt.id), 150);
+    } else {
+      showToast("⚠️ Événement introuvable (id " + targetId + ")", "info");
+    }
+    
+    urlParams.delete('eventId');
+    const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
+    history.replaceState(null, "", newUrl);
+  }
+
   const hash = window.location.hash.replace("#", "");
   if (!hash) return;
 
