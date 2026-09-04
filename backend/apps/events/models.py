@@ -122,6 +122,25 @@ class EventParticipant(models.Model):
         return f"{self.user} -> {self.event} ({self.status})"
 
 
+class EventReminderDispatch(models.Model):
+    """Trace idempotente des rappels réellement déposés dans la boîte utilisateur."""
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reminder_dispatches")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    scheduled_for = models.DateTimeField()
+    dispatched_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "user", "scheduled_for"],
+                name="unique_event_reminder_dispatch",
+            )
+        ]
+        verbose_name = "Rappel d'événement envoyé"
+        verbose_name_plural = "Rappels d'événements envoyés"
+
+
 class EventMedia(models.Model):
     """
     Photos/vidéos liées à l'événement — fichier réel géré par l'app

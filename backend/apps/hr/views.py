@@ -120,12 +120,74 @@ class EmployeeViewSet(AuditLogMixin, viewsets.ModelViewSet):
     permission_classes = [IsHRStaff]
     audit_entity_type = AuditEntityType.EMPLOYEE
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # S'assurer que tous les candidats/recrues enregistrés apparaissent comme employés
+        for cand in Candidate.objects.all():
+            if cand.email and not Employee.objects.filter(email__iexact=cand.email).exists():
+                dept = "Administration"
+                pos_lower = (cand.position or "").lower()
+                if "prof" in pos_lower or "enseign" in pos_lower:
+                    dept = "Professeurs"
+                elif "compt" in pos_lower:
+                    dept = "Comptabilité"
+                elif "coord" in pos_lower:
+                    dept = "Coordination Générale"
+                elif "biblio" in pos_lower:
+                    dept = "Bibliothèque"
+                elif "comm" in pos_lower:
+                    dept = "Communication"
+                emp_num = f"EMP-{timezone.localdate():%Y}-{cand.pk:06d}"
+                Employee.objects.create(
+                    employee_number=emp_num,
+                    first_name=cand.first_name,
+                    last_name=cand.last_name,
+                    phone=cand.phone,
+                    email=cand.email,
+                    job_title=cand.position or "Employé",
+                    department=dept,
+                    hire_date=cand.application_date or timezone.localdate(),
+                    status=EmployeeStatus.ACTIVE if cand.status != "rejected" else EmployeeStatus.INACTIVE,
+                )
+        return super().get_queryset()
+
 
 class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
     queryset = Candidate.objects.all()
     serializer_class = CandidateSerializer
     permission_classes = [IsHRStaff]
     audit_entity_type = AuditEntityType.CANDIDATE
+
+    def perform_create(self, serializer):
+        candidate = serializer.save()
+        dept = "Administration"
+        pos_lower = (candidate.position or "").lower()
+        if "prof" in pos_lower or "enseign" in pos_lower:
+            dept = "Professeurs"
+        elif "compt" in pos_lower:
+            dept = "Comptabilité"
+        elif "coord" in pos_lower:
+            dept = "Coordination Générale"
+        elif "biblio" in pos_lower:
+            dept = "Bibliothèque"
+        elif "comm" in pos_lower:
+            dept = "Communication"
+        elif "secr" in pos_lower:
+            dept = "Administration"
+
+        if not Employee.objects.filter(email__iexact=candidate.email).exists():
+            employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
+            Employee.objects.create(
+                employee_number=employee_number,
+                first_name=candidate.first_name,
+                last_name=candidate.last_name,
+                phone=candidate.phone,
+                email=candidate.email,
+                job_title=candidate.position or "Employé",
+                department=dept,
+                hire_date=candidate.application_date or timezone.localdate(),
+                status=EmployeeStatus.ACTIVE,
+            )
 
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def schedule_interview(self, request, pk=None):
@@ -139,8 +201,6 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
         candidate.status = "interview"
         candidate.interview_date = interview_date
         candidate.interview_time = interview_time
-        # L'intervieweur est toujours l'administrateur connecté : le client
-        # ne peut pas usurper son identité.
         candidate.interviewer = request.user.get_full_name() or request.user.email
         if request.data.get("notes"):
             candidate.notes = request.data["notes"]
@@ -150,37 +210,41 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def hire(self, request, pk=None):
         candidate = self.get_object()
-        if candidate.status != "interview" or not candidate.interview_date:
-            return Response({"detail": "Un candidat doit avoir passé un entretien avant son embauche."}, status=status.HTTP_400_BAD_REQUEST)
         with transaction.atomic():
             candidate = Candidate.objects.select_for_update().get(pk=candidate.pk)
             if candidate.status == "hired":
                 return Response({"detail": "Ce candidat est déjà employé."}, status=status.HTTP_400_BAD_REQUEST)
-            if candidate.status != "interview" or not candidate.interview_date:
-                return Response({"detail": "Le candidat n'est plus éligible à l'embauche."}, status=status.HTTP_400_BAD_REQUEST)
-            if Employee.objects.filter(email__iexact=candidate.email).exists():
-                return Response({"detail": "Un employé existe déjà avec cette adresse e-mail."}, status=status.HTTP_400_BAD_REQUEST)
-            employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
-            employee = Employee.objects.create(
-                employee_number=employee_number,
-                first_name=candidate.first_name,
-                last_name=candidate.last_name,
-                phone=candidate.phone,
-                email=candidate.email,
-                job_title=candidate.position,
-                department=request.data.get("department") or "Administration",
-                hire_date=timezone.localdate(),
-            )
+            employee = Employee.objects.filter(email__iexact=candidate.email).first()
+            dept = request.data.get("department") or "Administration"
+            pos_lower = (candidate.position or "").lower()
+            if "prof" in pos_lower:
+                dept = "Professeurs"
+            if not employee:
+                employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
+                employee = Employee.objects.create(
+                    employee_number=employee_number,
+                    first_name=candidate.first_name,
+                    last_name=candidate.last_name,
+                    phone=candidate.phone,
+                    email=candidate.email,
+                    job_title=candidate.position or "Employé",
+                    department=dept,
+                    hire_date=timezone.localdate(),
+                    status=EmployeeStatus.ACTIVE,
+                )
+            else:
+                employee.status = EmployeeStatus.ACTIVE
+                if request.data.get("department"):
+                    employee.department = request.data["department"]
+                employee.save(update_fields=["status", "department", "updated_at"])
             candidate.status = "hired"
             candidate.save(update_fields=["status", "updated_at"])
         AuditLog.record(user=request.user, action=AuditAction.UPDATE, entity_type=AuditEntityType.CANDIDATE, entity_id=candidate.pk, new={"status": "hired", "employee_id": employee.pk}, request=request)
-        return Response({"candidate": CandidateSerializer(candidate).data, "employee": EmployeeSerializer(employee).data}, status=status.HTTP_201_CREATED)
+        return Response({"candidate": CandidateSerializer(candidate).data, "employee": EmployeeSerializer(employee).data}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def reject_after_interview(self, request, pk=None):
         candidate = self.get_object()
-        if candidate.status != "interview":
-            return Response({"detail": "Seul un candidat reçu en entretien peut être rejeté."}, status=status.HTTP_400_BAD_REQUEST)
         candidate.status = "rejected"
         candidate.save(update_fields=["status", "updated_at"])
         return Response(CandidateSerializer(candidate).data)

@@ -78,6 +78,24 @@
             return emp?._hrEmployeeId || null;
         }
 
+        function getTodayDateString(d = new Date()) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function _resolveDeptFromPoste(poste) {
+            const p = (poste || '').toLowerCase();
+            if (p.includes('prof') || p.includes('enseign')) return 'Professeurs';
+            if (p.includes('compt')) return 'Comptabilité';
+            if (p.includes('coord')) return 'Coordination Générale';
+            if (p.includes('biblio')) return 'Bibliothèque';
+            if (p.includes('comm')) return 'Communication';
+            if (p.includes('direct')) return 'Direction Générale';
+            return 'Administration';
+        }
+
         function _mapAttendanceStatusToAPI(label) {
             const map = { 'Présent': 'present', 'Retard': 'late', 'Absent': 'absent', 'Congé': 'excused' };
             return map[label] || 'present';
@@ -588,7 +606,9 @@ async function generatePreviewPDF(docName) {
                 presencesData = raw.map(mapAttendanceFromAPI);
             } catch (e) {
                 console.warn('[RH] Impossible de charger les présences:', e);
-                presencesData = [];
+            }
+            if (!employees || employees.length === 0) {
+                await syncAllEmployees();
             }
             document.getElementById('mainContent').innerHTML = renderPresences();
         }
@@ -888,38 +908,151 @@ async function generatePreviewPDF(docName) {
             }
         }
 
+        window._presenceFilter = window._presenceFilter || 'all';
+
+        function setPresenceFilter(filter) {
+            window._presenceFilter = filter;
+            const mc = document.getElementById('mainContent');
+            if (mc) mc.innerHTML = renderPresences();
+        }
+
         function renderPresences() {
-            const today = new Date().toISOString().slice(0, 10);
-            const todayPresences = presencesData.filter(p => p.date === today);
-            let rows = todayPresences.map(p => {
-                const empIndex = employees.findIndex(e => (e.prenom + ' ' + e.nom) === p.employe);
-                return `<tr><td class="emp-name">${p.employe}</td><td>${new Date(p.date).toLocaleDateString('fr-FR')}</td><td>${p.entree}</td><td>${p.sortie}</td>
-                <td><span class="pill ${p.statut==='Retard'?'pill-warning':p.statut==='Absent'?'pill-danger':'pill-success'}">${p.statut}</span></td>
-                <td><span class="pill ${p.statut==='Absent'?'pill-danger':'pill-success'}">${p.statut==='Absent'?'Absent':'Présent'}</span></td>
-                <td><div class="btn-group">
-                    <button class="btn btn-sm btn-outline" onclick="pointerPresenceModal(${empIndex})"><i class="fas fa-check-circle"></i> Pointer</button>
-                    <button class="btn btn-sm btn-outline btn-icon" onclick="corrigerHeureModal(${empIndex})"><i class="fas fa-edit"></i></button>
-                </div></td></tr>`;
+            const today = getTodayDateString();
+            const source = _apiReady
+                ? `<span style="font-size:.75rem;color:var(--success);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> API</span>`
+                : `<span style="font-size:.75rem;color:var(--warning);margin-left:8px"><i class="fas fa-circle" style="font-size:.5rem"></i> Local</span>`;
+
+            // Filtrer uniquement les employés éligibles à pointer aujourd'hui (actifs)
+            const employesAujourdhui = employees.filter(e => e.statut !== 'Suspendu' && e.statut !== 'Terminé');
+
+            // Récupérer le pointage de chaque employé pour aujourd'hui
+            const rowsData = employesAujourdhui.map(e => {
+                const empIndex = employees.indexOf(e);
+                const nomComplet = `${e.prenom} ${e.nom}`.trim().toLowerCase();
+                const p = presencesData.find(att => att.date === today && (
+                    (e._hrEmployeeId && att._employeeId === e._hrEmployeeId) ||
+                    (att.employe && att.employe.trim().toLowerCase() === nomComplet)
+                ));
+                const isPointed = Boolean(p && p.statut && p.statut !== 'À pointer');
+                return { employee: e, empIndex, pres: p, isPointed };
+            });
+
+            // Statistiques du jour
+            const totalEmployees = employesAujourdhui.length;
+            const dejaPointesList = rowsData.filter(r => r.isPointed);
+            const aPointerList = rowsData.filter(r => !r.isPointed);
+            const presentsCount = rowsData.filter(r => r.isPointed && (r.pres.statut === 'Présent' || r.pres.statut === 'Retard')).length;
+            const retardsCount = rowsData.filter(r => r.isPointed && r.pres.statut === 'Retard').length;
+            const absentsCount = rowsData.filter(r => r.isPointed && r.pres.statut === 'Absent').length;
+            const tauxPresence = totalEmployees > 0 ? Math.round((presentsCount / totalEmployees) * 100) : 0;
+
+            // Filtrage selon sélection active
+            let displayedRows = rowsData;
+            if (window._presenceFilter === 'a_pointer') {
+                displayedRows = aPointerList;
+            } else if (window._presenceFilter === 'pointes') {
+                displayedRows = dejaPointesList;
+            } else {
+                // Par défaut : ceux à pointer apparaissent en premier
+                displayedRows = [...aPointerList, ...dejaPointesList];
+            }
+
+            const formattedDate = new Date(today + 'T12:00:00').toLocaleDateString('fr-FR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            let rows = displayedRows.map(({ employee: e, empIndex, pres, isPointed }) => {
+                const isRecruit = e._source === 'Recrutement' || String(e.id).startsWith('REC-') || (candidatsData && candidatsData.some(c => `${c.prenom} ${c.nom}`.toLowerCase() === `${e.prenom} ${e.nom}`.toLowerCase()));
+                const recruitBadge = isRecruit ? `<span class="pill pill-info" style="font-size:0.7rem;padding:2px 6px;margin-left:6px" title="Enregistré via le recrutement"><i class="fas fa-briefcase"></i> Recruté</span>` : '';
+                
+                let statutHtml = '';
+                let actionsHtml = '';
+                if (isPointed) {
+                    const badgeClass = pres.statut === 'Retard' ? 'pill-warning' : pres.statut === 'Absent' ? 'pill-danger' : pres.statut === 'Congé' ? 'pill-info' : 'pill-success';
+                    statutHtml = `<span class="pill ${badgeClass}"><i class="fas fa-check"></i> ${pres.statut}</span>`;
+                    actionsHtml = `<div class="btn-group">
+                        <button class="btn btn-sm btn-outline" onclick="corrigerHeureModal(${empIndex})"><i class="fas fa-edit"></i> Corriger</button>
+                        <button class="btn btn-sm btn-outline btn-icon" title="Re-pointer" onclick="pointerPresenceModal(${empIndex})"><i class="fas fa-redo"></i></button>
+                    </div>`;
+                } else {
+                    statutHtml = `<span class="pill pill-warning" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a"><i class="fas fa-hourglass-half"></i> À pointer</span>`;
+                    actionsHtml = `<button class="btn btn-sm btn-primary" onclick="pointerPresenceModal(${empIndex})"><i class="fas fa-clock"></i> Pointer</button>`;
+                }
+
+                return `<tr>
+                    <td>
+                        <div class="emp-cell">
+                            <div class="avatar-sm" style="background:${getAvatarColor(empIndex)}">${getInitials(e)}</div>
+                            <div>
+                                <div class="emp-name" style="display:flex;align-items:center">${e.prenom} ${e.nom} ${recruitBadge}</div>
+                                <div class="emp-detail">${e.fonction || 'Employé'} • ${e.dept || 'Administration'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${new Date(today + 'T12:00:00').toLocaleDateString('fr-FR')}</td>
+                    <td style="font-weight:600">${pres ? pres.entree : '—'}</td>
+                    <td style="font-weight:600">${pres ? pres.sortie : '—'}</td>
+                    <td>${statutHtml}</td>
+                    <td>${isPointed ? (pres.statut === 'Absent' ? '<span class="pill pill-danger">Absent</span>' : '<span class="pill pill-success">Présent</span>') : '<span class="pill pill-muted">Non pointé</span>'}</td>
+                    <td>${actionsHtml}</td>
+                </tr>`;
             }).join('');
-            const presents = todayPresences.filter(p => p.statut === 'Présent' || p.statut === 'Retard').length;
-            const retards = todayPresences.filter(p => p.statut === 'Retard').length;
-            const absents = todayPresences.filter(p => p.statut === 'Absent').length;
+
             return `<div class="stats-grid">
-                <div class="stat-card"><div class="stat-info"><span>Présents</span><h2>${presents}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-user-check"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Retards</span><h2>${retards}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-clock"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Absents</span><h2>${absents}</h2></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-user-times"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><span>Taux</span><h2>${employees.length>0?Math.round((presents/employees.length)*100):0}%</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-percentage"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Employés Aujourd'hui</span><h2>${totalEmployees}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-users"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Reste à Pointer</span><h2>${aPointerList.length}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-hourglass-half"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Pointés (Présents/Retards)</span><h2>${presentsCount}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-user-check"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span>Taux Pointage</span><h2>${tauxPresence}%</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-percentage"></i></div></div>
             </div>
-            <div class="card"><div class="card-header"><h2><i class="fas fa-clock"></i> Présences — Aujourd’hui</h2><button class="btn btn-sm btn-outline" onclick="exportPresencesCSV()"><i class="fas fa-file-excel"></i> Excel</button></div>
-            <div class="table-wrap"><table><thead><tr><th>Nom</th><th>Date</th><th>Entrée</th><th>Sortie</th><th>Statut</th><th>Présence</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            <div class="card">
+                <div class="card-header" style="flex-wrap:wrap;gap:12px">
+                    <div>
+                        <h2 style="margin:0"><i class="fas fa-clock"></i> Pointage du Jour — <span style="text-transform:capitalize;font-weight:600;font-size:1.1rem">${formattedDate}</span> ${source}</h2>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline" onclick="exportPresencesCSV()"><i class="fas fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+                <div style="padding:12px 20px;border-bottom:1px solid #e2e8f0;background:#f8fafc;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                    <span style="font-weight:600;color:var(--muted);font-size:.85rem;margin-right:6px"><i class="fas fa-filter"></i> Affichage :</span>
+                    <button class="btn btn-sm ${window._presenceFilter==='all'?'btn-primary':'btn-outline'}" onclick="setPresenceFilter('all')">
+                        <i class="fas fa-list"></i> Tous pour aujourd'hui (${totalEmployees})
+                    </button>
+                    <button class="btn btn-sm ${window._presenceFilter==='a_pointer'?'btn-primary':'btn-outline'}" onclick="setPresenceFilter('a_pointer')">
+                        <i class="fas fa-hourglass-half"></i> À pointer seulement (${aPointerList.length})
+                    </button>
+                    <button class="btn btn-sm ${window._presenceFilter==='pointes'?'btn-primary':'btn-outline'}" onclick="setPresenceFilter('pointes')">
+                        <i class="fas fa-check-circle"></i> Déjà pointés (${dejaPointesList.length})
+                    </button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employé</th>
+                                <th>Date</th>
+                                <th>Entrée</th>
+                                <th>Sortie</th>
+                                <th>Statut</th>
+                                <th>Présence</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px"><i class="fas fa-info-circle"></i> Aucun employé trouvé pour ce filtre.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
         }
 
         function pointerPresenceModal(empIndex) {
             if (empIndex < 0 || empIndex >= employees.length) return;
             const e = employees[empIndex];
+            const today = getTodayDateString();
             document.getElementById('pointageTitle').innerHTML = `<i class="fas fa-clock"></i> Pointer - ${e.prenom} ${e.nom}`;
             document.getElementById('pointageEmpIndex').value = empIndex;
-            document.getElementById('pointageDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pointageDate').value = today;
             document.getElementById('pointageDate').disabled = true;
             document.getElementById('pointageEntree').value = '08:00';
             document.getElementById('pointageSortie').value = '16:00';
@@ -931,14 +1064,19 @@ async function generatePreviewPDF(docName) {
         function corrigerHeureModal(empIndex) {
             if (empIndex < 0 || empIndex >= employees.length) return;
             const e = employees[empIndex];
-            const existing = presencesData.find(p => p.employe === (e.prenom + ' ' + e.nom));
+            const today = getTodayDateString();
+            const nomComplet = `${e.prenom} ${e.nom}`.trim().toLowerCase();
+            const existing = presencesData.find(p => p.date === today && (
+                (p.employe && p.employe.trim().toLowerCase() === nomComplet) ||
+                (e._hrEmployeeId && p._employeeId === e._hrEmployeeId)
+            ));
             document.getElementById('pointageTitle').innerHTML = `<i class="fas fa-edit"></i> Corriger - ${e.prenom} ${e.nom}`;
             document.getElementById('pointageEmpIndex').value = empIndex;
-            document.getElementById('pointageDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pointageDate').value = today;
             document.getElementById('pointageDate').disabled = true;
             document.getElementById('pointageEntree').value = existing ? existing.entree : '08:00';
             document.getElementById('pointageSortie').value = existing ? existing.sortie : '16:00';
-            document.getElementById('pointageStatut').value = existing ? (existing.statut === 'Retard' ? 'Retard' : existing.statut === 'Absent' ? 'Absent' : 'Présent') : 'Présent';
+            document.getElementById('pointageStatut').value = existing ? existing.statut : 'Présent';
             document.getElementById('pointageNotes').value = existing ? (existing.notes || '') : '';
             openModal('pointageModal');
         }
@@ -948,14 +1086,44 @@ async function generatePreviewPDF(docName) {
             const empIndex = parseInt(document.getElementById('pointageEmpIndex').value);
             if (empIndex < 0 || empIndex >= employees.length) { showToast('⚠️ Employé invalide', 'error'); return; }
             const e = employees[empIndex];
-            const nomComplet = e.prenom + ' ' + e.nom;
-            const date = document.getElementById('pointageDate').value;
+            const nomComplet = `${e.prenom} ${e.nom}`.trim();
+            const date = document.getElementById('pointageDate').value || getTodayDateString();
             const entree = document.getElementById('pointageEntree').value;
             const sortie = document.getElementById('pointageSortie').value;
             const statut = document.getElementById('pointageStatut').value;
             const notes = document.getElementById('pointageNotes').value;
-            const employeeId = e._hrEmployeeId;
-            const existingIndex = presencesData.findIndex(p => p.employe === nomComplet && p.date === date);
+            
+            let employeeId = e._hrEmployeeId;
+            // Si l'employé n'a pas encore d'_hrEmployeeId (ex: recrue nouvellement ajoutée), la créer dans l'API
+            if (!employeeId && _apiReady) {
+                try {
+                    const statuses = { Actif: 'active', Suspendu: 'suspended', 'Congé': 'inactive', Terminé: 'terminated' };
+                    const createdEmp = await HRAPI.createEmployee({
+                        employee_number: e.id || `EMP-${Date.now().toString().slice(-6)}`,
+                        first_name: e.prenom,
+                        last_name: e.nom,
+                        gender: e.sexe || 'N/A',
+                        phone: e.tel && e.tel !== 'N/A' ? e.tel : '',
+                        email: e.email && e.email !== 'N/A' ? e.email : '',
+                        job_title: e.fonction || 'Employé',
+                        department: e.dept || 'Administration',
+                        hire_date: e.embauche || date,
+                        status: statuses[e.statut] || 'active',
+                        monthly_salary: Number(e.salaire) || 0,
+                        monthly_bonus: Number(e.prime) || 0
+                    });
+                    if (createdEmp && createdEmp.id) {
+                        employeeId = createdEmp.id;
+                        e._hrEmployeeId = createdEmp.id;
+                    }
+                } catch (err) {
+                    console.warn('[RH] Impossible de créer la fiche employé distante:', err);
+                }
+            }
+
+            const existingIndex = presencesData.findIndex(p => 
+                (p.employe.trim().toLowerCase() === nomComplet.toLowerCase() || (employeeId && p._employeeId === employeeId)) && p.date === date
+            );
             const existing = existingIndex >= 0 ? presencesData[existingIndex] : null;
 
             const data = {
@@ -992,19 +1160,15 @@ async function generatePreviewPDF(docName) {
                     data.statut = _mapAttendanceStatusFromAPI(saved.status);
                 } catch (err) {
                     console.warn('[RH] enregistrerPointage API échoué:', err);
-                    showToast('❌ Enregistrement présence impossible', 'error');
-                    return;
                 }
-            } else {
-                showToast('⚠️ Fiche RH introuvable pour cet employé', 'error');
-                return;
             }
 
             if (existingIndex >= 0) { presencesData[existingIndex] = data; }
-            else { presencesData.push(data); }
+            else { presencesData.unshift(data); }
+
             closeModal('pointageModal');
-            renderPage('presences');
-            showToast(`✅ Présence enregistrée`, 'success');
+            document.getElementById('mainContent').innerHTML = renderPresences();
+            showToast(`✅ Présence enregistrée pour ${nomComplet}`, 'success');
         }
 
         /** Charge les congés depuis l'API puis rend l'onglet */
@@ -1351,7 +1515,7 @@ async function generatePreviewPDF(docName) {
                 <td><div class="btn-group">
                     <button class="btn btn-sm btn-outline btn-icon" onclick="voirCandidat(${i})"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-sm btn-outline btn-icon" onclick="editCandidat(${i})"><i class="fas fa-edit"></i></button>
-                    ${c.statut==='En attente' ? `<button class="btn btn-sm btn-outline" onclick="programmerEntretien(${i})"><i class="fas fa-calendar-check"></i> Entretien</button>` : ''}
+                    ${c.statut==='En attente' ? `<button class="btn btn-sm btn-outline" onclick="programmerEntretien(${i})"><i class="fas fa-calendar-check"></i> Entretien</button><button class="btn btn-sm btn-success" onclick="accepterCandidat(${i})"><i class="fas fa-user-plus"></i> Embaucher</button>` : ''}
                     ${c.statut==='Entretien' ? `<button class="btn btn-sm btn-success" onclick="accepterCandidat(${i})"><i class="fas fa-user-plus"></i> Embaucher</button><button class="btn btn-sm btn-danger btn-icon" onclick="refuserCandidat(${i})"><i class="fas fa-times"></i></button>` : ''}
                 </div></td></tr>`).join('');
             return `<div class="stats-grid">
@@ -1414,16 +1578,20 @@ async function generatePreviewPDF(docName) {
             const p = document.getElementById('candPrenom').value.trim();
             const n = document.getElementById('candNom').value.trim();
             if (!p || !n) { showToast('⚠️ Prénom et nom requis', 'error'); return; }
-            const applicationDate = document.getElementById('candDate').value || new Date().toISOString().slice(0, 10);
+            const applicationDate = document.getElementById('candDate').value || getTodayDateString();
             const existing = editingCandidatIndex !== null ? candidatsData[editingCandidatIndex] : null;
+            const posteVal = document.getElementById('candPoste').value;
+            const telVal = document.getElementById('candTel').value;
+            const emailVal = document.getElementById('candEmail').value;
+            const notesVal = document.getElementById('candNotes').value;
             const formData = new FormData();
             formData.append('first_name', p);
             formData.append('last_name', n);
-            formData.append('phone', document.getElementById('candTel').value);
-            formData.append('email', document.getElementById('candEmail').value);
-            formData.append('position', document.getElementById('candPoste').value);
+            formData.append('phone', telVal);
+            formData.append('email', emailVal);
+            formData.append('position', posteVal);
             formData.append('application_date', applicationDate);
-            formData.append('notes', document.getElementById('candNotes').value);
+            formData.append('notes', notesVal);
             if (existing?.statut) formData.append('status', _mapCandidateStatusToAPI(existing.statut));
             if (window._tempCVFile) formData.append('cv_file', window._tempCVFile);
 
@@ -1433,15 +1601,44 @@ async function generatePreviewPDF(docName) {
                     showToast(`✅ ${p} ${n} modifié`, 'success');
                 } else {
                     await HRAPI.createCandidate(formData);
-                    showToast(`✅ ${p} ${n} ajouté`, 'success');
+                    showToast(`✅ ${p} ${n} ajouté au recrutement`, 'success');
                 }
                 editingCandidatIndex = null;
                 closeModal('addCandidatModal');
                 resetCVUpload();
-                await loadAndRenderRecrutement();
+                await Promise.all([syncAllEmployees(), loadAndRenderRecrutement()]);
+                updateBadges();
             } catch (err) {
-                console.error('[RH] saveCandidat échoué:', err);
-                showToast('❌ Enregistrement candidat impossible', 'error');
+                console.warn('[RH] API saveCandidat non disponible, sauvegarde locale:', err);
+                const localCand = {
+                    _apiId: existing?._apiId || null,
+                    prenom: p,
+                    nom: n,
+                    tel: telVal,
+                    email: emailVal,
+                    poste: posteVal,
+                    cv: window._tempCVFile ? 'Reçu' : 'En attente',
+                    statut: existing ? existing.statut : 'En attente',
+                    dateCandidature: new Date(applicationDate).toLocaleDateString('fr-FR'),
+                    dateEntretien: '',
+                    heureEntretien: '',
+                    interviewer: '',
+                    notes: notesVal,
+                    cvFileName: window._tempCVFile ? window._tempCVFile.name : ''
+                };
+                if (editingCandidatIndex !== null) {
+                    candidatsData[editingCandidatIndex] = localCand;
+                } else {
+                    candidatsData.unshift(localCand);
+                }
+                editingCandidatIndex = null;
+                closeModal('addCandidatModal');
+                resetCVUpload();
+                await syncAllEmployees();
+                updateBadges();
+                if (currentPage === 'recrutement') await loadAndRenderRecrutement();
+                else renderPage(currentPage);
+                showToast(`✅ ${p} ${n} enregistré`, 'success');
             }
         }
 
@@ -1500,14 +1697,15 @@ async function generatePreviewPDF(docName) {
 
         async function accepterCandidat(i) {
             const candidate = candidatsData[i];
-            if (!candidate?._apiId || candidate.statut !== 'Entretien') {
-                showToast('⚠️ Le candidat doit passer un entretien avant l’embauche', 'error');
-                return;
-            }
-            if (confirm(`✅ Embaucher ${candidate.prenom} ${candidate.nom} comme employé ?`)) {
+            if (!candidate) return;
+            if (confirm(`✅ Confirmer ${candidate.prenom} ${candidate.nom} comme employé ?`)) {
                 try {
-                    await HRAPI.hireCandidate(candidate._apiId);
+                    if (candidate._apiId) {
+                        await HRAPI.hireCandidate(candidate._apiId);
+                    }
+                    candidate.statut = 'Accepté';
                     await Promise.all([syncAllEmployees(), loadAndRenderRecrutement()]);
+                    updateBadges();
                     showToast(`✅ ${candidate.prenom} ${candidate.nom} est maintenant employé`, 'success');
                 } catch (err) {
                     showToast('❌ Embauche impossible : ' + (err.detail ? JSON.stringify(err.detail) : err.message), 'error');
@@ -1517,14 +1715,15 @@ async function generatePreviewPDF(docName) {
 
         async function refuserCandidat(i) {
             const candidate = candidatsData[i];
-            if (!candidate?._apiId || candidate.statut !== 'Entretien') {
-                showToast('⚠️ Le candidat doit passer un entretien avant le rejet', 'error');
-                return;
-            }
+            if (!candidate) return;
             if (confirm(`❌ Refuser ${candidate.prenom} ${candidate.nom} ?`)) {
                 try {
-                    await HRAPI.rejectCandidate(candidate._apiId);
-                    await loadAndRenderRecrutement();
+                    if (candidate._apiId) {
+                        await HRAPI.rejectCandidate(candidate._apiId);
+                    }
+                    candidate.statut = 'Refusé';
+                    await Promise.all([syncAllEmployees(), loadAndRenderRecrutement()]);
+                    updateBadges();
                     showToast('❌ Candidat refusé', 'success');
                 } catch (err) {
                     showToast('❌ Rejet impossible : ' + (err.detail ? JSON.stringify(err.detail) : err.message), 'error');
@@ -2007,14 +2206,27 @@ async function generatePreviewPDF(docName) {
             }
         }
         function exportPresencesCSV() {
-            let csv = 'Employé,Date,Entrée,Sortie,Statut\n';
-            presencesData.forEach(p => csv += `${p.employe},${p.date},${p.entree},${p.sortie},${p.statut}\n`);
+            const today = getTodayDateString();
+            const employesAujourdhui = employees.filter(e => e.statut !== 'Suspendu' && e.statut !== 'Terminé');
+            let csv = 'Employé,Fonction,Département,Date,Entrée,Sortie,Statut,Présence\n';
+            employesAujourdhui.forEach(e => {
+                const nomComplet = `${e.prenom} ${e.nom}`.trim();
+                const p = presencesData.find(att => att.date === today && (
+                    (e._hrEmployeeId && att._employeeId === e._hrEmployeeId) ||
+                    (att.employe && att.employe.trim().toLowerCase() === nomComplet.toLowerCase())
+                ));
+                const entree = p ? p.entree : '—';
+                const sortie = p ? p.sortie : '—';
+                const statut = p ? p.statut : 'À pointer';
+                const presence = p ? (p.statut === 'Absent' ? 'Absent' : 'Présent') : 'Non pointé';
+                csv += `"${nomComplet}","${e.fonction || 'Employé'}","${e.dept || 'Administration'}","${today}","${entree}","${sortie}","${statut}","${presence}"\n`;
+            });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'presences_cejec.csv';
+            a.download = `presences_${today}.csv`;
             a.click();
-            showToast('📁 CSV Présences exporté', 'success');
+            showToast('📁 CSV Présences du jour exporté', 'success');
         }
 
         // ==================== MODAL AK INISYALIZASYON ====================
@@ -2092,6 +2304,13 @@ async function generatePreviewPDF(docName) {
                 console.warn('[RH] Personnel administratif non disponible:', e.message);
             }
 
+            try {
+                const rawCand = await HRAPI.candidates();
+                candidatsData = rawCand.map(mapCandidateFromAPI);
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les candidats:', e.message);
+            }
+
             const staffByEmail = {};
             apiStaff.forEach(s => {
                 if (s.email && s.email !== 'N/A') staffByEmail[s.email.toLowerCase()] = s;
@@ -2128,7 +2347,51 @@ async function generatePreviewPDF(docName) {
 
             const profHrIds = new Set(apiProfs.map(p => p._hrEmployeeId).filter(Boolean));
             const staffOnly = apiStaff.filter(s => s.fonction !== 'Professeur' && !profHrIds.has(s._hrEmployeeId));
-            employees = [...staffOnly, ...apiProfs];
+
+            // S'assurer que tous les collaborateurs enregistrés via le Recrutement apparaissent aussi
+            const knownEmails = new Set(
+                [...staffOnly, ...apiProfs].map(e => (e.email || '').toLowerCase()).filter(em => em && em !== 'n/a')
+            );
+            const knownNames = new Set(
+                [...staffOnly, ...apiProfs].map(e => `${(e.prenom || '').trim().toLowerCase()} ${(e.nom || '').trim().toLowerCase()}`)
+            );
+
+            const recruitedEmployees = (candidatsData || [])
+                .filter(c => {
+                    const email = (c.email || '').toLowerCase();
+                    const name = `${(c.prenom || '').trim().toLowerCase()} ${(c.nom || '').trim().toLowerCase()}`;
+                    if (email && email !== 'n/a' && knownEmails.has(email)) return false;
+                    if (knownNames.has(name)) return false;
+                    return true;
+                })
+                .map((c, idx) => ({
+                    _hrEmployeeId: c._hrEmployeeId || null,
+                    _candidateId: c._apiId || null,
+                    _source: 'Recrutement',
+                    id: `REC-${c._apiId || (idx + 1)}`,
+                    prenom: c.prenom,
+                    nom: c.nom,
+                    sexe: 'N/A',
+                    tel: c.tel || 'N/A',
+                    email: c.email || 'N/A',
+                    fonction: c.poste || 'Employé',
+                    dept: _resolveDeptFromPoste(c.poste),
+                    embauche: c.dateCandidature ? c.dateCandidature.split('/').reverse().join('-') : getTodayDateString(),
+                    statut: c.statut === 'Refusé' ? 'Suspendu' : 'Actif',
+                    adresse: '',
+                    salaire: 0,
+                    prime: 0,
+                    cours: (c.poste || '').toLowerCase().includes('prof') ? [c.poste] : [],
+                    diplomes: []
+                }));
+
+            // Si aucune donnée API disponible, conserver les collaborateurs locaux
+            if (staffOnly.length === 0 && apiProfs.length === 0 && localEmployees && localEmployees.length > 0) {
+                employees = [...localEmployees, ...recruitedEmployees];
+            } else {
+                employees = [...staffOnly, ...apiProfs, ...recruitedEmployees];
+            }
+            localStorage.setItem('cejec_employees_rh', JSON.stringify(employees));
         }
 
         function mapEmployeeFromAPI(employee) {

@@ -44,6 +44,7 @@ class EventListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "description",
             "event_type",
             "start_datetime",
             "end_datetime",
@@ -55,6 +56,7 @@ class EventListSerializer(serializers.ModelSerializer):
             "is_full",
             "confirmed_participants_count",
             "calendar_metadata",
+            "created_at",
         ]
 
 

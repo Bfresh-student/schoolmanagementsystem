@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
@@ -124,3 +126,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+CELERY_BEAT_SCHEDULE = {
+    "events-send-configured-reminders": {
+        "task": "apps.events.tasks.send_upcoming_event_reminders",
+        "schedule": crontab(minute="*"),
+    },
+    "notifications-retry-failed": {
+        "task": "apps.notifications.tasks.retry_failed_notifications",
+        "schedule": crontab(minute="*/15"),
+    },
+}

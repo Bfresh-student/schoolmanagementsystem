@@ -280,36 +280,85 @@ document.addEventListener("DOMContentLoaded", async () => {
             // ============================================
             let eventsDatabase = [];
             try {
-                const token = localStorage.getItem('authToken');
-                if (token) {
-                    const evtRes = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/events/events/', {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    if (evtRes.ok) {
-                        const rawEvents = await evtRes.json();
-                        const evtList = Array.isArray(rawEvents) ? rawEvents : (rawEvents.results || []);
-                        eventsDatabase = evtList.map(e => {
-                            const meta = e.calendar_metadata || {};
-                            return {
-                                id: e.id,
-                                title: e.title,
-                                start: meta.dateDebut || e.created_at.split('T')[0],
-                                end: meta.dateFin || meta.dateDebut || e.created_at.split('T')[0],
-                                allDay: true,
-                                backgroundColor: meta.couleur === 'blue' ? '#0a4d8c' : (meta.couleur === 'red' ? '#d62828' : (meta.couleur === 'green' ? '#10b981' : (meta.couleur === 'orange' ? '#f97316' : '#8b5cf6'))),
-                                borderColor: 'transparent',
-                                description: e.description || '',
-                                time: meta.heureDebut ? `${meta.heureDebut} - ${meta.heureFin || ''}` : 'Toute la journée',
-                                icon: meta.cat === 'Cours' ? 'fa-solid fa-book' : 'fa-solid fa-calendar-check',
-                                location: meta.lieu || '',
-                                participants: meta.resp || ''
-                            };
-                        });
-                    }
-                }
+                const rawEvents = await apiClientRequest('/events/events/?page_size=1000');
+                const evtList = Array.isArray(rawEvents) ? rawEvents : (rawEvents.results || []);
+                eventsDatabase = evtList.map(e => {
+                    const meta = e.calendar_metadata || {};
+                    const start = e.start_datetime || meta.dateDebut;
+                    const end = e.end_datetime || meta.dateFin || start;
+                    return {
+                        id: e.id,
+                        title: e.name || 'Événement sans titre',
+                        start: String(start || '').slice(0, 10),
+                        end: String(end || start || '').slice(0, 10),
+                        allDay: true,
+                        backgroundColor: meta.couleur === 'blue' ? '#0a4d8c' : (meta.couleur === 'red' ? '#d62828' : (meta.couleur === 'green' ? '#10b981' : (meta.couleur === 'orange' ? '#f97316' : '#8b5cf6'))),
+                        borderColor: 'transparent',
+                        description: e.description || '',
+                        time: e.start_datetime ? `${String(e.start_datetime).slice(11, 16)} - ${String(e.end_datetime || '').slice(11, 16)}` : 'Toute la journée',
+                        icon: meta.cat === 'Cours' ? 'fa-solid fa-book' : 'fa-solid fa-calendar-check',
+                        location: e.location || '',
+                        participants: meta.resp || ''
+                    };
+                }).filter(event => event.start);
             } catch (err) {
                 console.error("Erreur chargement événements", err);
             }
+
+            // Les notifications persistées par le backend sont la source du
+            // journal. Les rappels d'événements apparaissent donc ici et dans
+            // la notification native lorsque le navigateur l'autorise.
+            const activityList = document.getElementById('recentActivityList');
+            const notificationBadge = document.querySelector('.badge44');
+            const notifiedIds = new Set(JSON.parse(sessionStorage.getItem('cejec_notified_ids') || '[]'));
+            const relativeTime = (value) => {
+                const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+                if (seconds < 60) return "À l'instant";
+                if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
+                if (seconds < 86400) return `Il y a ${Math.floor(seconds / 3600)} h`;
+                return new Date(value).toLocaleDateString('fr-FR');
+            };
+            const renderActivities = (notifications) => {
+                if (!activityList) return;
+                activityList.replaceChildren();
+                if (!notifications.length) {
+                    const empty = document.createElement('p');
+                    empty.textContent = 'Aucune activité récente.';
+                    activityList.append(empty);
+                    return;
+                }
+                notifications.slice(0, 5).forEach(notification => {
+                    const item = document.createElement('div');
+                    item.className = `activity-item ${notification.priority === 'urgent' || notification.priority === 'high' ? 'red-item' : 'green-item'}`;
+                    item.innerHTML = '<div class="activity-indicator"></div><div class="activity-details"><p></p><span></span></div>';
+                    item.querySelector('p').textContent = notification.title;
+                    item.querySelector('span').textContent = `${relativeTime(notification.created_at)} · ${notification.content}`;
+                    activityList.append(item);
+                });
+            };
+            const refreshNotifications = async () => {
+                try {
+                    const response = await apiClientRequest('/notifications/notifications/?page_size=20');
+                    const notifications = Array.isArray(response) ? response : (response.results || []);
+                    renderActivities(notifications);
+                    const unread = notifications.filter(item => !item.is_read);
+                    if (notificationBadge) notificationBadge.textContent = unread.length;
+                    unread.filter(item => item.trigger_type === 'event_reminder').forEach(item => {
+                        if (notifiedIds.has(item.id) || !('Notification' in window) || Notification.permission !== 'granted') return;
+                        new Notification(item.title, { body: item.content, icon: 'images/logo.png' });
+                        notifiedIds.add(item.id);
+                    });
+                    sessionStorage.setItem('cejec_notified_ids', JSON.stringify([...notifiedIds].slice(-100)));
+                } catch (error) {
+                    console.error('Erreur chargement notifications', error);
+                }
+            };
+            document.querySelector('.notification-bell')?.addEventListener('click', async () => {
+                if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
+                refreshNotifications();
+            });
+            await refreshNotifications();
+            window.setInterval(refreshNotifications, 60000);
 
             // ============================================
             // FONCTIONS DU MODAL AVEC REDIRECTION
@@ -460,10 +509,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         openEventModal(info.dateStr);
                     },
                     eventClick: function(info) {
-                        const eventId = parseInt(info.event.id);
-                        if (eventId) {
-                            redirectToEventDetail(eventId);
-                        }
+                        redirectToEventDetail(info.event.id);
                     },
                     windowResize: function() {
                         this.setOption('dayMaxEvents', window.innerWidth <= 480 ? 1 : 2);
