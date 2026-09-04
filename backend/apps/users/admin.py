@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, UserProfile, LoginLog, PasswordResetToken
+from .models import User, UserProfile, LoginLog, PasswordResetToken, SystemSetting
 
 
 @admin.register(User)
@@ -51,3 +51,9 @@ class PasswordResetTokenAdmin(admin.ModelAdmin):
     list_filter = ('is_used', 'created_at')
     search_fields = ('user__email',)
     readonly_fields = ('created_at',)
+
+
+@admin.register(SystemSetting)
+class SystemSettingAdmin(admin.ModelAdmin):
+    list_display = ('key', 'updated_by', 'updated_at')
+    readonly_fields = ('updated_at',)

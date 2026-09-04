@@ -1,6 +1,6 @@
 (function() {
       // ----- DATA -----
-      let etudiantsListe = [
+      let etudiantsListe = [] /*
         { id: 'ETU-001', nom: 'Pierre Antoine', sexe: 'M', cours: 'Entrepreneuriat', statut: 'Actif', moyenne: 92, presences: 95, solde: 0, nouvelInscrit: false },
         { id: 'ETU-002', nom: 'Marie Joseph', sexe: 'F', cours: 'Marketing', statut: 'Actif', moyenne: 78, presences: 88, solde: 15000, nouvelInscrit: false },
         { id: 'ETU-003', nom: 'Jameson Pierre', sexe: 'M', cours: 'Leadership', statut: 'Actif', moyenne: 65, presences: 72, solde: 5000, nouvelInscrit: false },
@@ -13,30 +13,30 @@
         { id: 'ETU-010', nom: 'Nathalie Pierre', sexe: 'F', cours: 'Marketing', statut: 'Diplômé', moyenne: 94, presences: 97, solde: 0, nouvelInscrit: false },
         { id: 'ETU-011', nom: 'David Marcelin', sexe: 'M', cours: "Plan d'Affaires", statut: 'Actif', moyenne: 81, presences: 89, solde: 0, nouvelInscrit: true },
         { id: 'ETU-012', nom: 'Chantal Bijou', sexe: 'F', cours: 'Art Oratoire', statut: 'Actif', moyenne: 76, presences: 85, solde: 22000, nouvelInscrit: false }
-      ];
+      ]; */
 
-      let coursCEJEC = ['Entrepreneuriat', "Plan d'Affaires", 'Sociologie des Affaires', 'Éducation Technologique', 'Développement Personnel', 'Marketing', 'Droit des Affaires', 'Lois du Succès', 'GRH', 'Leadership', 'Correspondance Admin', 'Art Oratoire'];
+      let coursCEJEC = [];
       let coursStats = coursCEJEC.map(c => ({ nom: c, etudiants: 0, reussite: 0, abandon: 0 }));
-      let partenaires = [
+      let partenaires = [] /*
         { nom: 'Digicel', type: 'Technologie', contrats: 3, stages: 12 },
         { nom: 'Banque Nationale', type: 'Finance', contrats: 2, stages: 8 },
         { nom: 'Fondation Espoir', type: 'ONG', contrats: 1, stages: 5 },
         { nom: 'Université Quisqueya', type: 'Éducation', contrats: 2, stages: 10 },
         { nom: 'BRANA', type: 'Industrie', contrats: 1, stages: 6 }
-      ];
-      let evenements = [
+      ]; */
+      let evenements = [] /*
         { nom: 'Journée Portes Ouvertes', date: '15/06/2026', participants: 250, cout: 50000, retombees: 'Élevées' },
         { nom: 'Conférence Entrepreneuriat', date: '22/06/2026', participants: 150, cout: 35000, retombees: 'Moyennes' },
         { nom: 'Cérémonie de Remise Diplômes', date: '30/06/2026', participants: 400, cout: 120000, retombees: 'Très Élevées' },
         { nom: 'Atelier Leadership', date: '05/07/2026', participants: 80, cout: 25000, retombees: 'Bonnes' }
-      ];
-      let employesRH = [
+      ]; */
+      let employesRH = [] /*
         { nom: 'Jean-Marc Dubois', fonction: 'Administrateur', presences: 22, absences: 0, conges: 2, salaire: 95000 },
         { nom: 'Jacques Mentor', fonction: 'Professeur', presences: 20, absences: 1, conges: 3, salaire: 75000 },
         { nom: 'Marie Louis', fonction: 'Secrétaire', presences: 21, absences: 0, conges: 1, salaire: 65000 },
         { nom: 'Carline Étienne', fonction: 'Comptable', presences: 22, absences: 0, conges: 0, salaire: 70000 },
         { nom: 'Rose Michel', fonction: 'Professeur', presences: 19, absences: 2, conges: 1, salaire: 72000 }
-      ];
+      ]; */
 
       let currentPage = 'academique';
       let currentFilter = 'mois';
@@ -47,42 +47,67 @@
 
       const reportList = data => Array.isArray(data) ? data : (data.results || []);
       async function reportApi(path) {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1' + path, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
-        if (!response.ok) throw new Error('API_ERROR_' + response.status);
-        return response.json();
+        // apiFetch renouvelle le JWT avant de signaler une erreur : les
+        // rapports ont le même comportement de session que les autres pages.
+        return apiFetch(path);
       }
       function courseStat(course) {
         const enrolled = Number(course.seats_taken || 0);
-        return { nom: course.name, etudiants: enrolled, reussite: 0, abandon: 0 };
+        // L'API des cours fournit les inscriptions actives, mais pas encore les
+        // résultats ni les abandons. Ne jamais présenter 0 % comme une mesure.
+        return { nom: course.name, etudiants: enrolled, reussite: null, abandon: null };
       }
       function monthlyAmounts(items, dateField) {
         const buckets = new Map();
-        items.forEach(item => { const date = item[dateField]; if (!date) return; const key = date.slice(0, 7); buckets.set(key, (buckets.get(key) || 0) + Number(item.amount || 0)); });
+        items.forEach(item => { const date = item[dateField] || item.created_at; if (!date) return; const key = date.slice(0, 7); buckets.set(key, (buckets.get(key) || 0) + Number(item.amount || 0)); });
         return [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
       }
       function financialSeries() {
         const revenue = monthlyAmounts(payments.filter(payment => payment.status === 'completed'), 'paid_at');
         return { labels: revenue.map(([month]) => month), revenus: revenue.map(([, amount]) => amount), depenses: revenue.map(() => 0) };
       }
+      function selectedRange() {
+        const end = new Date();
+        const start = new Date(end);
+        if (currentFilter === 'semaine') start.setDate(end.getDate() - 6);
+        else if (currentFilter === 'trimestre') start.setMonth(end.getMonth() - 2);
+        else if (currentFilter === 'annee') start.setMonth(0, 1);
+        else start.setDate(1);
+        const toDate = value => `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+        return { start: toDate(start), end: toDate(end) };
+      }
+      function inRange(value, range) {
+        const date = String(value || '').slice(0, 10);
+        return Boolean(date && date >= range.start && date <= range.end);
+      }
+      function enrollmentSeries() {
+        const buckets = new Map();
+        etudiantsListe.forEach(student => {
+          const date = student.dateInscription;
+          if (!date) return;
+          const month = date.slice(0, 7);
+          buckets.set(month, (buckets.get(month) || 0) + 1);
+        });
+        const entries = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
+        return { labels: entries.map(([month]) => month), values: entries.map(([, count]) => count) };
+      }
       async function loadReportData() {
         try {
-          const today = new Date().toISOString().slice(0, 10);
-          const monthStart = `${today.slice(0, 8)}01`;
+          const range = selectedRange();
           const [studentsData, coursesData, invoicesData, paymentsData, companiesData, eventsData, internshipsData, hrData] = await Promise.all([
-            reportApi('/students/students/'), reportApi('/courses/courses/'), reportApi('/finance/invoices/'), reportApi('/finance/payments/'), reportApi('/projects/companies/'), reportApi('/events/events/'), reportApi('/projects/internships/'), reportApi(`/hr/attendances/report-summary/?start=${monthStart}&end=${today}`)
+            reportApi('/students/students/?page_size=1000'), reportApi('/courses/courses/?page_size=1000'), reportApi('/finance/invoices/?page_size=1000'), reportApi('/finance/payments/?page_size=1000'), reportApi('/projects/companies/?page_size=1000'), reportApi('/events/events/?page_size=1000'), reportApi('/projects/internships/?page_size=1000'), reportApi(`/hr/attendances/report-summary/?start=${range.start}&end=${range.end}`)
           ]);
           const students = reportList(studentsData);
           const courses = reportList(coursesData);
-          invoices = reportList(invoicesData); payments = reportList(paymentsData);
+          invoices = reportList(invoicesData); payments = reportList(paymentsData).filter(payment => inRange(payment.paid_at || payment.created_at, range));
           const invoicesByStudent = new Map(invoices.map(invoice => [String(invoice.student), invoice]));
-          etudiantsListe = students.map(student => { const invoice = invoicesByStudent.get(String(student.id)); return { id: student.registration_number || student.id, nom: student.full_name, sexe: '—', cours: student.school_class_name || student.specialization_name || '—', statut: student.status, moyenne: 0, presences: 0, solde: Number(invoice ? invoice.balance_due : 0), nouvelInscrit: false }; });
+          etudiantsListe = students.map(student => { const invoice = invoicesByStudent.get(String(student.id)); const enrolled = student.enrollment_date || student.created_at || ''; return { id: student.registration_number || student.id, nom: student.full_name, sexe: '—', cours: student.school_class_name || student.specialization_name || '—', statut: ({ active: 'Actif', suspended: 'Suspendu', graduated: 'Diplômé', withdrawn: 'Abandon' })[student.status] || student.status || '—', moyenne: 0, presences: 0, solde: Number(invoice ? invoice.balance_due : 0), nouvelInscrit: inRange(enrolled, range), dateInscription: enrolled.slice(0, 10) }; });
           coursCEJEC = courses.map(course => course.name); coursStats = courses.map(courseStat);
           hrReport = hrData.employees || [];
           employesRH = hrReport.map(employee => ({ nom: employee.name, fonction: employee.job_title, presences: employee.present_days, absences: employee.absent_days, conges: Number(employee.leave_days), salaire: Number(employee.monthly_salary) }));
           const internships = reportList(internshipsData);
           partenaires = reportList(companiesData).map(company => ({ nom: company.name, type: company.sector || '—', contrats: 0, stages: internships.filter(internship => internship.company === company.id).length }));
-          evenements = reportList(eventsData).map(event => ({ nom: event.title || event.name || '—', date: (event.calendar_metadata?.dateDebut) || (event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : (event.created_at ? new Date(event.created_at).toLocaleDateString('fr-FR') : '—')), participants: event.confirmed_participants_count || 0, cout: 0, retombees: event.status }));
+          evenements = reportList(eventsData).filter(event => inRange(event.start_datetime, range)).map(event => ({ nom: event.name || '—', date: event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : '—', participants: Number(event.confirmed_participants_count || 0), cout: Number(event.calendar_metadata?.cout || 0), retombees: event.status || '—' }));
           renderPage(currentPage);
         } catch (error) {
           // Un rapport indisponible ne doit jamais afficher les chiffres de démonstration.
@@ -164,7 +189,7 @@
         const mois = series.labels;
         const finRows = revenusMensuels.map((r, i) => [
           mois[i], r.toLocaleString() + ' HTG', depensesMensuels[i].toLocaleString() + ' HTG',
-          (r - depensesMensuels[i]).toLocaleString() + ' HTG', Math.round((r - depensesMensuels[i]) / r * 100) + '%'
+          (r - depensesMensuels[i]).toLocaleString() + ' HTG', (r ? Math.round((r - depensesMensuels[i]) / r * 100) : 0) + '%'
         ]);
         sections.push({
           title: 'Détail Financier',
@@ -333,18 +358,21 @@
 
       // ----- ACADEMIQUE -----
       function initAcademiqueCharts() {
+        const series = enrollmentSeries();
         const ctx1 = document.getElementById('acadInscriptionChart');
         if (ctx1 && !chartInstances['acadInscription']) {
           chartInstances['acadInscription'] = new Chart(ctx1, {
-            type: 'line', data: { labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'], datasets: [{ label: 'Inscriptions', data: [200, 250, 300, 350, 380, 420, 450, 450], borderColor: '#0A4D8C', backgroundColor: 'rgba(10,77,140,0.1)', fill: true, tension: 0.4, borderWidth: 2 }] },
+            type: 'line', data: { labels: series.labels, datasets: [{ label: 'Inscriptions', data: series.values, borderColor: '#0A4D8C', backgroundColor: 'rgba(10,77,140,0.1)', fill: true, tension: 0.4, borderWidth: 2 }] },
             options: { responsive: true, maintainAspectRatio: false }
           });
         }
         const ctx2 = document.getElementById('acadReussiteChart');
         if (ctx2 && !chartInstances['acadReussite']) {
+          const graduated = etudiantsListe.filter(student => student.statut === 'Diplômé').length;
+          const rate = etudiantsListe.length ? Math.round((graduated / etudiantsListe.length) * 100) : 0;
           chartInstances['acadReussite'] = new Chart(ctx2, {
-            type: 'line', data: { labels: ['2019', '2020', '2021', '2022', '2023', '2024'], datasets: [{ label: 'Taux réussite %', data: [75, 78, 80, 82, 85, 88], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, borderWidth: 2 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 60, max: 100 } } }
+            type: 'bar', data: { labels: ['Taux de diplomation'], datasets: [{ label: 'Diplômés (%)', data: [rate], backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
           });
         }
       }
@@ -372,7 +400,7 @@
             <div class="chart-box"><h3><i class="fas fa-chart-line"></i> Évolution des inscriptions</h3><div class="chart-wrap"><canvas id="acadInscriptionChart"></canvas></div></div>
             <div class="chart-box"><h3><i class="fas fa-percent"></i> Taux de réussite par année</h3><div class="chart-wrap"><canvas id="acadReussiteChart"></canvas></div></div>
           </div>
-          <div class="alert-box alert-info"><i class="fas fa-info-circle"></i> <strong>3 nouveaux étudiants</strong> inscrits cette semaine</div>
+          <div class="alert-box alert-info"><i class="fas fa-info-circle"></i> <strong>${nouveauxCount} nouvel(aux) étudiant(s)</strong> sur la période sélectionnée</div>
           <div class="section-tabs" id="acadTabs">
             <button class="section-tab active" data-filter="all"><i class="fas fa-list"></i> Tous</button>
             <button class="section-tab" data-filter="Actif"><i class="fas fa-check-circle"></i> Actifs</button>
@@ -451,17 +479,15 @@
 
       // ----- FORMATIONS -----
       function renderFormations() {
-        let rows = coursStats.map(c => `<tr><td class="fw-600">${c.nom}</td><td>${c.etudiants}</td><td><div style="display:flex;align-items:center;gap:8px">${c.reussite}%<div style="flex:1;height:6px;background:#e5e7eb;border-radius:10px;overflow:hidden"><div style="width:${c.reussite}%;height:100%;background:var(--success);border-radius:10px"></div></div></div></td><td><span class="pill ${c.abandon>5?'pill-danger':'pill-success'}">${c.abandon}%</span></td></tr>`).join('');
+        let rows = coursStats.map(c => `<tr><td class="fw-600">${c.nom}</td><td>${c.etudiants}</td><td>—</td><td>—</td></tr>`).join('');
         return `
-          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Cours actifs</span><h2>${coursCEJEC.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-book-open"></i></div></div><div class="stat-card"><div class="stat-info"><span>Taux réussite moyen</span><h2>85%</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-chart-line"></i></div></div><div class="stat-card"><div class="stat-info"><span>Taux abandon</span><h2>4.2%</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-exclamation-triangle"></i></div></div></div>
-          <div class="charts-row"><div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Étudiants par cours</h3><div class="chart-wrap"><canvas id="coursBarChart"></canvas></div></div><div class="chart-box"><h3><i class="fas fa-percent"></i> Réussite par cours</h3><div class="chart-wrap"><canvas id="coursReussiteChart"></canvas></div></div></div>
+          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Cours actifs</span><h2>${coursCEJEC.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-book-open"></i></div></div><div class="stat-card"><div class="stat-info"><span>Réussite</span><h2>Non disponible</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-chart-line"></i></div></div><div class="stat-card"><div class="stat-info"><span>Abandon</span><h2>Non disponible</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-exclamation-triangle"></i></div></div></div>
+          <div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Étudiants par cours</h3><div class="chart-wrap"><canvas id="coursBarChart"></canvas></div></div>
           <div class="card"><div class="card-header"><h2><i class="fas fa-list"></i> Les 12 Cours CEJEC</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Cours</th><th>Étudiants</th><th>Réussite</th><th>Abandon</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
       }
       function initFormationsCharts() {
         const ctx1 = document.getElementById('coursBarChart');
         if (ctx1 && !chartInstances['coursBar']) chartInstances['coursBar'] = new Chart(ctx1, { type: 'bar', data: { labels: coursCEJEC.slice(0, 8), datasets: [{ label: 'Étudiants', data: coursStats.slice(0, 8).map(c => c.etudiants), backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' } });
-        const ctx2 = document.getElementById('coursReussiteChart');
-        if (ctx2 && !chartInstances['coursReussite']) chartInstances['coursReussite'] = new Chart(ctx2, { type: 'bar', data: { labels: coursCEJEC.slice(0, 8), datasets: [{ label: 'Réussite %', data: coursStats.slice(0, 8).map(c => c.reussite), backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 50, max: 100 } } } });
       }
 
       // ----- PARTENARIATS -----

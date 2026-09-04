@@ -162,6 +162,23 @@ class UserProfile(AuditableMixin):
         return f"Profil de {self.user.get_full_name()}"
 
 
+class SystemSetting(models.Model):
+    """Configuration globale administrée depuis la page Paramètre."""
+
+    key = models.CharField(max_length=100, unique=True)
+    value = models.JSONField(default=dict, blank=True)
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="updated_system_settings",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "users_system_setting"
+        verbose_name = "Paramètre système"
+        verbose_name_plural = "Paramètres système"
+
+
 class LoginLog(models.Model):
     """Enregistrement des connexions pour l'audit"""
     

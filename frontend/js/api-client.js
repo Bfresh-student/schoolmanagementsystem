@@ -134,6 +134,9 @@ const AuthAPI = {
     async me() {
         return apiClientRequest('/auth/users/me/');
     },
+    async updateMe(body) {
+        return apiClientRequest('/auth/users/me/update/', { method: 'PATCH', body });
+    },
     async registerStudent({ first_name, last_name, phone = '', password }) {
         return apiClientRequest('/auth/users/register/', {
             method: 'POST',
@@ -162,6 +165,19 @@ const AuthAPI = {
     },
 };
 window.AuthAPI = AuthAPI;
+
+const SettingsAPI = {
+    get() { return apiClientRequest('/auth/users/settings/'); },
+    save(settings) { return apiClientRequest('/auth/users/settings/', { method: 'PATCH', body: { settings } }); },
+};
+window.SettingsAPI = SettingsAPI;
+
+const GlobalSearchAPI = {
+    search(query) {
+        return apiClientRequest(`/auth/users/global-search/?q=${encodeURIComponent(query)}`);
+    },
+};
+window.GlobalSearchAPI = GlobalSearchAPI;
 
 // 🔧 FIX #6 — extraction défensive de l'ID étudiant depuis la réponse de
 // /auth/users/register/. La forme exacte de cette réponse n'était pas
@@ -199,6 +215,10 @@ const StudentsAPI = {
     },
     async list() {
         const data = await apiClientRequest('/students/students/?page_size=1000');
+        return data.results || data;
+    },
+    async search(query) {
+        const data = await apiClientRequest(`/students/students/?search=${encodeURIComponent(query)}&page_size=1000`);
         return data.results || data;
     },
 };
@@ -311,6 +331,7 @@ const HRAPI = {
 
     // --- Personnel administratif ---
     employees() { return this.list('employees'); },
+    searchEmployees(query) { return apiClientRequest(`/hr/employees/?search=${encodeURIComponent(query)}&page_size=1000`).then(data => data.results || data); },
     createEmployee(body) { return apiClientRequest('/hr/employees/', { method: 'POST', body }); },
     updateEmployee(id, body) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'PATCH', body }); },
     deleteEmployee(id) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'DELETE' }); },
@@ -397,6 +418,10 @@ const InscriptionsAPI = {
     },
     async get(id) {
         return apiClientRequest(`/enrollments/inscriptions/${id}/`);
+    },
+    async search(query) {
+        const data = await apiClientRequest(`/enrollments/inscriptions/?search=${encodeURIComponent(query)}&page_size=1000`);
+        return data.results || data;
     },
     async create({ student, school_class, promotion = '', requested_at, created_offline = false, local_uuid = null }) {
         // 🔧 FIX #1 — bug principal du CRUD cassé.

@@ -1540,12 +1540,30 @@ function renderEtudiants() {
     </div>`;
 }
 
-function filterEtudiants(val) {
+let inscriptionSearchTimer;
+async function filterEtudiants(val) {
   const tbody = document.getElementById("etudiantTbody");
   if (!tbody) return;
-  tbody.querySelectorAll("tr").forEach((tr) => {
-    tr.style.display = tr.innerText.toLowerCase().includes(val.toLowerCase()) ? "" : "none";
-  });
+  const query = val.trim();
+  if (!query) {
+    tbody.querySelectorAll("tr").forEach((tr) => { tr.style.display = ""; });
+    return;
+  }
+  clearTimeout(inscriptionSearchTimer);
+  inscriptionSearchTimer = setTimeout(async () => {
+    try {
+      const remote = await InscriptionsAPI.search(query);
+      const ids = new Set(remote.map(item => String(item.id)));
+      tbody.querySelectorAll("tr").forEach((tr, index) => {
+        tr.style.display = ids.has(String(etudiants[index]?.id)) ? "" : "none";
+      });
+    } catch (error) {
+      console.error("Recherche des inscriptions impossible", error);
+      tbody.querySelectorAll("tr").forEach((tr) => {
+        tr.style.display = tr.innerText.toLowerCase().includes(query.toLowerCase()) ? "" : "none";
+      });
+    }
+  }, 250);
 }
 
 function filterByStatut(val) {

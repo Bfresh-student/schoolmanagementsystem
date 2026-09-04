@@ -20,7 +20,10 @@ def send_upcoming_event_reminders():
 
     now = timezone.now()
     upcoming = Event.objects.filter(
-        status__in=("published", "ongoing"), start_datetime__gt=now
+        status__in=("published", "ongoing"),
+        # Une petite fenêtre de grâce évite de rater une alarme réglée à
+        # l'heure exacte si le beat s'exécute quelques secondes après elle.
+        start_datetime__gte=now - timedelta(minutes=5),
     ).prefetch_related("participants")
 
     for event in upcoming:

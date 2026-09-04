@@ -18,6 +18,7 @@ from apps.hr.models import (
     Candidate,
     Contract,
     Employee,
+    EmployeeStatus,
     EmployeeAttendance,
     HRDocument,
     Leave,
@@ -39,6 +40,67 @@ from apps.hr.serializers import (
     PerformanceEvaluationSerializer,
     SalarySerializer,
 )
+
+
+def _is_teacher_position(job_title: str) -> bool:
+    return any(word in (job_title or "").lower() for word in ("prof", "enseign"))
+
+
+def _sync_teacher_account(employee: Employee):
+    """Garantit qu'un employé enseignant possède son compte et sa fiche Teacher."""
+    if not _is_teacher_position(employee.job_title):
+        return
+
+    from apps.teachers.models import Teacher
+    from apps.users.models import User, UserProfile
+
+    user = employee.user
+    if user is None:
+        user = User.objects.filter(email__iexact=employee.email).first()
+    if user is None:
+        user = User.objects.create_user(
+            email=employee.email,
+            password=None,
+            first_name=employee.first_name,
+            last_name=employee.last_name,
+            phone=employee.phone,
+            role="TEACHER",
+            status="ACTIVE",
+        )
+    else:
+        user.first_name = employee.first_name
+        user.last_name = employee.last_name
+        user.phone = employee.phone
+        user.role = "TEACHER"
+        user.status = "ACTIVE" if employee.status == EmployeeStatus.ACTIVE else "INACTIVE"
+        user.save(update_fields=["first_name", "last_name", "phone", "role", "status"])
+
+    if employee.user_id != user.id:
+        employee.user = user
+        employee.save(update_fields=["user", "updated_at"])
+
+    gender_map = {"homme": "M", "masculin": "M", "m": "M", "femme": "F", "féminin": "F", "f": "F"}
+    gender = gender_map.get((employee.gender or "").strip().lower())
+    if gender:
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if profile.gender != gender:
+            profile.gender = gender
+            profile.save(update_fields=["gender"])
+
+    teacher, created = Teacher.objects.get_or_create(
+        user=user,
+        defaults={
+            "teacher_id": employee.employee_number,
+            "hire_date": employee.hire_date,
+            "status": "ACTIVE" if employee.status == EmployeeStatus.ACTIVE else "INACTIVE",
+            "monthly_salary": employee.monthly_salary,
+        },
+    )
+    if not created:
+        teacher.hire_date = employee.hire_date
+        teacher.status = "ACTIVE" if employee.status == EmployeeStatus.ACTIVE else "INACTIVE"
+        teacher.monthly_salary = employee.monthly_salary
+        teacher.save(update_fields=["hire_date", "status", "monthly_salary", "updated_at"])
 
 
 def _role_name(user):
@@ -122,34 +184,34 @@ class EmployeeViewSet(AuditLogMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # S'assurer que tous les candidats/recrues enregistrés apparaissent comme employés
-        for cand in Candidate.objects.all():
-            if cand.email and not Employee.objects.filter(email__iexact=cand.email).exists():
-                dept = "Administration"
-                pos_lower = (cand.position or "").lower()
-                if "prof" in pos_lower or "enseign" in pos_lower:
-                    dept = "Professeurs"
-                elif "compt" in pos_lower:
-                    dept = "Comptabilité"
-                elif "coord" in pos_lower:
-                    dept = "Coordination Générale"
-                elif "biblio" in pos_lower:
-                    dept = "Bibliothèque"
-                elif "comm" in pos_lower:
-                    dept = "Communication"
-                emp_num = f"EMP-{timezone.localdate():%Y}-{cand.pk:06d}"
-                Employee.objects.create(
-                    employee_number=emp_num,
-                    first_name=cand.first_name,
-                    last_name=cand.last_name,
-                    phone=cand.phone,
-                    email=cand.email,
-                    job_title=cand.position or "Employé",
-                    department=dept,
-                    hire_date=cand.application_date or timezone.localdate(),
-                    status=EmployeeStatus.ACTIVE if cand.status != "rejected" else EmployeeStatus.INACTIVE,
-                )
-        return super().get_queryset()
+        if search := self.request.query_params.get("search"):
+            qs = qs.filter(
+                Q(first_name__icontains=search) | Q(last_name__icontains=search)
+                | Q(email__icontains=search) | Q(employee_number__icontains=search)
+                | Q(job_title__icontains=search) | Q(department__icontains=search)
+            )
+        return qs
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            employee = serializer.save()
+            _sync_teacher_account(employee)
+        AuditLog.record(
+            user=self.request.user, action=AuditAction.CREATE,
+            entity_type=self.audit_entity_type, entity_id=employee.pk,
+            new=EmployeeSerializer(employee).data, request=self.request,
+        )
+
+    def perform_update(self, serializer):
+        previous = EmployeeSerializer(self.get_object()).data
+        with transaction.atomic():
+            employee = serializer.save()
+            _sync_teacher_account(employee)
+        AuditLog.record(
+            user=self.request.user, action=AuditAction.UPDATE,
+            entity_type=self.audit_entity_type, entity_id=employee.pk,
+            old=previous, new=EmployeeSerializer(employee).data, request=self.request,
+        )
 
 
 class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
@@ -159,35 +221,7 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
     audit_entity_type = AuditEntityType.CANDIDATE
 
     def perform_create(self, serializer):
-        candidate = serializer.save()
-        dept = "Administration"
-        pos_lower = (candidate.position or "").lower()
-        if "prof" in pos_lower or "enseign" in pos_lower:
-            dept = "Professeurs"
-        elif "compt" in pos_lower:
-            dept = "Comptabilité"
-        elif "coord" in pos_lower:
-            dept = "Coordination Générale"
-        elif "biblio" in pos_lower:
-            dept = "Bibliothèque"
-        elif "comm" in pos_lower:
-            dept = "Communication"
-        elif "secr" in pos_lower:
-            dept = "Administration"
-
-        if not Employee.objects.filter(email__iexact=candidate.email).exists():
-            employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
-            Employee.objects.create(
-                employee_number=employee_number,
-                first_name=candidate.first_name,
-                last_name=candidate.last_name,
-                phone=candidate.phone,
-                email=candidate.email,
-                job_title=candidate.position or "Employé",
-                department=dept,
-                hire_date=candidate.application_date or timezone.localdate(),
-                status=EmployeeStatus.ACTIVE,
-            )
+        serializer.save()
 
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def schedule_interview(self, request, pk=None):
@@ -214,6 +248,8 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
             candidate = Candidate.objects.select_for_update().get(pk=candidate.pk)
             if candidate.status == "hired":
                 return Response({"detail": "Ce candidat est déjà employé."}, status=status.HTTP_400_BAD_REQUEST)
+            if candidate.status != "interview":
+                return Response({"detail": "Seul un candidat ayant passé l'entretien peut être embauché."}, status=status.HTTP_400_BAD_REQUEST)
             employee = Employee.objects.filter(email__iexact=candidate.email).first()
             dept = request.data.get("department") or "Administration"
             pos_lower = (candidate.position or "").lower()
@@ -237,6 +273,7 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
                 if request.data.get("department"):
                     employee.department = request.data["department"]
                 employee.save(update_fields=["status", "department", "updated_at"])
+            _sync_teacher_account(employee)
             candidate.status = "hired"
             candidate.save(update_fields=["status", "updated_at"])
         AuditLog.record(user=request.user, action=AuditAction.UPDATE, entity_type=AuditEntityType.CANDIDATE, entity_id=candidate.pk, new={"status": "hired", "employee_id": employee.pk}, request=request)

@@ -28,6 +28,28 @@ services:
       - db
       - redis
 
+  celery-worker:
+    build: ./backend
+    command: celery -A config worker --loglevel=INFO
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: ./backend
+    command: celery -A config beat --loglevel=INFO
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
   frontend:
     build: ./frontend
     ports:

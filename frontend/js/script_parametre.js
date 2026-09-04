@@ -11,8 +11,52 @@
     const appState = {
         currentSection: 'general',
         is2FASetupInProgress: false,
-        courseCounter: 1
+        courseCounter: 1,
+        backendSettings: {}
     };
+
+    async function loadBackendSettings() {
+        if (!window.SettingsAPI) return;
+        try {
+            const response = await SettingsAPI.get();
+            appState.backendSettings = response.settings || {};
+        } catch (error) {
+            console.error('Chargement des paramètres impossible', error);
+            showToast('⚠️ Impossible de charger les paramètres enregistrés.', 'warning');
+        }
+    }
+
+    function applyBackendSettings(section) {
+        const values = appState.backendSettings[section] || {};
+        Object.entries(values).forEach(([id, value]) => {
+            const input = document.getElementById(id);
+            if (input) {
+                if (input.type === 'checkbox') input.checked = Boolean(value);
+                else input.value = value;
+                return;
+            }
+            const toggle = document.querySelector(`.toggle-switch[data-id="${id}"]`);
+            if (toggle) {
+                toggle.classList.toggle('checked', Boolean(value));
+                toggle.setAttribute('aria-checked', Boolean(value) ? 'true' : 'false');
+            }
+        });
+    }
+
+    function generalSettingsPayload() {
+        return Object.fromEntries([
+            'cejec-name', 'slogan', 'address', 'phone', 'email', 'website',
+            'timezone', 'lang-system', 'date-format'
+        ].map(id => [id, document.getElementById(id)?.value || '']));
+    }
+
+    async function persistSettings(section, values) {
+        if (!window.SettingsAPI) throw new Error('API des paramètres indisponible');
+        const settings = { ...appState.backendSettings, [section]: values };
+        const response = await SettingsAPI.save(settings);
+        appState.backendSettings = response.settings || settings;
+        updateLastSaveTime();
+    }
 
     // ========== CACHE DOM ==========
     const DOM = {
@@ -1191,7 +1235,7 @@
         // Form submission - CEJEC
         const cejecForm = document.getElementById('cejec-form');
         if (cejecForm) {
-            cejecForm.addEventListener('submit', function(e) {
+            cejecForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const requiredFields = cejecForm.querySelectorAll('[required]');
                 let allValid = true;
@@ -1204,8 +1248,13 @@
                     }
                 });
                 if (allValid) {
-                    showToast('✅ Sauvegardé !', 'success');
-                    updateLastSaveTime();
+                    try {
+                        await persistSettings('general', generalSettingsPayload());
+                        showToast('✅ Paramètres de l’établissement enregistrés.', 'success');
+                    } catch (error) {
+                        console.error('Sauvegarde paramètres impossible', error);
+                        showToast('❌ Enregistrement impossible sur le serveur.', 'error');
+                    }
                 } else {
                     showToast('❌ Veuillez remplir tous les champs obligatoires', 'error');
                 }
@@ -1215,10 +1264,21 @@
         // Form submission - Profile
         const profileForm = document.getElementById('profile-form');
         if (profileForm) {
-            profileForm.addEventListener('submit', function(e) {
+            profileForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                showToast('✅ Profil mis à jour avec succès !', 'success');
-                updateLastSaveTime();
+                try {
+                    await AuthAPI.updateMe({
+                        first_name: document.getElementById('first-name').value.trim(),
+                        last_name: document.getElementById('last-name').value.trim(),
+                        email: document.getElementById('profile-email').value.trim(),
+                        phone: document.getElementById('profile-phone').value.trim(),
+                    });
+                    showToast('✅ Profil mis à jour sur le serveur.', 'success');
+                    updateLastSaveTime();
+                } catch (error) {
+                    console.error('Mise à jour profil impossible', error);
+                    showToast('❌ Mise à jour du profil impossible.', 'error');
+                }
             });
         }
 
@@ -1270,8 +1330,19 @@
         // Save notifications
         const btnSaveNotifications = document.getElementById('btn-save-notifications');
         if (btnSaveNotifications) {
-            btnSaveNotifications.addEventListener('click', function() {
-                showToast('✅ Préférences de notifications sauvegardées !', 'success');
+            btnSaveNotifications.addEventListener('click', async function() {
+                const preferences = Object.fromEntries(
+                    [...document.querySelectorAll('.toggle-switch[data-id]')]
+                        .filter(toggle => toggle.dataset.id.startsWith('notif-'))
+                        .map(toggle => [toggle.dataset.id, toggle.classList.contains('checked')])
+                );
+                try {
+                    await persistSettings('notifications', preferences);
+                    showToast('✅ Préférences de notifications enregistrées.', 'success');
+                } catch (error) {
+                    console.error('Sauvegarde notifications impossible', error);
+                    showToast('❌ Préférences non enregistrées.', 'error');
+                }
             });
         }
 
@@ -1306,6 +1377,21 @@
         requestAnimationFrame(() => {
             DOM.contentDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
             requestAnimationFrame(() => {
+                applyBackendSettings(key);
+                if (key === 'profile' && window.AuthAPI) {
+                    AuthAPI.me().then(user => {
+                        const fields = {
+                            'first-name': user.first_name,
+                            'last-name': user.last_name,
+                            'profile-email': user.email,
+                            'profile-phone': user.phone,
+                        };
+                        Object.entries(fields).forEach(([id, value]) => {
+                            const input = document.getElementById(id);
+                            if (input) input.value = value || '';
+                        });
+                    }).catch(error => console.error('Chargement profil impossible', error));
+                }
                 attachAllEvents();
                 if (key === 'journalaudit') {
                     initAudit();
@@ -1439,7 +1525,7 @@
             tab.setAttribute('aria-selected', 'true');
         }
 
-        renderSection(savedSection);
+        loadBackendSettings().finally(() => renderSection(savedSection));
 
         // Initialiser les inputs 2FA
         const twofaInputs = document.querySelectorAll('#twofa-code-inputs input');

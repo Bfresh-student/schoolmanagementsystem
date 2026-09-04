@@ -62,6 +62,16 @@ async function apiFetch(url, options = {}) {
   return res;
 }
 
+
+// ── Engagement tracking ─────────────────────────────────────────────────────
+async function incrementView(articleId) {
+  try {
+    await fetch(API_BASE + "/articles/" + articleId + "/increment_view/", { method: "POST" });
+    const a = articles.find(x => x.id === articleId);
+    if (a) a.views_count = (a.views_count || 0) + 1;
+  } catch (e) { /* silent */ }
+}
+
 // ── Fetch Media Assets ──────────────────────────────────────────────────────
 async function fetchMedias() {
   try {
@@ -306,6 +316,7 @@ function openArticleModal(editId = null) {
   if (editId) {
     const a = articles.find((x) => x.id === editId);
     if (!a) return;
+    incrementView(editId);
     document.getElementById("articleModalTitle").innerHTML = '<i class="fas fa-edit"></i> Modifier l\'article';
     document.getElementById("articleEditId").value = a.id;
     document.getElementById("articleTitle").value = a.title || a.titre || "";
@@ -315,8 +326,18 @@ function openArticleModal(editId = null) {
     document.getElementById("articleResume").value = a.description || "";
     document.getElementById("articleContent").innerHTML = a.content || "";
     
-    // Convert status to backend values -> frontend
-    const mapStatusToFront = { 'draft': 'Brouillon', 'published': 'Publié', 'archived': 'Archivé' };
+    // Sync status select to article status
+    const statusSel = document.getElementById("articleStatus");
+    if (statusSel && a.status) statusSel.value = a.status;
+    // Populate shareLink from backend canonical URL
+    const shareLinkEl = document.getElementById("shareLink");
+    if (shareLinkEl) {
+      if (a.share_url) {
+        shareLinkEl.value = a.share_url;
+      } else if (a.slug) {
+        shareLinkEl.value = "https://cejec.edu.ht/blog/" + a.slug;
+      }
+    }
     
     if (a.cover_image && a.cover_image.file) {
       updateCoverPreview(a.cover_image.file, a.cover_image.title || "Cover");
@@ -336,6 +357,8 @@ function openArticleModal(editId = null) {
     document.getElementById("articleEditId").value = "";
     document.getElementById("articleTitle").value = "";
     document.getElementById("articleAuthor").value = "";
+    const shareLinkNew = document.getElementById("shareLink");
+    if (shareLinkNew) shareLinkNew.value = "https://cejec.edu.ht/blog/titre-article";
     
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -356,45 +379,36 @@ function openArticleModal(editId = null) {
 async function saveArticle(statusStr) {
   const titre = document.getElementById("articleTitle").value.trim();
   if (!titre) { showToast("Titre obligatoire", "error"); return; }
-  
-  const statusMap = { 'brouillon': 'draft', 'programmé': 'draft', 'publié': 'published' };
-  const backendStatus = statusMap[statusStr] || 'draft';
-  
+  const statusSelect = document.getElementById("articleStatus");
+  const statusMap = { brouillon: "draft", programme: "scheduled", publie: "published", publié: "published", programmé: "scheduled" };
+  const backendStatus = statusStr
+    ? (statusMap[statusStr.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")] || statusStr)
+    : (statusSelect ? statusSelect.value : "draft");
   const formData = new FormData();
-  formData.append('title', titre);
-  formData.append('status', backendStatus);
-  formData.append('category', document.getElementById("articleCat").value);
-  formData.append('description', document.getElementById("articleResume").value.trim());
-  formData.append('content', document.getElementById("articleContent").innerHTML);
+  formData.append("title", titre);
+  formData.append("status", backendStatus);
+  formData.append("category", document.getElementById("articleCat").value);
+  formData.append("description", document.getElementById("articleResume").value.trim());
+  formData.append("content", document.getElementById("articleContent").innerHTML);
   const pubDate = document.getElementById("articleDate").value;
-  if (pubDate) formData.append('publication_date', pubDate);
-  
-  if (articleTags && articleTags.length > 0) {
-    formData.append('tags_list', JSON.stringify(articleTags));
-  }
-
+  if (pubDate) formData.append("publication_date", pubDate);
+  if (articleTags && articleTags.length > 0) formData.append("tags_list", JSON.stringify(articleTags));
   const coverInput = document.getElementById("coverImageInput");
-  if (coverInput && coverInput.files[0]) {
-    formData.append('cover_image', coverInput.files[0]);
-  }
-
+  if (coverInput && coverInput.files[0]) formData.append("cover_image", coverInput.files[0]);
   const editId = document.getElementById("articleEditId").value;
-
   try {
-    let url = `${API_BASE}/articles/`;
-    let method = "POST";
-    if (editId) {
-      url = `${API_BASE}/articles/${editId}/`;
-      method = "PATCH";
-    }
-
-    const res = await apiFetch(url, {
-      method,
-      body: formData
-    });
-
+    let url = API_BASE + "/articles/", method = "POST";
+    if (editId) { url = API_BASE + "/articles/" + editId + "/"; method = "PATCH"; }
+    const res = await apiFetch(url, { method, body: formData });
     if (res.ok) {
+      const saved = await res.json();
       showToast(editId ? "Article mis à jour" : "Article créé", "success");
+      if (saved.share_url) {
+        const shareLinkEl = document.getElementById("shareLink");
+        if (shareLinkEl) shareLinkEl.value = saved.share_url;
+        const seoSlug = document.getElementById("seoSlug");
+        if (seoSlug && saved.slug) seoSlug.textContent = saved.slug;
+      }
       closeModal("articleModal");
       fetchArticles();
     } else {
@@ -427,12 +441,69 @@ async function deleteArticle() {
 }
 
 function previewArticle() {
-  const contenu = document.getElementById("articleContent").innerHTML,
-    titre = document.getElementById("articleTitle").value || "Aperçu";
-  const w = window.open("", "_blank", "width=900,height=700");
-  w.document.write(
-    `<!DOCTYPE html><html><head><title>${titre}</title><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.8;color:#1a1f2b}${coverImageData ? `.cover-img{width:100%;max-height:400px;object-fit:cover;border-radius:16px;margin-bottom:24px}` : ""}h1{font-family:'Playfair Display',serif;color:#073864;font-size:2rem}.meta{color:#5b6675;font-size:.9rem;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e5ebf2}img{max-width:100%;height:auto;border-radius:10px}blockquote{border-left:4px solid #0A4D8C;padding:10px 20px;margin:15px 0;background:#f4f8fd;border-radius:0 10px 10px 0}@media(max-width:600px){body{margin:20px auto;padding:15px}h1{font-size:1.5rem}}</style></head><body>${coverImageData ? `<img src="${coverImageData}" alt="Cover" class="cover-img">` : ""}<h1>${titre}</h1><div class="meta">Par ${document.getElementById("articleAuthor").value} · ${document.getElementById("articleDate").value}</div>${contenu}</body></html>`
-  );
+  const titre = (document.getElementById("articleTitle") ? document.getElementById("articleTitle").value : "") || "Aperçu";
+  const contenu = document.getElementById("articleContent") ? document.getElementById("articleContent").innerHTML : "";
+  const auteur = document.getElementById("articleAuthor") ? document.getElementById("articleAuthor").value || "CEJEC Communication" : "CEJEC Communication";
+  const dateVal = document.getElementById("articleDate") ? document.getElementById("articleDate").value : "";
+  const dateStr = dateVal ? new Date(dateVal).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }) : new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+  const resume = document.getElementById("articleResume") ? document.getElementById("articleResume").value : "";
+  const catEl = document.getElementById("articleCat");
+  const catLabels = { news:"Actualités", communication:"Communiqués", event:"Événements", entrepreneurship:"Entrepreneuriat", innovation:"Innovation", testimonial:"Témoignages", partnership:"Partenariats", student_life:"Vie estudiantine", success:"Réussites", training:"Formations" };
+  const catKey = catEl ? catEl.value : "news";
+  const catLabel = catLabels[catKey] || catKey;
+  const coverSrc = coverImageData || "";
+  const tagsHtml = articleTags.length ? articleTags.map(t => "<span style=\"background:#e8f1fb;color:#0A4D8C;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:500;\">" + t + "</span>").join(" ") : "";
+  const shareUrl = document.getElementById("shareLink") ? document.getElementById("shareLink").value : "https://cejec.edu.ht/blog/article";
+  const wordCount = contenu.replace(/<[^>]+>/g,"").trim().split(/s+/).length;
+  const readMin = Math.max(1, Math.ceil(wordCount / 200));
+  const w = window.open("", "_blank", "width=960,height=800");
+  w.document.write("<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + titre + " – CEJEC</title>" +
+    "<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap\" rel=\"stylesheet\">" +
+    "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css\">" +
+    "<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,sans-serif;background:#f7f9fc;color:#1a1f2b;line-height:1.8}" +
+    ".hero{width:100%;max-height:480px;overflow:hidden;position:relative}" +
+    ".hero img{width:100%;max-height:480px;object-fit:cover;display:block}" +
+    ".hero-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:40px 60px 30px}" +
+    ".hero-category{background:#0A4D8C;color:#fff;padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:600;display:inline-block;margin-bottom:12px}" +
+    ".hero-title{font-family:Playfair Display,serif;color:#fff;font-size:2.4rem;font-weight:700;line-height:1.25}" +
+    ".article-wrap{max-width:800px;margin:0 auto;padding:40px 20px}" +
+    ".article-meta{display:flex;align-items:center;gap:16px;color:#5b6675;font-size:.9rem;padding:20px 0;border-bottom:1px solid #e5ebf2;flex-wrap:wrap}" +
+    ".author-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0A4D8C,#1a7fd4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem}" +
+    ".meta-divider{color:#ccd5e0}" +
+    ".article-resume{background:#f0f6ff;border-left:4px solid #0A4D8C;padding:16px 20px;border-radius:0 12px 12px 0;color:#2c3a4a;font-style:italic;margin:28px 0}" +
+    ".article-content{margin-top:28px}" +
+    ".article-content h1,.article-content h2,.article-content h3{font-family:Playfair Display,serif;color:#073864;margin:28px 0 12px}" +
+    ".article-content h1{font-size:1.9rem}.article-content h2{font-size:1.5rem}.article-content h3{font-size:1.25rem}" +
+    ".article-content p{margin-bottom:16px;color:#2c3a4a}" +
+    ".article-content img{max-width:100%;border-radius:12px;margin:16px 0}" +
+    ".article-content blockquote{border-left:4px solid #0A4D8C;padding:12px 20px;margin:20px 0;background:#f4f8fd;border-radius:0 10px 10px 0;color:#2c3a4a;font-style:italic}" +
+    ".article-content a{color:#0A4D8C;text-decoration:underline}" +
+    ".article-content ul,.article-content ol{padding-left:24px;margin-bottom:16px}" +
+    ".article-content li{margin-bottom:6px}" +
+    ".tags-section{margin-top:32px;padding-top:20px;border-top:1px solid #e5ebf2}" +
+    ".tags-label{font-size:.85rem;color:#5b6675;font-weight:600;margin-bottom:10px}" +
+    ".share-bar{background:#073864;color:#fff;padding:20px 0;margin-top:40px;text-align:center}" +
+    ".share-bar h4{margin-bottom:14px;font-size:1rem;font-weight:600}" +
+    ".share-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}" +
+    ".share-btn{padding:10px 20px;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:8px;text-decoration:none;transition:.2s}" +
+    ".share-btn:hover{opacity:.85}" +
+    ".btn-fb{background:#1877F2}.btn-tw{background:#000}.btn-wa{background:#25D366}.btn-li{background:#0A66C2}" +
+    ".preview-badge{background:rgba(255,165,0,.15);border:1px solid orange;color:orange;padding:6px 16px;border-radius:6px;font-size:.8rem;text-align:center;margin-bottom:20px}" +
+    "@media(max-width:640px){.hero-title{font-size:1.5rem}.hero-overlay{padding:20px}.article-wrap{padding:20px 16px}}</style></head><body>" +
+    (coverSrc ? "<div class=\"hero\"><img src=\"" + coverSrc + "\" alt=\"Cover\"><div class=\"hero-overlay\"><span class=\"hero-category\">" + catLabel + "</span><h1 class=\"hero-title\">" + titre + "</h1></div></div>" : "<div style=\"background:linear-gradient(135deg,#073864,#0A4D8C);padding:60px 60px 40px;\"><span style=\"background:rgba(255,255,255,.15);color:#fff;padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:600;display:inline-block;margin-bottom:12px;\">" + catLabel + "</span><h1 style=\"font-family:Playfair Display,serif;color:#fff;font-size:2.4rem;font-weight:700;\">" + titre + "</h1></div>") +
+    "<div class=\"article-wrap\">" +
+    "<div class=\"preview-badge\">👁 Aperçu – Ce rendu reflète la publication réelle</div>" +
+    "<div class=\"article-meta\"><div class=\"author-avatar\">" + auteur.charAt(0).toUpperCase() + "</div><div><strong>" + auteur + "</strong></div><span class=\"meta-divider\">•</span><span><i class=\"far fa-calendar\"></i> " + dateStr + "</span><span class=\"meta-divider\">•</span><span><i class=\"far fa-clock\"></i> " + readMin + " min de lecture</span></div>" +
+    (resume ? "<div class=\"article-resume\">" + resume + "</div>" : "") +
+    "<div class=\"article-content\">" + contenu + "</div>" +
+    (tagsHtml ? "<div class=\"tags-section\"><div class=\"tags-label\">Tags</div>" + tagsHtml + "</div>" : "") +
+    "</div>" +
+    "<div class=\"share-bar\"><h4><i class=\"fas fa-share-alt\"></i> Partager cet article</h4><div class=\"share-btns\">" +
+    "<a class=\"share-btn btn-fb\" href=\"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl) + "\" target=\"_blank\"><i class=\"fab fa-facebook-f\"></i> Facebook</a>" +
+    "<a class=\"share-btn btn-tw\" href=\"https://x.com/intent/tweet?text=" + encodeURIComponent(titre) + "&url=" + encodeURIComponent(shareUrl) + "\" target=\"_blank\"><i class=\"fab fa-x-twitter\"></i> X/Twitter</a>" +
+    "<a class=\"share-btn btn-wa\" href=\"https://wa.me/?text=" + encodeURIComponent(titre + "\n" + shareUrl) + "\" target=\"_blank\"><i class=\"fab fa-whatsapp\"></i> WhatsApp</a>" +
+    "<a class=\"share-btn btn-li\" href=\"https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(shareUrl) + "\" target=\"_blank\"><i class=\"fab fa-linkedin-in\"></i> LinkedIn</a>" +
+    "</div></div></body></html>");
   w.document.close();
 }
 
@@ -512,12 +583,33 @@ function renderBlog() {
     <select class="filter-select" onchange="filterBlogByCat(this.value)"><option value="tous">Catégories</option>${[...new Set(articles.map((a) => a.category))].filter(Boolean).map((c) => `<option>${c}</option>`).join("")}</select>
     <select class="filter-select" onchange="filterBlogByStatus(this.value)"><option value="tous">Statuts</option><option value="published">Publié</option><option value="draft">Brouillon</option><option value="archived">Archivé</option></select>
   </div>
-  <div class="blog-grid">${articles.map((a) => `<div class="blog-card" onclick="openArticleModal(${a.id})"><div class="blog-img"><img src="${a.cover_image && a.cover_image.file ? a.cover_image.file : "https://picsum.photos/400/250?random=" + a.id}" alt="${a.title}" loading="lazy"><span class="blog-category">${a.category || ''}</span><button class="edit-btn-overlay" onclick="event.stopPropagation();openArticleModal(${a.id})" title="Modifier"><i class="fas fa-pen"></i></button></div><div class="blog-body"><div class="blog-title">${a.title}</div><div class="blog-excerpt">${a.description || ''}</div><div class="blog-meta"><span><i class="fas fa-user"></i> ${a.author_name || 'Auteur'}</span><span><i class="fas fa-calendar"></i> ${a.publication_date ? a.publication_date.slice(0, 10) : ''}</span><span class="pill ${a.status === "published" ? "pill-success" : a.status === "draft" ? "pill-warning" : "pill-muted"}">${a.status}</span></div></div><div class="blog-footer"><div class="blog-stats"><span><i class="fas fa-eye"></i> ${Math.floor(Math.random() * 500) + 50}</span><span><i class="fas fa-comment"></i> ${Math.floor(Math.random() * 20)}</span><span><i class="fas fa-share-alt"></i> ${Math.floor(Math.random() * 30)}</span></div><div class="blog-actions" onclick="event.stopPropagation()"><button class="btn btn-sm btn-facebook" onclick="shareFromBlog('facebook','${(a.title||'').replace(/'/g, "\\'")}')"><i class="fab fa-facebook-f"></i></button><button class="btn btn-sm btn-twitter" onclick="shareFromBlog('twitter','${(a.title||'').replace(/'/g, "\\'")}')"><i class="fab fa-x-twitter"></i></button><button class="btn btn-sm btn-whatsapp" onclick="shareFromBlog('whatsapp','${(a.title||'').replace(/'/g, "\\'")}')"><i class="fab fa-whatsapp"></i></button></div></div></div>`).join("")}</div>${articles.length === 0 ? `<div class="card" style="text-align:center;padding:60px"><i class="fas fa-newspaper" style="font-size:4rem;color:var(--muted-light)"></i><h3>Aucun article</h3><button class="btn btn-primary" onclick="openArticleModal()"><i class="fas fa-pen"></i> Créer</button></div>` : ""}`;
+  <div class="blog-grid">${articles.map((a) => `<div class="blog-card" onclick="openArticleModal(${a.id})"><div class="blog-img"><img src="${a.cover_image && a.cover_image.file ? a.cover_image.file : "https://picsum.photos/400/250?random=" + a.id}" alt="${a.title}" loading="lazy"><span class="blog-category">${a.category || ''}</span><button class="edit-btn-overlay" onclick="event.stopPropagation();openArticleModal(${a.id})" title="Modifier"><i class="fas fa-pen"></i></button></div><div class="blog-body"><div class="blog-title">${a.title}</div><div class="blog-excerpt">${a.description || ''}</div><div class="blog-meta"><span><i class="fas fa-user"></i> ${a.author_name || 'Auteur'}</span><span><i class="fas fa-calendar"></i> ${a.publication_date ? a.publication_date.slice(0, 10) : ''}</span><span class="pill ${a.status === "published" ? "pill-success" : a.status === "draft" ? "pill-warning" : "pill-muted"}">${a.status}</span></div></div><div class="blog-footer"><div class="blog-stats"><span><i class="fas fa-eye"></i> ${a.views_count || 0}</span><span><i class="fas fa-comment"></i> ${a.comments_count || 0}</span><span><i class="fas fa-share-alt"></i> ${a.shares_count || 0}</span></div><div class="blog-actions" onclick="event.stopPropagation()"><button class="btn btn-sm btn-facebook" onclick="shareFromBlog('facebook',${a.id})"><i class="fab fa-facebook-f"></i></button><button class="btn btn-sm btn-twitter" onclick="shareFromBlog('twitter',${a.id})"><i class="fab fa-x-twitter"></i></button><button class="btn btn-sm btn-whatsapp" onclick="shareFromBlog('whatsapp',${a.id})"><i class="fab fa-whatsapp"></i></button></div></div></div>`).join("")}</div>${articles.length === 0 ? `<div class="card" style="text-align:center;padding:60px"><i class="fas fa-newspaper" style="font-size:4rem;color:var(--muted-light)"></i><h3>Aucun article</h3><button class="btn btn-primary" onclick="openArticleModal()"><i class="fas fa-pen"></i> Créer</button></div>` : ""}`;
 }
-function shareFromBlog(platform, titre) {
-  const url = encodeURIComponent(`https://cejec.edu.ht/blog/${titre.toLowerCase().replace(/\s+/g, "-")}`), text = encodeURIComponent(titre), urls = { facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`, twitter: `https://x.com/intent/tweet?text=${text}&url=${url}`, whatsapp: `https://wa.me/?text=${text}%20${url}` };
-  window.open(urls[platform], "_blank", "width=600,height=500");
-  showToast(`Partagé sur ${platform}`, "info");
+function shareFromBlog(platform, articleId) {
+  const article = articles.find(a => a.id === articleId);
+  if (!article) return;
+  const shareUrl = article.share_url || ("https://cejec.edu.ht/blog/" + (article.slug || article.id));
+  const encoded = encodeURIComponent(shareUrl);
+  const text = encodeURIComponent(article.title || "Article CEJEC");
+  const desc = encodeURIComponent((article.description || "").slice(0, 200));
+  const cover = article.cover_image && article.cover_image.file_url ? encodeURIComponent(article.cover_image.file_url) : "";
+  const tags = article.tags && article.tags.length ? article.tags.map(t => "%23" + t.name.replace(/\s+/g, "")).join("%20") : "";
+  const shareUrls = {
+    facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encoded + "&quote=" + text,
+    twitter: "https://x.com/intent/tweet?text=" + text + "&url=" + encoded + (tags ? "&hashtags=" + article.tags.map(t=>t.name).join(",") : ""),
+    whatsapp: "https://wa.me/?text=" + text + "%0A" + desc + "%0A" + encoded,
+    linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + encoded + "&title=" + text + "&summary=" + desc,
+  };
+  if (shareUrls[platform]) {
+    window.open(shareUrls[platform], "_blank", "width=600,height=500");
+    // Increment share count silently
+    fetch(API_BASE + "/articles/" + articleId + "/increment_share/", { method: "POST" })
+      .then(() => {
+        const a = articles.find(x => x.id === articleId);
+        if (a) { a.shares_count = (a.shares_count || 0) + 1; }
+      }).catch(() => {});
+    showToast("Partagé sur " + platform, "success");
+  }
 }
 function filterBlog(v) { document.querySelectorAll(".blog-card").forEach((c) => c.style.display = c.innerText.toLowerCase().includes(v.toLowerCase()) ? "" : "none"); }
 function filterBlogByCat(v) { document.querySelectorAll(".blog-card").forEach((c) => c.style.display = v === "tous" || c.innerText.includes(v) ? "" : "none"); }
@@ -649,25 +741,56 @@ function updateCharCount() {
   document.getElementById("charCount").style.color = len > 160 ? "var(--red)" : "var(--muted-light)";
 }
 function updateSEOPreview() {
-  const titre = document.getElementById("articleTitle").value || "Titre de l'article", resume = document.getElementById("articleResume").value || "Le résumé apparaîtra ici...", slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "titre-article";
+  const titre = document.getElementById("articleTitle").value || "Titre de l'article";
+  const resume = document.getElementById("articleResume").value || "Le résumé apparaîtra ici...";
+  const slug = titre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/, "") || "titre-article";
   const elTitle = document.getElementById("seoTitle"), elSlug = document.getElementById("seoSlug"), elDesc = document.getElementById("seoDesc"), share = document.getElementById("shareLink");
   if (elTitle) elTitle.textContent = titre;
   if (elSlug) elSlug.textContent = slug;
   if (elDesc) elDesc.textContent = resume.length > 160 ? resume.substring(0, 157) + "..." : resume;
-  if (share) share.value = `https://cejec.edu.ht/blog/${slug}`;
+  // Only set shareLink if it still contains the placeholder
+  if (share && (share.value.includes("titre-article") || share.value === "")) {
+    share.value = "https://cejec.edu.ht/blog/" + slug;
+  }
 }
 function shareArticle(platform) {
-  const titre = encodeURIComponent(document.getElementById("articleTitle").value || "Article CEJEC"), url = encodeURIComponent(document.getElementById("shareLink").value), shareUrls = { facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`, twitter: `https://x.com/intent/tweet?text=${titre}&url=${url}`, linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`, whatsapp: `https://wa.me/?text=${titre}%20${url}` };
+  const titre = document.getElementById("articleTitle") ? document.getElementById("articleTitle").value || "Article CEJEC" : "Article CEJEC";
+  const shareLink = document.getElementById("shareLink");
+  const shareUrl = shareLink ? shareLink.value : "https://cejec.edu.ht/blog/article";
+  const encoded = encodeURIComponent(shareUrl);
+  const text = encodeURIComponent(titre);
+  const desc = encodeURIComponent((document.getElementById("articleResume") ? document.getElementById("articleResume").value : "").slice(0, 200));
+  const tagStr = articleTags.length ? articleTags.map(t => "%23" + t.replace(/\s+/g, "")).join("%20") : "";
+  const shareUrls = {
+    facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encoded + "&quote=" + text,
+    twitter: "https://x.com/intent/tweet?text=" + text + "&url=" + encoded + (articleTags.length ? "&hashtags=" + articleTags.join(",") : ""),
+    linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + encoded + "&title=" + text + "&summary=" + desc,
+    whatsapp: "https://wa.me/?text=" + text + "%0A" + desc + "%0A" + encoded,
+    instagram: null,
+    tiktok: null,
+  };
+  const editId = document.getElementById("articleEditId") ? document.getElementById("articleEditId").value : null;
   if (platform === "instagram" || platform === "tiktok") {
     copyShareLink();
-    showToast(`Lien copié pour ${platform}`, "info");
-  } else {
-    window.open(shareUrls[platform], "_blank", "width=600,height=500");
-    showToast(`Partagé sur ${platform}`, "success");
+    showToast("Lien copié — collez-le dans " + platform, "info");
+    return;
   }
+  if (navigator.share && (platform === "native" || !shareUrls[platform])) {
+    navigator.share({ title: titre, text: titre + "\n" + (document.getElementById("articleResume") ? document.getElementById("articleResume").value : ""), url: shareUrl })
+      .catch(() => {});
+  } else if (shareUrls[platform]) {
+    window.open(shareUrls[platform], "_blank", "width=600,height=500");
+  }
+  // Track share
+  if (editId) {
+    fetch(API_BASE + "/articles/" + editId + "/increment_share/", { method: "POST" })
+      .then(() => { const a = articles.find(x => String(x.id) === String(editId)); if (a) a.shares_count = (a.shares_count||0)+1; }).catch(() => {});
+  }
+  showToast("Partagé sur " + platform, "success");
 }
 function copyShareLink() {
   const input = document.getElementById("shareLink");
   input.select();
   navigator.clipboard.writeText(input.value).then(() => showToast("Lien copié !", "success")).catch(() => showToast("Erreur", "error"));
 }
+

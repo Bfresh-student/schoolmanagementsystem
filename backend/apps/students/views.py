@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -70,6 +71,13 @@ class StudentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(specialization_id=spec_id)
         if class_id := params.get("school_class"):
             qs = qs.filter(school_class_id=class_id)
+        if search := params.get("search"):
+            qs = qs.filter(
+                Q(user__first_name__icontains=search)
+                | Q(user__last_name__icontains=search)
+                | Q(user__email__icontains=search)
+                | Q(registration_number__icontains=search)
+            )
         return qs
 
     @action(detail=False, methods=["get"], url_path="me")

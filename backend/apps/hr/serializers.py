@@ -20,6 +20,13 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["id", "employee_number", "first_name", "last_name", "gender", "phone", "email", "address", "job_title", "department", "hire_date", "status", "monthly_salary", "monthly_bonus", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        title = attrs.get("job_title", getattr(self.instance, "job_title", ""))
+        email = attrs.get("email", getattr(self.instance, "email", ""))
+        if any(word in (title or "").lower() for word in ("prof", "enseign")) and not email:
+            raise serializers.ValidationError({"email": "L'email est obligatoire pour créer le compte professeur."})
+        return attrs
+
 
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:

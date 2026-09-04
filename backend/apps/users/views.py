@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.db.models import Q
 from apps.students.models import Student
-from .models import User, UserProfile, LoginLog, PasswordResetToken
+from .models import User, UserProfile, LoginLog, PasswordResetToken, SystemSetting
 from .serializers import (
     UserListSerializer, UserDetailSerializer, UserCreateSerializer,
     UserUpdateSerializer, UserPasswordChangeSerializer, LoginLogSerializer,
@@ -99,6 +99,100 @@ class UserViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_admin_user:
             return queryset.filter(pk=self.request.user.pk)
         return queryset
+
+    @action(detail=False, methods=['get', 'patch'], url_path='settings', permission_classes=[IsAdministrator])
+    def institution_settings(self, request):
+        """Lit ou enregistre la configuration globale de l'établissement."""
+        setting, _ = SystemSetting.objects.get_or_create(key="institution")
+        if request.method == 'GET':
+            return Response({"settings": setting.value, "updated_at": setting.updated_at})
+
+        payload = request.data.get("settings")
+        if not isinstance(payload, dict):
+            return Response(
+                {"detail": "Le champ settings doit être un objet JSON."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        setting.value = payload
+        setting.updated_by = request.user
+        setting.save(update_fields=["value", "updated_by", "updated_at"])
+        return Response({"settings": setting.value, "updated_at": setting.updated_at})
+
+    @action(detail=False, methods=['get'], url_path='global-search', permission_classes=[IsAdministrator])
+    def global_search(self, request):
+        """Recherche unifiée, limitée aux données visibles par l'administration."""
+        query = (request.query_params.get("q") or "").strip()
+        if len(query) < 2:
+            return Response({"results": []})
+
+        from apps.courses.models import Course
+        from apps.events.models import Event
+        from apps.hr.models import Employee
+        from apps.students.models import Student
+        from apps.teachers.models import Teacher
+
+        limit = 5
+        results = []
+        students = Student.objects.select_related("user").filter(
+            Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(registration_number__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Étudiant", "id": student.id,
+            "title": student.user.get_full_name() or student.user.email,
+            "subtitle": student.registration_number,
+            "href": "gestion_inscriptions.html",
+        } for student in students)
+
+        teachers = Teacher.objects.select_related("user").filter(
+            Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(teacher_id__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Professeur", "id": str(teacher.id),
+            "title": teacher.full_name or teacher.email,
+            "subtitle": teacher.teacher_id,
+            "href": "rh.html",
+        } for teacher in teachers)
+
+        employees = Employee.objects.filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+            | Q(employee_number__icontains=query)
+            | Q(job_title__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Employé", "id": employee.id,
+            "title": f"{employee.first_name} {employee.last_name}",
+            "subtitle": f"{employee.employee_number} · {employee.job_title}",
+            "href": "rh.html",
+        } for employee in employees)
+
+        courses = Course.objects.filter(
+            Q(name__icontains=query) | Q(code__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Formation", "id": str(course.id),
+            "title": course.name,
+            "subtitle": course.code,
+            "href": "gestion_classes.html",
+        } for course in courses)
+
+        events = Event.objects.filter(
+            Q(name__icontains=query) | Q(location__icontains=query)
+        )[:limit]
+        results.extend({
+            "type": "Événement", "id": str(event.id),
+            "title": event.name,
+            "subtitle": event.location or event.start_datetime.strftime("%d/%m/%Y %H:%M"),
+            "href": "incubateur_calendrier.html",
+        } for event in events)
+        return Response({"results": results[:25]})
     
     @action(detail=False, methods=['post'])
     def register(self, request):

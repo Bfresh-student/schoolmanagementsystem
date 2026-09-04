@@ -822,6 +822,15 @@ function triggerAlarm(event, config) {
   const intervalle = (config.intervalle || 5) * 60 * 1000;
 
   function showAlarmPopup() {
+    // Notification native locale : elle complète la fenêtre d'alarme et
+    // reste visible même lorsque l'onglet calendrier est en arrière-plan.
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Rappel d'événement : " + event.titre, {
+        body: event.dateDebut + " à " + event.heureDebut + (event.lieu ? " · " + event.lieu : ""),
+        icon: "images/logo.png",
+        tag: "cejec-event-" + event.apiId,
+      });
+    }
     document.getElementById("alarmPopupIcon").textContent =
       config.icone || "🔔";
     document.getElementById("alarmPopupTitle").textContent = event.titre;
@@ -902,6 +911,9 @@ function toggleAlarmConfig() {
   const checkbox = document.getElementById("evtAlarme");
   const section = document.getElementById("alarmConfigSection");
   section.style.display = checkbox.checked ? "block" : "none";
+  if (checkbox.checked && "Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
 }
 
 // Volume slider

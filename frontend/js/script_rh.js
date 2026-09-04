@@ -643,9 +643,28 @@ async function generatePreviewPDF(docName) {
             <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Sexe</th><th>Tél</th><th>Email</th><th>Fonction</th><th>Dépt</th><th>Embauche</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="empTbody">${rows}</tbody></table></div></div>`;
         }
 
-        function searchEmp(val) {
+        let employeeSearchTimer;
+        async function searchEmp(val) {
             const tbody = document.getElementById('empTbody');
-            if (tbody) tbody.querySelectorAll('tr').forEach(tr => tr.style.display = tr.innerText.toLowerCase().includes(val.toLowerCase()) ? '' : 'none');
+            const query = val.trim();
+            if (!query) {
+                if (tbody) tbody.querySelectorAll('tr').forEach(tr => tr.style.display = '');
+                return;
+            }
+            clearTimeout(employeeSearchTimer);
+            employeeSearchTimer = setTimeout(async () => {
+                try {
+                    const remoteEmployees = await HRAPI.searchEmployees(query);
+                    const allowedIds = new Set(remoteEmployees.map(item => String(item.id)));
+                    if (tbody) tbody.querySelectorAll('tr').forEach((tr, index) => {
+                        const employee = employees[index];
+                        tr.style.display = employee?._hrEmployeeId && allowedIds.has(String(employee._hrEmployeeId)) ? '' : 'none';
+                    });
+                } catch (error) {
+                    console.error('[RH] Recherche employés impossible:', error);
+                    if (tbody) tbody.querySelectorAll('tr').forEach(tr => tr.style.display = tr.innerText.toLowerCase().includes(query.toLowerCase()) ? '' : 'none');
+                }
+            }, 250);
         }
 
         function viewProfil(i) {
@@ -1159,8 +1178,13 @@ async function generatePreviewPDF(docName) {
                     data.sortie = saved.check_out_time ? String(saved.check_out_time).slice(0, 5) : sortie;
                     data.statut = _mapAttendanceStatusFromAPI(saved.status);
                 } catch (err) {
-                    console.warn('[RH] enregistrerPointage API échoué:', err);
+                    console.error('[RH] enregistrerPointage API échoué:', err);
+                    showToast('❌ La présence n’a pas été enregistrée dans la base de données.', 'error');
+                    return;
                 }
+            } else {
+                showToast('❌ Fiche employé introuvable : présence non enregistrée.', 'error');
+                return;
             }
 
             if (existingIndex >= 0) { presencesData[existingIndex] = data; }
@@ -2330,7 +2354,7 @@ async function generatePreviewPDF(docName) {
                         id: hrMatch?.id || `PROF-${t.id}`,
                         prenom: usr.first_name || 'Inconnu',
                         nom: usr.last_name || '',
-                        sexe: 'N/A',
+                        sexe: usr.profile?.gender === 'M' ? 'Homme' : (usr.profile?.gender === 'F' ? 'Femme' : 'N/A'),
                         tel: usr.phone || 'N/A',
                         email: usr.email || 'N/A',
                         fonction: 'Professeur',

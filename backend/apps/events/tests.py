@@ -1,10 +1,12 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.events.models import Event, EventParticipant
+from apps.events.models import Event, EventParticipant, EventReminderDispatch
+from apps.events.tasks import send_upcoming_event_reminders
 
 User = get_user_model()
 
@@ -50,3 +52,25 @@ class EventModelTests(TestCase):
         EventParticipant.objects.create(event=self.event, user=user, status="registered")
         with self.assertRaises(Exception):
             EventParticipant.objects.create(event=self.event, user=user, status="registered")
+
+    @patch("apps.notifications.services.enqueue_notification")
+    def test_configured_reminder_is_dispatched_once_per_recipient(self, enqueue):
+        participant_user = User.objects.create_user(
+            email="reminder@ecole.ht", password="testpass123", role="STUDENT"
+        )
+        EventParticipant.objects.create(
+            event=self.event, user=participant_user, status="registered"
+        )
+        self.event.start_datetime = timezone.now() + timedelta(minutes=10)
+        self.event.end_datetime = self.event.start_datetime + timedelta(hours=2)
+        self.event.calendar_metadata = {"alarme": {"avance": 15}}
+        self.event.save()
+
+        send_upcoming_event_reminders()
+        send_upcoming_event_reminders()
+
+        self.assertEqual(EventReminderDispatch.objects.filter(event=self.event).count(), 2)
+        self.assertEqual(enqueue.call_count, 2)
+        self.assertTrue(
+            all(call.kwargs["trigger_type"] == "event_reminder" for call in enqueue.call_args_list)
+        )

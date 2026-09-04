@@ -22,6 +22,9 @@ from apps.hr.models import (
     LeaveType,
     Salary,
 )
+from apps.teachers.models import Teacher
+from apps.users.models import UserProfile
+from rest_framework.test import APIClient
 
 
 class HRBaseTestCase(TestCase):
@@ -44,6 +47,51 @@ class HRBaseTestCase(TestCase):
 
         # Create a generic leave type for reuse in leave tests
         self.leave_type = LeaveType.objects.create(name="Congé annuel", days_per_year=Decimal("12"), is_paid=True)
+
+
+class EmployeeAndAttendanceAPITests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            email="admin-rh@ecole.ht", password="testpass123", role="ADMIN"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+
+    def test_professor_employee_creates_teacher_and_persists_gender(self):
+        response = self.client.post("/api/v1/hr/employees/", {
+            "employee_number": "EMP-TEST-TEACHER",
+            "first_name": "Marie",
+            "last_name": "Joseph",
+            "gender": "Femme",
+            "phone": "+50911112222",
+            "email": "marie.joseph@ecole.ht",
+            "address": "Port-au-Prince",
+            "job_title": "Professeur",
+            "department": "Professeurs",
+            "hire_date": "2026-09-04",
+            "status": "active",
+            "monthly_salary": "50000.00",
+            "monthly_bonus": "0.00",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201, response.data)
+        employee = Employee.objects.get(employee_number="EMP-TEST-TEACHER")
+        self.assertEqual(employee.gender, "Femme")
+        self.assertIsNotNone(employee.user)
+        self.assertEqual(employee.user.profile.gender, "F")
+        self.assertTrue(Teacher.objects.filter(user=employee.user).exists())
+
+    def test_attendance_is_saved_for_the_employee(self):
+        employee = Employee.objects.create(
+            employee_number="EMP-TEST-ATTENDANCE", first_name="Jean", last_name="Paul",
+            job_title="Agent", department="Administration", hire_date=date(2026, 9, 4),
+        )
+        response = self.client.post("/api/v1/hr/attendances/", {
+            "employee": employee.id, "date": "2026-09-04", "check_in_time": "08:00",
+            "check_out_time": "16:00", "status": "present", "notes": "Test présence",
+        }, format="json")
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(employee.attendances.count(), 1)
 
 
 class ContractTests(HRBaseTestCase):

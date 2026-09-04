@@ -486,6 +486,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             // ============================================
             const calendarEl = document.getElementById('fullCalendar');
             if (calendarEl) {
+                // FullCalendar interprète ``end`` comme exclusif pour les
+                // événements "all day". La date de fin métier, elle, est
+                // inclusive : on ajoute donc un jour uniquement à sa copie
+                // d'affichage, sans fausser le filtre du modal.
+                const calendarEvents = eventsDatabase.map(event => {
+                    const exclusiveEnd = new Date(event.end + 'T00:00:00');
+                    exclusiveEnd.setDate(exclusiveEnd.getDate() + 1);
+                    return { ...event, end: exclusiveEnd.toISOString().slice(0, 10) };
+                });
                 const calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     locale: 'fr',
@@ -499,7 +508,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         month: 'Mois',
                         week: 'Semaine'
                     },
-                    events: eventsDatabase,
+                    events: calendarEvents,
                     height: 'auto',
                     contentHeight: 'auto',
                     selectable: true,

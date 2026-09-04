@@ -148,3 +148,76 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+// Recherche globale : les champs d'en-tête interrogent l'API, pas les
+// données de démonstration éventuellement présentes dans une page.
+document.addEventListener("DOMContentLoaded", function () {
+    const requestSearch = async (query) => {
+        if (window.GlobalSearchAPI) return GlobalSearchAPI.search(query);
+        const endpoint = "https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/auth/users/global-search/?q=" + encodeURIComponent(query);
+        const execute = (token) => fetch(endpoint, { headers: token ? { Authorization: "Bearer " + token } : {} });
+        let response = await execute(localStorage.getItem("authToken"));
+        if (response.status === 401 && localStorage.getItem("refreshToken")) {
+            const refresh = await fetch("https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/auth/users/refresh/", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh: localStorage.getItem("refreshToken") }),
+            });
+            if (refresh.ok) {
+                const tokens = await refresh.json();
+                localStorage.setItem("authToken", tokens.access);
+                response = await execute(tokens.access);
+            }
+        }
+        if (!response.ok) throw new Error("Recherche indisponible");
+        return response.json();
+    };
+
+    document.querySelectorAll(".header-center .input-group").forEach((group) => {
+        const input = group.querySelector("input");
+        const button = group.querySelector(".btn-search");
+        if (!input || input.dataset.globalSearchBound) return;
+        input.dataset.globalSearchBound = "true";
+        group.style.position = "relative";
+        const results = document.createElement("div");
+        results.setAttribute("role", "listbox");
+        results.style.cssText = "display:none;position:absolute;z-index:3000;top:calc(100% + 6px);left:0;right:0;max-height:320px;overflow:auto;background:#fff;border:1px solid #dbe4ee;border-radius:10px;box-shadow:0 12px 28px rgba(15,23,42,.18);padding:6px";
+        group.append(results);
+        let timer;
+        const render = (items, query) => {
+            results.replaceChildren();
+            if (!items.length) {
+                const empty = document.createElement("div");
+                empty.textContent = `Aucun résultat pour « ${query} »`;
+                empty.style.cssText = "padding:12px;color:#64748b;font-size:.9rem";
+                results.append(empty);
+            }
+            items.forEach((item) => {
+                const row = document.createElement("a");
+                row.href = item.href + "?search=" + encodeURIComponent(query);
+                row.style.cssText = "display:block;padding:9px 10px;border-radius:7px;text-decoration:none;color:#172033";
+                const title = document.createElement("strong");
+                title.textContent = item.title;
+                const detail = document.createElement("span");
+                detail.textContent = `${item.type} · ${item.subtitle || ""}`;
+                detail.style.cssText = "display:block;font-size:.78rem;color:#64748b;margin-top:2px";
+                row.append(title, detail);
+                results.append(row);
+            });
+            results.style.display = "block";
+        };
+        const search = async () => {
+            const query = input.value.trim();
+            if (query.length < 2) { results.style.display = "none"; return; }
+            try {
+                const payload = await requestSearch(query);
+                render(payload.results || [], query);
+            } catch (error) {
+                results.style.display = "none";
+                console.error("Recherche globale impossible", error);
+            }
+        };
+        input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(search, 250); });
+        button?.addEventListener("click", (event) => { event.preventDefault(); clearTimeout(timer); search(); });
+        document.addEventListener("click", (event) => { if (!group.contains(event.target)) results.style.display = "none"; });
+    });
+});

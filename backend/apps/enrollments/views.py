@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -69,6 +70,14 @@ class InscriptionViewSet(viewsets.ModelViewSet):
         if role_name == "TEACHER":
             return qs.filter(school_class__specialization__courses__teacher__user=user).distinct()
         if role_name in ("ADMIN", "DIRECTOR", "SECRETARY", "ACCOUNTANT"):
+            if search := self.request.query_params.get("search"):
+                qs = qs.filter(
+                    Q(student__user__first_name__icontains=search)
+                    | Q(student__user__last_name__icontains=search)
+                    | Q(student__user__email__icontains=search)
+                    | Q(student__registration_number__icontains=search)
+                    | Q(promotion__icontains=search)
+                )
             return qs
 
         return qs.none()

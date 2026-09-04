@@ -25,6 +25,22 @@ services:
       - redis
     restart: always
 
+  celery-worker:
+    build: ./backend
+    command: celery -A config worker --loglevel=INFO
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  celery-beat:
+    build: ./backend
+    command: celery -A config beat --loglevel=INFO
+    depends_on:
+      - db
+      - redis
+    restart: always
+
   nginx:
     image: nginx:latest
     ports:
