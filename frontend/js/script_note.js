@@ -171,12 +171,12 @@
             let headHTML = '<tr><th class="corner"><i class="fas fa-user"></i> Élève</th>';
             matieres.forEach(mat => {
                 const count = classEvals.filter(ev => ev.matiere === mat).length;
-                const shortName = mat.length > 20 ? mat.substring(0, 18) + '...' : mat;
+                const shortName = mat.length > 22 ? mat.substring(0, 20) + '...' : mat;
                 headHTML +=
-                    `<th><i class="fas fa-book"></i> ${shortName}<br><small style="font-weight:400;font-size:.6rem">${count} note(s)</small></th>`;
+                    `<th class="th-matiere" title="${mat}"><i class="fas fa-book"></i> <span class="th-title">${shortName}</span><br><small style="font-weight:400;font-size:.62rem;opacity:0.85">${count} note(s)</small></th>`;
             });
             headHTML +=
-                '<th><i class="fas fa-calculator"></i> Moy.</th><th><i class="fas fa-trophy"></i> Rang</th><th><i class="fas fa-star"></i> Mention</th>';
+                '<th class="th-stat"><i class="fas fa-calculator"></i> Moy.</th><th class="th-stat"><i class="fas fa-trophy"></i> Rang</th><th class="th-stat"><i class="fas fa-star"></i> Mention</th>';
             headHTML +=
                 '<th class="actions-col"><i class="fas fa-cogs"></i> Actions</th></tr>';
             head.innerHTML = headHTML;
@@ -187,13 +187,13 @@
 
             let bodyHTML = '';
             if (filtered.length === 0) {
-                bodyHTML = '<tr><td colspan="' + (matieres.length + 4) +
-                    '" style="text-align:center;padding:40px;color:var(--muted);font-size:0.9rem">Aucun élève trouvé</td></tr>';
+                bodyHTML = '<tr><td colspan="' + (matieres.length + 5) +
+                    '" style="text-align:center;padding:40px;color:var(--muted);font-size:0.9rem"><i class="fas fa-user-slash" style="font-size:1.8rem;margin-bottom:8px;display:block;opacity:0.5"></i>Aucun élève trouvé</td></tr>';
             } else {
                 filtered.forEach((et) => {
                     bodyHTML += '<tr>';
                     bodyHTML +=
-                        `<td class="student-cell" onclick="openPanel(${et.id})" title="Détails"><span class="avatar-xs" style="background:${getAvatarColor(et.id)}">${getInitials(et.nom)}</span>${et.nom}</td>`;
+                        `<td class="student-cell" onclick="openPanel(${et.id})" title="Détails de l'élève"><div class="student-info-wrap"><span class="avatar-xs" style="background:${getAvatarColor(et.id)}">${getInitials(et.nom)}</span><span class="student-name-text">${et.nom}</span></div></td>`;
 
                     matieres.forEach(mat => {
                         const avg = getMatiereAverage(et.id, mat);
@@ -211,13 +211,15 @@
                     bodyHTML += `<td class="avg-cell">${avg > 0 ? avg.toFixed(2) : '-'}</td>`;
                     bodyHTML += `<td class="rank-cell">${rank}<sup>/${filtered.length}</sup></td>`;
                     bodyHTML +=
-                        `<td><span class="mention-badge ${mention.class}">${avg > 0 ? mention.text : '-'}</span></td>`;
+                        `<td class="mention-cell"><span class="mention-badge ${mention.class}">${avg > 0 ? mention.text : '-'}</span></td>`;
                     bodyHTML += `<td class="actions-cell">
-                <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openPanel(${et.id})" title="Voir"><i class="fas fa-eye"></i></button>
-                <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openEditNotesModal(${et.id})" title="Modifier tout"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();generateBulletin(${et.id})" title="Bulletin"><i class="fas fa-file-alt"></i></button>
-                <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();printStudent(${et.id})" title="Imprimer"><i class="fas fa-print"></i></button>
-                <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();archiveStudent(${et.id})" title="Archiver"><i class="fas fa-archive"></i></button>
+                <div class="actions-cell-wrap">
+                    <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openPanel(${et.id})" title="Voir profil"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openEditNotesModal(${et.id})" title="Modifier notes"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();generateBulletin(${et.id})" title="Bulletin"><i class="fas fa-file-alt"></i></button>
+                    <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();printStudent(${et.id})" title="Imprimer"><i class="fas fa-print"></i></button>
+                    <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();archiveStudent(${et.id})" title="Archiver"><i class="fas fa-archive"></i></button>
+                </div>
               </td>`;
                     bodyHTML += '</tr>';
                 });
