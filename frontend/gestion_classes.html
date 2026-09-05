@@ -1,306 +1,460 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>Gestion des Classes · CEJEC ERP</title>
     <!-- Favicons (remplacez les chemins par vos fichiers finaux) -->
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/StyleBordAD.css">
-    <link rel="stylesheet" href="css/AI_Styles.css">
-    <link rel="stylesheet" href="css/styles_classes.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="assets/favicon.png" sizes="50x50" type="image/png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="css/StyleBordAD.css" />
+    <link rel="stylesheet" href="css/AI_Styles.css" />
+    <link rel="stylesheet" href="css/styles_classes.css" />
     <link rel="manifest" href="manifest.json" />
     <script src="sw-register.js" defer></script>
   </head>
-<body>
+  <body>
     <div class="dashboard">
-        <!-- Header -->
-        <header class="header">
+      <!-- Header -->
+      <header class="header">
+        <!-- LOGO -->
+        <div class="header-left">
+          <!-- Menu Toggle Button -->
+          <button
+            id="menu-toggle"
+            class="menu-toggle"
+            aria-label="Ouvrir le menu"
+            aria-expanded="false">
+            <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
+              <rect width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
+              <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
+            </svg>
+          </button>
 
-            <!-- LOGO -->
-            <div class="header-left">
-                <!-- Menu Toggle Button -->
-                <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
-                    <svg width="28" height="28" viewBox="0 0 100 80" fill="none">
-                        <rect width="100" height="10" rx="5" fill="#050505"></rect>
-                        <rect y="30" width="100" height="10" rx="5" fill="#050505"></rect>
-                        <rect y="60" width="70" height="10" rx="5" fill="#050505"></rect>
-                    </svg>
-                </button>
+          <a href="Dashbord-Admin.html" class="logo-link">
+            <i class="fas fa-chart-line logo-img"></i>
+          </a>
+        </div>
 
-                <a href="Dashbord-Admin.html" class="logo-link">
-                    <i class="fas fa-chart-line logo-img"></i>
-                </a>
+        <!-- SEARCH BAR -->
+        <div class="header-center">
+          <div class="input-group">
+            <span class="search-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Rechercher étudiants, formations, enseignants ou informations..."
+              aria-label="Rechercher dans le tableau de bord" />
+            <button type="submit" class="btn-search">Recherche</button>
+          </div>
+        </div>
+
+        <!-- USER + NOTIFICATIONS -->
+        <div class="header-right">
+          <!-- USER MENU -->
+          <div class="user-section">
+            <div class="user-trigger" onclick="toggleUserMenu()">
+              <div class="avatar">B</div>
+              <span class="user-name">Bruno Jean</span>
+              <i class="fa-solid fa-chevron-down arrow"></i>
             </div>
 
-            <!-- SEARCH BAR -->
-            <div class="header-center">
-                <div class="input-group">
-                    <span class="search-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </span>
-                    <input type="text" placeholder="Rechercher étudiants, formations, enseignants ou informations..." aria-label="Rechercher dans le tableau de bord">
-                    <button type="submit" class="btn-search">Recherche</button>
-                </div>
+            <div class="user-menu" id="userMenu">
+              <div class="user-info">
+                <strong>CEJEC</strong>
+                <span>brunojean90@gmail.com</span>
+              </div>
+
+              <!-- PARAMÈTRE -->
+              <a href="Parametre_Admin.html" class="menu-item">
+                <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
+              </a>
+
+              <div class="menu-divider"></div>
+
+              <a href="Se connecter - Admin.html" class="menu-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Se déconnecter</span>
+              </a>
             </div>
-            
-            <!-- USER + NOTIFICATIONS -->
-            <div class="header-right">
+          </div>
 
-                <!-- USER MENU -->
-                <div class="user-section">
-                    <div class="user-trigger" onclick="toggleUserMenu()">
-                        <div class="avatar">B</div>
-                        <span class="user-name">Bruno Jean</span>
-                        <i class="fa-solid fa-chevron-down arrow"></i>
-                    </div>
-
-                    <div class="user-menu" id="userMenu">
-                        <div class="user-info">
-                            <strong>CEJEC</strong>
-                            <span>brunojean90@gmail.com</span>
-                        </div>
-
-                        <!-- PARAMÈTRE -->
-                        <a href="Parametre_Admin.html" class="menu-item">
-                        <i class="fa-solid fa-gear"></i> <span>Paramètre</span>
-                        </a>
-
-                        <div class="menu-divider"></div>
-
-                        <a href="Se connecter - Admin.html" class="menu-item logout">
-                            <i class="fa-solid fa-right-from-bracket"></i> 
-                            <span>Se déconnecter</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- NOTIFICATIONS -->
-                <div class="header-actions">
-                    <div class="notification-bell">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="badge44">5</span>
-                    </div>
-                </div>
-
+          <!-- NOTIFICATIONS -->
+          <div class="header-actions">
+            <div class="notification-bell">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge44" hidden>0</span>
             </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- BRAND -->
+        <div class="brand">
+          <div class="logo">
+            <img src="assets/favicon.png" alt="CEJEC Logo" />
+          </div>
+          <div>
+            <h1>CEJEC</h1>
+            <div class="muted">Admin Panel</div>
+          </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav>
+          <!-- DASHBOARD -->
+          <p>Vue d'ensemble</p>
+          <a href="Dashbord-Admin.html">
+            <div class="nav-item">
+              <i class="fa-solid fa-chart-line"></i>
+              Tableau de bord
+            </div>
+          </a>
+
+          <!-- MANAGEMENT -->
+          <p>Opérations</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggle">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-school fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Académique
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenu">
+              <a class="dropdown22-item active" href="gestion_classes.html"
+                ><i class="fa-solid fa-chalkboard"></i> Classes</a
+              >
+              <a class="dropdown22-item" href="gestion_notes.html"
+                ><i class="fa-solid fa-sticky-note"></i> Notes</a
+              >
+              <a class="dropdown22-item" href="gestion_medias.html">
+                <span class="fa-stack" style="width: 1.5em">
+                  <!-- ICON PRINCIPAL -->
+                  <i class="fa-solid fa-image fa-stack-1x"></i>
+                  <!-- PETIT GEAR (TOP RIGHT) -->
+                  <i
+                    class="fa-solid fa-newspaper fa-stack-1x"
+                    style="
+                      font-size: 0.55em;
+                      transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                Médias & Communication
+              </a>
+            </div>
+          </div>
+
+          <!-- INCUBATEUR PROJETS & CALDRIER -->
+          <a href="incubateur_calendrier.html">
+            <div class="nav-item">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-calendar-days fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Incubateur Projets & Calendrier
+            </div>
+          </a>
+
+          <!-- OPERATIONS -->
+          <p>Système</p>
+          <!-- DROPDOWN -->
+          <div class="dropdown22">
+            <div class="dropdown22-toggle" id="chevrToggle">
+              <span class="fa-stack" style="width: 1.5em">
+                <!-- ICON PRINCIPAL -->
+                <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                <!-- PETIT GEAR (TOP RIGHT) -->
+                <i
+                  class="fa-solid fa-gear fa-stack-1x"
+                  style="
+                    font-size: 0.55em;
+                    transform: translate(8px, -8px);
+                  "></i>
+              </span>
+              Opérations
+              <!-- CHEVRON DEROULE -->
+              <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+            </div>
+            <!-- MENI DEROULE -->
+            <div class="dropdown22-menu" id="itemMenu">
+              <a class="dropdown22-item" href="gestion_inscriptions.html"
+                ><i class="fa-solid fa-user-plus"></i> Inscriptions</a
+              >
+              <a class="dropdown22-item" href="gestion_utilisateurs.html"
+                ><i class="fa-solid fa-users"></i> Eleves & Professeurs</a
+              >
+              <a class="dropdown22-item" href="Rapports_Admin.html"
+                ><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a
+              >
+              <a class="dropdown22-item" href="rh.html"
+                ><i class="fa-solid fa-user-tie"></i> RH</a
+              >
+            </div>
+          </div>
+
+          <!-- PARAMÈT -->
+          <a href="Parametre_Admin.html">
+            <div class="nav-item">
+              <i class="fa-solid fa-gear"></i>
+              Paramètre
+            </div>
+          </a>
+        </nav>
+
+        <!-- FOOTER TOOLS -->
+        <div class="sidebar-footer">
+          <div class="user-profile2">
+            <div class="avatar-wrapper2">
+              <div class="avatar2">BJ</div>
+              <span class="status-indicator2"></span>
+            </div>
+
+            <div class="user-info2">
+              <div class="user-name2">Bruno Jean</div>
+              <div class="user-role2">Super Admin</div>
+            </div>
+            <a href="Se connecter - Admin.html">
+              <button class="logout-btn2" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </button>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- OVERLAY -->
+      <div class="overlay"></div>
+
+      <!-- MAIN CONTENT -->
+      <div class="container">
+        <div class="breadcrumb">
+          <i class="fas fa-home"></i> Accueil
+          <i class="fas fa-chevron-right"></i>
+          <span class="current">Gestion des Classes</span>
+        </div>
+
+        <header class="header-page">
+          <div class="header-left22">
+            <h1>
+              <span class="icon-circle"><i class="fas fa-school"></i></span>
+              Gestion des Classes
+            </h1>
+            <span class="header-badge"
+              ><i class="fas fa-graduation-cap"></i> CEJEC · Promotion
+              2026</span
+            >
+            <br />
+            <p><span id="total-classes-text">1</span></p>
+          </div>
+          <button class="btn-ajouter" id="btn-add-class">
+            <i class="fas fa-plus"></i> Ajouter une Classe
+          </button>
         </header>
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-
-            <!-- BRAND -->
-            <div class="brand">
-                <div class="logo">
-                <img src="assets/favicon.png" alt="CEJEC Logo">
-                </div>
-                <div>
-                <h1>CEJEC</h1>
-                <div class="muted">Admin Panel</div>
-                </div>
+        <section class="stats-row">
+          <div class="stat-card stat-total">
+            <div class="stat-info">
+              <span class="stat-label">Total Classes</span
+              ><span class="stat-value" id="statClasses">0</span>
             </div>
-
-            <!-- NAVIGATION -->
-            <nav>
-
-                <!-- DASHBOARD -->
-                <p>Vue d'ensemble</p>                
-                <a href="Dashbord-Admin.html">
-                <div class="nav-item">
-                <i class="fa-solid fa-chart-line"></i>
-                Tableau de bord
-                </div>
-                </a>
-                
-                <!-- MANAGEMENT -->
-                <p>Opérations</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-school fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Académique
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item active" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
-                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
-                        <a class="dropdown22-item" href="gestion_medias.html">
-                            <span class="fa-stack" style="width: 1.5em;">
-                                    <!-- ICON PRINCIPAL -->
-                                    <i class="fa-solid fa-image fa-stack-1x"></i>
-                                    <!-- PETIT GEAR (TOP RIGHT) -->
-                                    <i class="fa-solid fa-newspaper fa-stack-1x"
-                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                            </span>  
-                        Médias & Communication
-                    </a>
-                    </div>
-                </div>
-                
-                <!-- INCUBATEUR PROJETS & CALDRIER -->
-                <a href="incubateur_calendrier.html">
-                <div class="nav-item">
-                <span class="fa-stack" style="width: 1.5em;">
-                    <!-- ICON PRINCIPAL -->
-                    <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
-                    <!-- PETIT GEAR (TOP RIGHT) -->
-                    <i class="fa-solid fa-calendar-days fa-stack-1x"
-                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                </span>                    
-                Incubateur Projets & Calendrier
-                </div>
-                </a>
-             
-                <!-- OPERATIONS -->
-                <p>Système</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Opérations
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                       
-                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
-                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
-                        <a class="dropdown22-item" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
-                    </div>
-                </div>   
-  
-                <!-- PARAMÈT -->
-                <a href="Parametre_Admin.html">
-                <div class="nav-item">
-                <i class="fa-solid fa-gear"></i>
-                Paramètre
-                </div>
-                </a>
-
-            </nav>
-                
-            <!-- FOOTER TOOLS -->
-            <div class="sidebar-footer">
-
-                <div class="user-profile2">
-                    <div class="avatar-wrapper2">
-                        <div class="avatar2">BJ</div>
-                        <span class="status-indicator2"></span>
-                    </div>
-                    
-                    <div class="user-info2">
-                        <div class="user-name2">Bruno Jean</div>
-                        <div class="user-role2">Super Admin</div>
-                    </div>
-                    <a href="Se connecter - Admin.html">
-                        <button class="logout-btn2" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </a>
-                </div>
-                
+            <div class="stat-icon"><i class="fas fa-school"></i></div>
+          </div>
+          <div class="stat-card stat-cours">
+            <div class="stat-info">
+              <span class="stat-label">Total Cours</span
+              ><span class="stat-value" id="statCours">0</span>
             </div>
+            <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+          </div>
+          <div class="stat-card stat-eleves">
+            <div class="stat-info">
+              <span class="stat-label">Total Élèves</span
+              ><span class="stat-value" id="statEleves">0</span>
+            </div>
+            <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+          </div>
+          <div class="stat-card stat-profs">
+            <div class="stat-info">
+              <span class="stat-label">Professeurs</span
+              ><span class="stat-value" id="statProfs">0</span>
+            </div>
+            <div class="stat-icon">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+          </div>
+        </section>
 
-        </aside>
+        <main id="dashboard-content"></main>
+      </div>
 
-        <!-- OVERLAY -->
-        <div class="overlay"></div>
-
-        <!-- MAIN CONTENT -->
-        <div class="container">
-            <div class="breadcrumb"><i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <span class="current">Gestion des Classes</span></div>
-
-            <header class="header-page">
-                <div class="header-left22">
-                    <h1><span class="icon-circle"><i class="fas fa-school"></i></span> Gestion des Classes</h1>
-                    <span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span> <br>
-                    <p><span id="total-classes-text">1</span></p>
+      <div class="modal-overlay" id="addClassModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3><span id="modalTitle">Ajouter une Classe</span></h3>
+            <button class="modal-close" onclick="closeModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editClassId" />
+            <div class="form-grid">
+              <div class="form-group full">
+                <label>Filière</label>
+                <div style="display: flex; gap: 8px; align-items: stretch">
+                  <select
+                    id="modalSpecialization"
+                    style="flex: 1"
+                    onchange="updateNamePreview()">
+                    <option value="">— Sélectionner une filière —</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="btn-add-prof-row"
+                    onclick="promptNewSpecialization()"
+                    title="Créer une nouvelle filière">
+                    <i class="fas fa-plus"></i>
+                  </button>
                 </div>
-                <button class="btn-ajouter" id="btn-add-class"><i class="fas fa-plus"></i> Ajouter une Classe</button>
-            </header>
+              </div>
 
-            <section class="stats-row">
-                <div class="stat-card stat-total"><div class="stat-info"><span class="stat-label">Total Classes</span><span class="stat-value" id="statClasses">0</span></div><div class="stat-icon"><i class="fas fa-school"></i></div></div>
-                <div class="stat-card stat-cours"><div class="stat-info"><span class="stat-label">Total Cours</span><span class="stat-value" id="statCours">0</span></div><div class="stat-icon"><i class="fas fa-book-open"></i></div></div>
-                <div class="stat-card stat-eleves"><div class="stat-info"><span class="stat-label">Total Élèves</span><span class="stat-value" id="statEleves">0</span></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
-                <div class="stat-card stat-profs"><div class="stat-info"><span class="stat-label">Professeurs</span><span class="stat-value" id="statProfs">0</span></div><div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div></div>
-            </section>
+              <div class="form-group">
+                <label>Niveau</label>
+                <input
+                  type="number"
+                  id="modalNiveau"
+                  min="1"
+                  max="10"
+                  value="1"
+                  oninput="updateNamePreview()" />
+              </div>
 
-            <main id="dashboard-content"></main>
+              <div class="form-group">
+                <label>Nom généré</label>
+                <input
+                  type="text"
+                  id="modalNamePreview"
+                  placeholder="— sélectionnez une filière —"
+                  readonly
+                  style="
+                    background: var(--bg-light, #f5f6f8);
+                    color: var(--muted, #888);
+                  " />
+              </div>
+
+              <div class="form-group">
+                <label>Capacité maximale</label
+                ><input type="number" id="modalStudents" min="1" value="25" />
+              </div>
+              <div class="form-group">
+                <label>Salle de Classe</label
+                ><input
+                  type="text"
+                  id="modalRoom"
+                  placeholder="Ex: Salle A-101" />
+              </div>
+              <div class="form-group">
+                <label>Frais de scolarité (HTG)</label
+                ><input
+                  type="number"
+                  id="modalTuitionFee"
+                  min="0"
+                  step="0.01"
+                  value="0" />
+              </div>
+
+              <div
+                class="form-group full"
+                id="currentCountRow"
+                style="display: none">
+                <span class="info-badge"
+                  ><i class="fas fa-user-graduate"></i>
+                  <span id="modalCurrentCount">0</span> élève(s) actuellement
+                  inscrit(s) dans cette classe</span
+                >
+              </div>
+
+              <div class="form-group full">
+                <label>Cours et Professeurs</label>
+                <p
+                  style="
+                    font-size: 0.7rem;
+                    color: var(--muted);
+                    margin-bottom: 8px;
+                  ">
+                  <i class="fas fa-circle-info"></i> Les cours sont rattachés à
+                  la <strong>filière</strong> : les modifier ici les modifie
+                  pour tous les niveaux de cette filière (ex: Entrepreneuriat 1,
+                  2 et 3 partagent le même programme).
+                </p>
+                <div class="cours-prof-editor" id="coursProfEditor"></div>
+                <button
+                  type="button"
+                  class="btn-add-prof-row"
+                  onclick="addCoursProfRow()"
+                  style="margin-top: 8px">
+                  <i class="fas fa-plus"></i> Ajouter un cours
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal()">Annuler</button
+            ><button class="btn-primary" onclick="saveClass()">
+              <i class="fas fa-save"></i> Enregistrer
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div class="modal-overlay" id="addClassModal">
-            <div class="modal"><div class="modal-header"><h3> <span id="modalTitle">Ajouter une Classe</span></h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
-            <div class="modal-body"><input type="hidden" id="editClassId"><div class="form-grid">
-
-                <div class="form-group full">
-                    <label>Filière</label>
-                    <div style="display:flex;gap:8px;align-items:stretch">
-                        <select id="modalSpecialization" style="flex:1" onchange="updateNamePreview()">
-                            <option value="">— Sélectionner une filière —</option>
-                        </select>
-                        <button type="button" class="btn-add-prof-row" onclick="promptNewSpecialization()" title="Créer une nouvelle filière"><i class="fas fa-plus"></i></button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Niveau</label>
-                    <input type="number" id="modalNiveau" min="1" max="10" value="1" oninput="updateNamePreview()">
-                </div>
-
-                <div class="form-group">
-                    <label>Nom généré</label>
-                    <input type="text" id="modalNamePreview" placeholder="— sélectionnez une filière —" readonly style="background:var(--bg-light,#f5f6f8);color:var(--muted,#888)">
-                </div>
-
-                <div class="form-group"><label>Capacité maximale</label><input type="number" id="modalStudents" min="1" value="25"></div>
-                                <div class="form-group"><label>Salle de Classe</label><input type="text" id="modalRoom" placeholder="Ex: Salle A-101"></div>
-                <div class="form-group"><label>Frais de scolarité (HTG)</label><input type="number" id="modalTuitionFee" min="0" step="0.01" value="0"></div>
-
-                <div class="form-group full" id="currentCountRow" style="display:none">
-                    <span class="info-badge"><i class="fas fa-user-graduate"></i> <span id="modalCurrentCount">0</span> élève(s) actuellement inscrit(s) dans cette classe</span>
-                </div>
-
-                <div class="form-group full">
-                    <label>Cours et Professeurs</label>
-                    <p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">
-                        <i class="fas fa-circle-info"></i> Les cours sont rattachés à la <strong>filière</strong> : les modifier ici les modifie pour tous les niveaux de cette filière (ex: Entrepreneuriat 1, 2 et 3 partagent le même programme).
-                    </p>
-                    <div class="cours-prof-editor" id="coursProfEditor"></div>
-                    <button type="button" class="btn-add-prof-row" onclick="addCoursProfRow()" style="margin-top:8px"><i class="fas fa-plus"></i> Ajouter un cours</button>
-                </div>
-            </div></div>
-            <div class="modal-footer"><button class="btn-outline" onclick="closeModal()">Annuler</button><button class="btn-primary" onclick="saveClass()"><i class="fas fa-save"></i> Enregistrer</button></div></div>
-        </div>
-
-        <div class="toast-container" id="toastContainer"></div>
-        <!-- AI Systeme -->
-        <div id="orion-concierge-sistem"></div>
+      <div class="toast-container" id="toastContainer"></div>
+      <!-- AI Systeme -->
+      <div id="orion-concierge-sistem"></div>
     </div>
-    
-<script src="js/Script_Ad.js"></script>
-<script src="js/AI_Script.js"></script>
-<script src="js/script_classes.js"></script>
-<script src="js/user-profile.js"></script>
-</body>
-</html>
 
+    <script src="js/Script_Ad.js"></script>
+    <script src="js/AI_Script.js"></script>
+    <script src="js/script_classes.js"></script>
+    <script src="js/user-profile.js"></script>
+  </body>
+</html>

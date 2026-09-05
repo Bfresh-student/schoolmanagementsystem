@@ -358,8 +358,9 @@ function getStudentAverage(etudiantId) {
         notes[key] !== null &&
         notes[key] !== ""
       ) {
-        totalNotes += notes[key] * ev.coef;
-        totalCoef += ev.coef;
+        const coefficient = Number(ev.coef) > 0 ? Number(ev.coef) : 1;
+        totalNotes += Number(notes[key]) * coefficient;
+        totalCoef += coefficient;
       }
     }
   });
@@ -381,8 +382,9 @@ function getMatiereAverage(etudiantId, matiere) {
         notes[key] !== null &&
         notes[key] !== ""
       ) {
-        totalNotes += notes[key] * ev.coef;
-        totalCoef += ev.coef;
+        const coefficient = Number(ev.coef) > 0 ? Number(ev.coef) : 1;
+        totalNotes += Number(notes[key]) * coefficient;
+        totalCoef += coefficient;
       }
     }
   });
@@ -492,20 +494,7 @@ function renderTable() {
 }
 
 function startCellEdit(cell, etudiantId, matiere) {
-  if (cell.classList.contains("editing")) return;
-  document.querySelectorAll("td.note-cell.editing").forEach((c) => {
-    c.classList.remove("editing");
-  });
-  cell.classList.add("editing");
-  const input = cell.querySelector(".note-input-inline");
-  const currentAvg = getMatiereAverage(etudiantId, matiere);
-  input.value = currentAvg !== null ? currentAvg : "";
-  setTimeout(() => {
-    input.focus();
-    if (input.value) input.select();
-  }, 50);
-  input.dataset.etudiantId = etudiantId;
-  input.dataset.matiere = matiere;
+  openEditNotesModal(etudiantId);
 }
 
 async function finishCellEdit(input, etudiantId, matiere) {
@@ -978,7 +967,7 @@ async function saveEditedNotes() {
         throw new Error("NOTE_INVALIDE");
       await persistNote(
         student.id,
-        evaluation.matiere,
+        evaluation.id,
         value,
         new Date().toISOString().slice(0, 10),
       );

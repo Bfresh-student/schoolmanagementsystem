@@ -86,6 +86,11 @@ class Inscription(models.Model):
     # Cohorte / promotion suivie. Une même classe peut accueillir des
     # promotions différentes au fil des années sans écraser l'historique.
     promotion = models.CharField(max_length=100, blank=True, db_index=True)
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Informations complémentaires saisies dans le dossier d'inscription.",
+    )
     academic_year = models.ForeignKey(
         "students.AcademicYear",
         on_delete=models.PROTECT,

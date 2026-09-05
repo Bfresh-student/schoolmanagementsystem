@@ -1,6 +1,6 @@
-(function() {
-      // ----- DATA -----
-      let etudiantsListe = [] /*
+(function () {
+  // ----- DATA -----
+  let etudiantsListe = []; /*
         { id: 'ETU-001', nom: 'Pierre Antoine', sexe: 'M', cours: 'Entrepreneuriat', statut: 'Actif', moyenne: 92, presences: 95, solde: 0, nouvelInscrit: false },
         { id: 'ETU-002', nom: 'Marie Joseph', sexe: 'F', cours: 'Marketing', statut: 'Actif', moyenne: 78, presences: 88, solde: 15000, nouvelInscrit: false },
         { id: 'ETU-003', nom: 'Jameson Pierre', sexe: 'M', cours: 'Leadership', statut: 'Actif', moyenne: 65, presences: 72, solde: 5000, nouvelInscrit: false },
@@ -15,22 +15,27 @@
         { id: 'ETU-012', nom: 'Chantal Bijou', sexe: 'F', cours: 'Art Oratoire', statut: 'Actif', moyenne: 76, presences: 85, solde: 22000, nouvelInscrit: false }
       ]; */
 
-      let coursCEJEC = [];
-      let coursStats = coursCEJEC.map(c => ({ nom: c, etudiants: 0, reussite: 0, abandon: 0 }));
-      let partenaires = [] /*
+  let coursCEJEC = [];
+  let coursStats = coursCEJEC.map((c) => ({
+    nom: c,
+    etudiants: 0,
+    reussite: 0,
+    abandon: 0,
+  }));
+  let partenaires = []; /*
         { nom: 'Digicel', type: 'Technologie', contrats: 3, stages: 12 },
         { nom: 'Banque Nationale', type: 'Finance', contrats: 2, stages: 8 },
         { nom: 'Fondation Espoir', type: 'ONG', contrats: 1, stages: 5 },
         { nom: 'Université Quisqueya', type: 'Éducation', contrats: 2, stages: 10 },
         { nom: 'BRANA', type: 'Industrie', contrats: 1, stages: 6 }
       ]; */
-      let evenements = [] /*
+  let evenements = []; /*
         { nom: 'Journée Portes Ouvertes', date: '15/06/2026', participants: 250, cout: 50000, retombees: 'Élevées' },
         { nom: 'Conférence Entrepreneuriat', date: '22/06/2026', participants: 150, cout: 35000, retombees: 'Moyennes' },
         { nom: 'Cérémonie de Remise Diplômes', date: '30/06/2026', participants: 400, cout: 120000, retombees: 'Très Élevées' },
         { nom: 'Atelier Leadership', date: '05/07/2026', participants: 80, cout: 25000, retombees: 'Bonnes' }
       ]; */
-      let employesRH = [] /*
+  let employesRH = []; /*
         { nom: 'Jean-Marc Dubois', fonction: 'Administrateur', presences: 22, absences: 0, conges: 2, salaire: 95000 },
         { nom: 'Jacques Mentor', fonction: 'Professeur', presences: 20, absences: 1, conges: 3, salaire: 75000 },
         { nom: 'Marie Louis', fonction: 'Secrétaire', presences: 21, absences: 0, conges: 1, salaire: 65000 },
@@ -38,388 +43,736 @@
         { nom: 'Rose Michel', fonction: 'Professeur', presences: 19, absences: 2, conges: 1, salaire: 72000 }
       ]; */
 
-      let currentPage = 'academique';
-      let currentFilter = 'mois';
-      let chartInstances = {};
-      let invoices = [];
-      let payments = [];
-      let hrReport = [];
-      let academicYearsList = [];
-      let selectedAcademicYear = null;
+  let currentPage = "academique";
+  let currentFilter = "mois";
+  let chartInstances = {};
+  let invoices = [];
+  let payments = [];
+  let hrReport = [];
+  let academicYearsList = [];
+  let selectedPromotion = null;
+  let promotionsList = [];
 
-      const reportList = data => Array.isArray(data) ? data : (data.results || []);
-      async function reportApi(path) {
-        // apiFetch renouvelle le JWT avant de signaler une erreur : les
-        // rapports ont le même comportement de session que les autres pages.
-        return apiFetch(path);
-      }
-      function courseStat(course) {
-        const enrolled = Number(course.seats_taken || 0);
-        // L'API des cours fournit les inscriptions actives, mais pas encore les
-        // résultats ni les abandons. Ne jamais présenter 0 % comme une mesure.
-        return { nom: course.name, etudiants: enrolled, reussite: null, abandon: null };
-      }
-      function monthlyAmounts(items, dateField) {
-        const buckets = new Map();
-        items.forEach(item => { const date = item[dateField] || item.created_at; if (!date) return; const key = date.slice(0, 7); buckets.set(key, (buckets.get(key) || 0) + Number(item.amount || 0)); });
-        return [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
-      }
-      function financialSeries() {
-        const revenue = monthlyAmounts(payments.filter(payment => payment.status === 'completed'), 'paid_at');
-        return { labels: revenue.map(([month]) => month), revenus: revenue.map(([, amount]) => amount), depenses: revenue.map(() => 0) };
-      }
-      function selectedRange() {
-        if (selectedAcademicYear) {
-          const ay = academicYearsList.find(y => y.label === selectedAcademicYear);
-          if (ay) {
-            return { start: ay.start_date, end: ay.end_date };
-          }
-        }
-        const end = new Date();
-        const start = new Date(end);
-        if (currentFilter === 'semaine') start.setDate(end.getDate() - 6);
-        else if (currentFilter === 'trimestre') start.setMonth(end.getMonth() - 2);
-        else if (currentFilter === 'annee') start.setMonth(0, 1);
-        else start.setDate(1);
-        const toDate = value => `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
-        return { start: toDate(start), end: toDate(end) };
-      }
-      function inRange(value, range) {
-        const date = String(value || '').slice(0, 10);
-        return Boolean(date && date >= range.start && date <= range.end);
-      }
-      function enrollmentSeries() {
-        const buckets = new Map();
-        etudiantsListe.forEach(student => {
-          const date = student.dateInscription;
-          if (!date) return;
-          const month = date.slice(0, 7);
-          buckets.set(month, (buckets.get(month) || 0) + 1);
-        });
-        const entries = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
-        return { labels: entries.map(([month]) => month), values: entries.map(([, count]) => count) };
-      }
-      async function loadReportData() {
-        try {
-          const range = selectedRange();
-          const [studentsData, coursesData, invoicesData, paymentsData, companiesData, eventsData, internshipsData, hrData, yearsData] = await Promise.all([
-            reportApi(selectedAcademicYear ? `/students/students/?academic_year=${encodeURIComponent(selectedAcademicYear)}&page_size=1000` : '/students/students/?page_size=1000'),
-            reportApi('/courses/courses/?page_size=1000'),
-            reportApi('/finance/invoices/?page_size=1000'),
-            reportApi('/finance/payments/?page_size=1000'),
-            reportApi('/projects/companies/?page_size=1000'),
-            reportApi('/events/events/?page_size=1000'),
-            reportApi('/projects/internships/?page_size=1000'),
-            reportApi(`/hr/attendances/report-summary/?start=${range.start}&end=${range.end}`),
-            reportApi('/students/academic-years/').catch(() => [])
-          ]);
-          academicYearsList = reportList(yearsData);
-          updateAcademicYearSelect();
-          const students = reportList(studentsData);
-          const courses = reportList(coursesData);
-          invoices = reportList(invoicesData); payments = reportList(paymentsData).filter(payment => inRange(payment.paid_at || payment.created_at, range));
-          const invoicesByStudent = new Map(invoices.map(invoice => [String(invoice.student), invoice]));
-          etudiantsListe = students.map(student => { const invoice = invoicesByStudent.get(String(student.id)); const enrolled = student.enrollment_date || student.created_at || ''; return { id: student.registration_number || student.id, nom: student.full_name, sexe: '—', cours: student.school_class_name || student.specialization_name || '—', statut: ({ active: 'Actif', suspended: 'Suspendu', graduated: 'Diplômé', withdrawn: 'Abandon' })[student.status] || student.status || '—', moyenne: 0, presences: 0, solde: Number(invoice ? invoice.balance_due : 0), nouvelInscrit: inRange(enrolled, range), dateInscription: enrolled.slice(0, 10) }; });
-          coursCEJEC = courses.map(course => course.name); coursStats = courses.map(courseStat);
-          hrReport = hrData.employees || [];
-          employesRH = hrReport.map(employee => ({ nom: employee.name, fonction: employee.job_title, presences: employee.present_days, absences: employee.absent_days, conges: Number(employee.leave_days), salaire: Number(employee.monthly_salary) }));
-          const internships = reportList(internshipsData);
-          partenaires = reportList(companiesData).map(company => ({ nom: company.name, type: company.sector || '—', contrats: 0, stages: internships.filter(internship => internship.company === company.id).length }));
-          evenements = reportList(eventsData).filter(event => inRange(event.start_datetime, range)).map(event => ({ nom: event.name || '—', date: event.start_datetime ? new Date(event.start_datetime).toLocaleDateString('fr-FR') : '—', participants: Number(event.confirmed_participants_count || 0), cout: Number(event.calendar_metadata?.cout || 0), retombees: event.status || '—' }));
-          renderPage(currentPage);
-        } catch (error) {
-          // Un rapport indisponible ne doit jamais afficher les chiffres de démonstration.
-          etudiantsListe = []; coursCEJEC = []; coursStats = []; partenaires = [];
-          evenements = []; employesRH = []; invoices = []; payments = []; hrReport = [];
-          renderPage(currentPage);
-          showToast('Chargement des rapports impossible : ' + error.message, 'error');
-        }
-      }
-
-      function updateAcademicYearSelect() {
-        const select = document.getElementById('rapportAcademicYearSelect');
-        if (!select || !academicYearsList.length) return;
-        select.innerHTML = '<option value="">Toutes les années</option>' +
-          academicYearsList.map(y => `<option value="${y.label}" ${selectedAcademicYear === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('');
-      }
-
-      window.changeRapportAcademicYear = function(val) {
-        selectedAcademicYear = val || null;
-        loadReportData();
-      };
-
-      // ----- TOAST SYSTEM -----
-      function showToast(msg, type = 'success') {
-        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
-        const el = document.createElement('div');
-        el.className = `toast toast-${type}`;
-        el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
-        document.getElementById('toastContainer').appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; el.style.transition = 'all .3s'; setTimeout(() => el.remove(), 300); }, 3000);
-      }
-
-      // ----- DATE FILTER -----
-      function initDateFilter() {
-        const trigger = document.getElementById('dateTrigger');
-        const dropdown = document.getElementById('dateDropdown');
-        const display = document.getElementById('selectedDisplay');
-        if (!trigger || !dropdown) return;
-        trigger.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); });
-        dropdown.querySelectorAll('.option-item').forEach(item => {
-          item.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const value = this.dataset.value;
-            currentFilter = value;
-            dropdown.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            if (!this.querySelector('.check-icon')) { const icon = document.createElement('i'); icon.className = 'fas fa-check check-icon'; this.prepend(icon); }
-            const texts = { semaine: 'Cette semaine', mois: 'Ce mois-ci', trimestre: 'Ce trimestre', annee: 'Cette année' };
-            display.textContent = texts[value] || 'Ce mois-ci';
-            dropdown.classList.remove('show');
-            refreshAll();
-            showToast(`Filtre appliqué : ${texts[value]}`, 'info');
-          });
-        });
-        document.addEventListener('click', () => dropdown.classList.remove('show'));
-      }
-
-      // ----- GLOBAL EXPORT (6 SECTIONS) -----
-      document.addEventListener('click', function(e) {
-        const btn = document.getElementById('exportBtn');
-        const dd = document.getElementById('exportDropdown');
-        if (btn && btn.contains(e.target)) { dd.classList.toggle('show'); } else if (dd && !dd.contains(e.target)) { dd.classList.remove('show'); }
+  const reportList = (data) =>
+    Array.isArray(data) ? data : data.results || [];
+  async function reportApi(path) {
+    // apiFetch renouvelle le JWT avant de signaler une erreur : les
+    // rapports ont le même comportement de session que les autres pages.
+    return apiFetch(path);
+  }
+  function courseStat(course) {
+    const enrolled = Number(course.seats_taken || 0);
+    // L'API des cours fournit les inscriptions actives, mais pas encore les
+    // résultats ni les abandons. Ne jamais présenter 0 % comme une mesure.
+    return {
+      nom: course.name,
+      etudiants: enrolled,
+      reussite: null,
+      abandon: null,
+    };
+  }
+  function monthlyAmounts(items, dateField) {
+    const buckets = new Map();
+    items.forEach((item) => {
+      const date = item[dateField] || item.created_at;
+      if (!date) return;
+      const key = date.slice(0, 7);
+      buckets.set(key, (buckets.get(key) || 0) + Number(item.amount || 0));
+    });
+    return [...buckets.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-6);
+  }
+  function financialSeries() {
+    const revenue = monthlyAmounts(
+      payments.filter((payment) => payment.status === "completed"),
+      "paid_at",
+    );
+    return {
+      labels: revenue.map(([month]) => month),
+      revenus: revenue.map(([, amount]) => amount),
+      depenses: revenue.map(() => 0),
+    };
+  }
+  function selectedRange() {
+    const end = new Date();
+    const start = new Date(end);
+    if (currentFilter === "semaine") start.setDate(end.getDate() - 6);
+    else if (currentFilter === "trimestre") start.setMonth(end.getMonth() - 2);
+    else if (currentFilter === "annee") start.setMonth(0, 1);
+    else start.setDate(1);
+    const toDate = (value) =>
+      `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+    return { start: toDate(start), end: toDate(end) };
+  }
+  function inRange(value, range) {
+    const date = String(value || "").slice(0, 10);
+    return Boolean(date && date >= range.start && date <= range.end);
+  }
+  function enrollmentSeries() {
+    const buckets = new Map();
+    etudiantsListe.forEach((student) => {
+      const date = student.dateInscription;
+      if (!date) return;
+      const month = date.slice(0, 7);
+      buckets.set(month, (buckets.get(month) || 0) + 1);
+    });
+    const entries = [...buckets.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-6);
+    return {
+      labels: entries.map(([month]) => month),
+      values: entries.map(([, count]) => count),
+    };
+  }
+  async function loadReportData() {
+    try {
+      const range = selectedRange();
+      const [
+        studentsData,
+        coursesData,
+        invoicesData,
+        paymentsData,
+        companiesData,
+        eventsData,
+        internshipsData,
+        hrData,
+        yearsData,
+        inscriptionsData,
+        employeesData,
+      ] = await Promise.all([
+        reportApi("/students/students/?page_size=1000"),
+        reportApi("/courses/courses/?page_size=1000"),
+        reportApi("/finance/invoices/?page_size=1000"),
+        reportApi("/finance/payments/?page_size=1000"),
+        reportApi("/projects/companies/?page_size=1000"),
+        reportApi("/events/events/?page_size=1000"),
+        reportApi("/projects/internships/?page_size=1000"),
+        reportApi(
+          `/hr/attendances/report-summary/?start=${range.start}&end=${range.end}`,
+        ),
+        reportApi("/students/academic-years/").catch(() => []),
+        reportApi("/enrollments/inscriptions/?page_size=1000").catch(() => []),
+        reportApi("/hr/employees/?page_size=1000").catch(() => []),
+      ]);
+      academicYearsList = reportList(yearsData);
+      updateAcademicYearSelect();
+      const inscriptions = reportList(inscriptionsData);
+      promotionsList = [
+        ...new Set(inscriptions.map((item) => item.promotion).filter(Boolean)),
+      ].sort();
+      updatePromotionSelect();
+      const allStudents = reportList(studentsData);
+      const selectedStudentIds = selectedPromotion
+        ? new Set(
+            inscriptions
+              .filter((item) => item.promotion === selectedPromotion)
+              .map((item) => String(item.student)),
+          )
+        : null;
+      const students = selectedStudentIds
+        ? allStudents.filter((student) =>
+            selectedStudentIds.has(String(student.id)),
+          )
+        : allStudents;
+      const courses = reportList(coursesData);
+      invoices = reportList(invoicesData);
+      payments = reportList(paymentsData).filter((payment) =>
+        inRange(payment.paid_at || payment.created_at, range),
+      );
+      const invoicesByStudent = new Map(
+        invoices.map((invoice) => [String(invoice.student), invoice]),
+      );
+      etudiantsListe = students.map((student) => {
+        const invoice = invoicesByStudent.get(String(student.id));
+        const enrolled = student.enrollment_date || student.created_at || "";
+        return {
+          id: student.registration_number || student.id,
+          nom: student.full_name,
+          sexe: "—",
+          cours:
+            student.school_class_name || student.specialization_name || "—",
+          statut:
+            {
+              active: "Actif",
+              suspended: "Suspendu",
+              graduated: "Diplômé",
+              withdrawn: "Abandon",
+            }[student.status] ||
+            student.status ||
+            "—",
+          moyenne: 0,
+          presences: 0,
+          solde: Number(invoice ? invoice.balance_due : 0),
+          nouvelInscrit: inRange(enrolled, range),
+          dateInscription: enrolled.slice(0, 10),
+        };
       });
-      document.getElementById('exportDropdown')?.addEventListener('click', function(e) {
-        const item = e.target.closest('.dropdown-item');
-        if (item) {
-          const format = item.getAttribute('data-format');
-          if (format === 'pdf') exportFullPDF();
-          else if (format === 'excel') exportFullExcel();
-          this.classList.remove('show');
-        }
+      coursCEJEC = courses.map((course) => course.name);
+      coursStats = courses.map(courseStat);
+      hrReport = hrData.employees || [];
+      const employeeRows = reportList(employeesData);
+      employesRH = hrReport.map((employee) => {
+        const match = employeeRows.find(
+          (row) =>
+            String(row.id) === String(employee.id) ||
+            row.employee_number === employee.employee_number ||
+            row.email === employee.email,
+        );
+        return {
+          nom: employee.name,
+          sexe: match?.gender || employee.gender || "—",
+          fonction: employee.job_title,
+          presences: employee.present_days,
+          absences: employee.absent_days,
+          conges: Number(employee.leave_days),
+          salaire: Number(employee.monthly_salary),
+        };
       });
+      const internships = reportList(internshipsData);
+      partenaires = reportList(companiesData).map((company) => ({
+        nom: company.name,
+        type: company.sector || "—",
+        contrats: 0,
+        stages: internships.filter(
+          (internship) => internship.company === company.id,
+        ).length,
+      }));
+      evenements = reportList(eventsData)
+        .filter((event) => inRange(event.start_datetime, range))
+        .map((event) => ({
+          nom: event.name || "—",
+          date: event.start_datetime
+            ? new Date(event.start_datetime).toLocaleDateString("fr-FR")
+            : "—",
+          participants: Number(event.confirmed_participants_count || 0),
+          cout: Number(event.calendar_metadata?.cout || 0),
+          retombees: event.status || "—",
+        }));
+      renderPage(currentPage);
+    } catch (error) {
+      // Un rapport indisponible ne doit jamais afficher les chiffres de démonstration.
+      etudiantsListe = [];
+      coursCEJEC = [];
+      coursStats = [];
+      partenaires = [];
+      evenements = [];
+      employesRH = [];
+      invoices = [];
+      payments = [];
+      hrReport = [];
+      renderPage(currentPage);
+      showToast(
+        "Chargement des rapports impossible : " + error.message,
+        "error",
+      );
+    }
+  }
 
-      // Définition des 6 sections pour l'export global
-      function getSectionsData() {
-        const sections = [];
-        // Section 1: Académique
-        const acadRows = etudiantsListe.map(e => [
-          e.id, e.nom + (e.nouvelInscrit ? ' (Nouveau)' : ''), e.sexe, e.cours, e.statut,
-          e.moyenne + '%', e.presences + '%', (e.solde || 0) > 0 ? (e.solde).toLocaleString() + ' HTG' : 'Soldé'
-        ]);
-        sections.push({
-          title: 'Registre Académique',
-          headers: ['Matricule', 'Nom complet', 'Sexe', 'Cours', 'Statut', 'Moyenne', 'Présences', 'Solde'],
-          rows: acadRows
-        });
-        // Section 2: Financier
-        const series = financialSeries();
-        const revenusMensuels = series.revenus;
-        const depensesMensuels = series.depenses;
-        const mois = series.labels;
-        const finRows = revenusMensuels.map((r, i) => [
-          mois[i], r.toLocaleString() + ' HTG', depensesMensuels[i].toLocaleString() + ' HTG',
-          (r - depensesMensuels[i]).toLocaleString() + ' HTG', (r ? Math.round((r - depensesMensuels[i]) / r * 100) : 0) + '%'
-        ]);
-        sections.push({
-          title: 'Détail Financier',
-          headers: ['Mois', 'Revenus', 'Dépenses', 'Bénéfices', 'Marge'],
-          rows: finRows
-        });
-        // Section 3: RH
-        const rhRows = employesRH.map(e => [
-          e.nom, e.fonction, e.presences + 'j', e.absences + 'j', e.conges + 'j', e.salaire.toLocaleString() + ' HTG'
-        ]);
-        sections.push({
-          title: 'Rapport RH',
-          headers: ['Employé', 'Fonction', 'Présences', 'Absences', 'Congés', 'Salaire'],
-          rows: rhRows
-        });
-        // Section 4: Formations
-        const formRows = coursStats.map(c => [c.nom, c.etudiants.toString(), c.reussite + '%', c.abandon + '%']);
-        sections.push({
-          title: 'Formations CEJEC',
-          headers: ['Cours', 'Étudiants', 'Réussite', 'Abandon'],
-          rows: formRows
-        });
-        // Section 5: Partenariats
-        const partRows = partenaires.map(p => [p.nom, p.type, p.contrats.toString(), p.stages.toString()]);
-        sections.push({
-          title: 'Partenariats',
-          headers: ['Partenaire', 'Type', 'Contrats', 'Stages'],
-          rows: partRows
-        });
-        // Section 6: Événements
-        const evRows = evenements.map(ev => [ev.nom, ev.date, ev.participants.toString(), ev.cout.toLocaleString() + ' HTG', ev.retombees]);
-        sections.push({
-          title: 'Événements',
-          headers: ['Nom', 'Date', 'Participants', 'Coût', 'Retombées'],
-          rows: evRows
-        });
-        return sections;
-      }
+  function updateAcademicYearSelect() {
+    const select = document.getElementById("rapportAcademicYearSelect");
+    if (!select || !academicYearsList.length) return;
+    select.innerHTML =
+      '<option value="">Toutes les promotions</option>' +
+      academicYearsList
+        .map(
+          (y) =>
+            `<option value="${y.label}">${y.label}${y.is_active ? " (Active)" : ""}</option>`,
+        )
+        .join("");
+  }
 
-      function exportFullPDF() {
-        try {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-          const sections = getSectionsData();
-          sections.forEach((section, index) => {
-            if (index > 0) doc.addPage();
-            doc.setFontSize(16);
-            doc.setTextColor(10, 77, 140);
-            doc.text('CEJEC - ' + section.title, 14, 15);
-            doc.setFontSize(9);
-            doc.setTextColor(90, 100, 110);
-            doc.text('Rapport exporté le ' + new Date().toLocaleDateString('fr-FR'), 14, 22);
-            doc.autoTable({
-              head: [section.headers],
-              body: section.rows,
-              startY: 28,
-              theme: 'grid',
-              styles: { fontSize: 8, cellPadding: 3 },
-              headStyles: { fillColor: [10, 77, 140], textColor: 255, fontStyle: 'bold' },
-              alternateRowStyles: { fillColor: [244, 248, 253] }
-            });
-          });
-          doc.save('rapport_cejec_complet_' + new Date().toISOString().split('T')[0] + '.pdf');
-          showToast('PDF 6 pages exporté avec succès', 'success');
-        } catch (e) {
-          console.error(e);
-          showToast('Erreur export PDF: ' + e.message, 'error');
+  function updatePromotionSelect() {
+    const select = document.getElementById("rapportAcademicYearSelect");
+    if (!select) return;
+    select.innerHTML =
+      '<option value="">Toutes les promotions</option>' +
+      promotionsList
+        .map(
+          (promotion) =>
+            `<option value="${promotion}" ${selectedPromotion === promotion ? "selected" : ""}>${promotion}</option>`,
+        )
+        .join("");
+  }
+
+  window.changeRapportAcademicYear = function (val) {
+    selectedPromotion = val || null;
+    loadReportData();
+  };
+
+  // ----- TOAST SYSTEM -----
+  function showToast(msg, type = "success") {
+    const icons = {
+      success: "fa-check-circle",
+      error: "fa-times-circle",
+      info: "fa-info-circle",
+      warning: "fa-exclamation-triangle",
+    };
+    const el = document.createElement("div");
+    el.className = `toast toast-${type}`;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+    document.getElementById("toastContainer").appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateX(100px)";
+      el.style.transition = "all .3s";
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
+  }
+
+  // ----- DATE FILTER -----
+  function initDateFilter() {
+    const trigger = document.getElementById("dateTrigger");
+    const dropdown = document.getElementById("dateDropdown");
+    const display = document.getElementById("selectedDisplay");
+    if (!trigger || !dropdown) return;
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("show");
+    });
+    dropdown.querySelectorAll(".option-item").forEach((item) => {
+      item.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const value = this.dataset.value;
+        currentFilter = value;
+        dropdown
+          .querySelectorAll(".option-item")
+          .forEach((opt) => opt.classList.remove("selected"));
+        this.classList.add("selected");
+        if (!this.querySelector(".check-icon")) {
+          const icon = document.createElement("i");
+          icon.className = "fas fa-check check-icon";
+          this.prepend(icon);
         }
-      }
+        const texts = {
+          semaine: "Cette semaine",
+          mois: "Ce mois-ci",
+          trimestre: "Ce trimestre",
+          annee: "Cette année",
+        };
+        display.textContent = texts[value] || "Ce mois-ci";
+        dropdown.classList.remove("show");
+        refreshAll();
+        showToast(`Filtre appliqué : ${texts[value]}`, "info");
+      });
+    });
+    document.addEventListener("click", () => dropdown.classList.remove("show"));
+  }
 
-      function exportFullExcel() {
-        try {
-          const wb = XLSX.utils.book_new();
-          const sections = getSectionsData();
-          sections.forEach((section, index) => {
-            const sheetData = [section.headers, ...section.rows];
-            const ws = XLSX.utils.aoa_to_sheet(sheetData);
-            const colWidths = section.headers.map((h, i) => ({ wch: Math.max(h.length + 5, ...section.rows.map(r => String(r[i] || '').length + 5)) }));
-            ws['!cols'] = colWidths;
-            XLSX.utils.book_append_sheet(wb, ws, section.title.substring(0, 31));
-          });
-          XLSX.writeFile(wb, 'rapport_cejec_complet_' + new Date().toISOString().split('T')[0] + '.xlsx');
-          showToast('Excel 6 feuilles exporté avec succès', 'success');
-        } catch (e) {
-          console.error(e);
-          showToast('Erreur export Excel: ' + e.message, 'error');
-        }
+  // ----- GLOBAL EXPORT (6 SECTIONS) -----
+  document.addEventListener("click", function (e) {
+    const btn = document.getElementById("exportBtn");
+    const dd = document.getElementById("exportDropdown");
+    if (btn && btn.contains(e.target)) {
+      dd.classList.toggle("show");
+    } else if (dd && !dd.contains(e.target)) {
+      dd.classList.remove("show");
+    }
+  });
+  document
+    .getElementById("exportDropdown")
+    ?.addEventListener("click", function (e) {
+      const item = e.target.closest(".dropdown-item");
+      if (item) {
+        const format = item.getAttribute("data-format");
+        if (format === "pdf") exportFullPDF();
+        else if (format === "excel") exportFullExcel();
+        this.classList.remove("show");
       }
+    });
 
-      function exportCurrentTablePDF() {
-        try {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-          doc.setFontSize(14);
-          doc.text('Rapport CEJEC', 14, 15);
-          const table = document.querySelector('table');
-          if (table) { doc.autoTable({ html: table, startY: 22, theme: 'grid', styles: { fontSize: 7 }, headStyles: { fillColor: [10, 77, 140] } }); doc.save('rapport_cejec_section.pdf'); showToast('PDF exporté', 'success'); }
-        } catch (e) { showToast('Erreur PDF', 'error'); }
-      }
-      function exportCurrentTableExcel() {
-        try {
-          const table = document.querySelector('table');
-          if (table) { const wb = XLSX.utils.table_to_book(table); XLSX.writeFile(wb, 'rapport_cejec_section.xlsx'); showToast('Excel exporté', 'success'); }
-        } catch (e) { showToast('Erreur Excel', 'error'); }
-      }
+  // Définition des 6 sections pour l'export global
+  function getSectionsData() {
+    const sections = [];
+    // Section 1: Académique
+    const acadRows = etudiantsListe.map((e) => [
+      e.id,
+      e.nom + (e.nouvelInscrit ? " (Nouveau)" : ""),
+      e.sexe,
+      e.cours,
+      e.statut,
+      e.moyenne + "%",
+      e.presences + "%",
+      (e.solde || 0) > 0 ? e.solde.toLocaleString() + " HTG" : "Soldé",
+    ]);
+    sections.push({
+      title: "Registre Académique",
+      headers: [
+        "Matricule",
+        "Nom complet",
+        "Sexe",
+        "Cours",
+        "Statut",
+        "Moyenne",
+        "Présences",
+        "Solde",
+      ],
+      rows: acadRows,
+    });
+    // Section 2: Financier
+    const series = financialSeries();
+    const revenusMensuels = series.revenus;
+    const depensesMensuels = series.depenses;
+    const mois = series.labels;
+    const finRows = revenusMensuels.map((r, i) => [
+      mois[i],
+      r.toLocaleString() + " HTG",
+      depensesMensuels[i].toLocaleString() + " HTG",
+      (r - depensesMensuels[i]).toLocaleString() + " HTG",
+      (r ? Math.round(((r - depensesMensuels[i]) / r) * 100) : 0) + "%",
+    ]);
+    sections.push({
+      title: "Détail Financier",
+      headers: ["Mois", "Revenus", "Dépenses", "Bénéfices", "Marge"],
+      rows: finRows,
+    });
+    // Section 3: RH
+    const rhRows = employesRH.map((e) => [
+      e.nom,
+      e.sexe,
+      e.fonction,
+      e.presences + "j",
+      e.absences + "j",
+      e.conges + "j",
+      e.salaire.toLocaleString() + " HTG",
+    ]);
+    sections.push({
+      title: "Rapport RH",
+      headers: [
+        "Employé",
+        "Sexe",
+        "Fonction",
+        "Présences",
+        "Absences",
+        "Congés",
+        "Salaire",
+      ],
+      rows: rhRows,
+    });
+    // Section 4: Formations
+    const formRows = coursStats.map((c) => [
+      c.nom,
+      c.etudiants.toString(),
+      c.reussite + "%",
+      c.abandon + "%",
+    ]);
+    sections.push({
+      title: "Formations CEJEC",
+      headers: ["Cours", "Étudiants", "Réussite", "Abandon"],
+      rows: formRows,
+    });
+    // Section 5: Partenariats
+    const partRows = partenaires.map((p) => [
+      p.nom,
+      p.type,
+      p.contrats.toString(),
+      p.stages.toString(),
+    ]);
+    sections.push({
+      title: "Partenariats",
+      headers: ["Partenaire", "Type", "Contrats", "Stages"],
+      rows: partRows,
+    });
+    // Section 6: Événements
+    const evRows = evenements.map((ev) => [
+      ev.nom,
+      ev.date,
+      ev.participants.toString(),
+      ev.cout.toLocaleString() + " HTG",
+      ev.retombees,
+    ]);
+    sections.push({
+      title: "Événements",
+      headers: ["Nom", "Date", "Participants", "Coût", "Retombées"],
+      rows: evRows,
+    });
+    return sections;
+  }
 
-      // ----- NAVIGATION -----
-      document.querySelectorAll('#navRH button').forEach(btn => {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('#navRH button').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          currentPage = this.dataset.page;
-          renderPage(currentPage);
+  function exportFullPDF() {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+      const sections = getSectionsData();
+      sections.forEach((section, index) => {
+        if (index > 0) doc.addPage();
+        doc.setFontSize(16);
+        doc.setTextColor(10, 77, 140);
+        doc.text("CEJEC - " + section.title, 14, 15);
+        doc.setFontSize(9);
+        doc.setTextColor(90, 100, 110);
+        doc.text(
+          "Rapport exporté le " + new Date().toLocaleDateString("fr-FR"),
+          14,
+          22,
+        );
+        doc.autoTable({
+          head: [section.headers],
+          body: section.rows,
+          startY: 28,
+          theme: "grid",
+          styles: { fontSize: 8, cellPadding: 3 },
+          headStyles: {
+            fillColor: [10, 77, 140],
+            textColor: 255,
+            fontStyle: "bold",
+          },
+          alternateRowStyles: { fillColor: [244, 248, 253] },
         });
       });
+      doc.save(
+        "rapport_cejec_complet_" +
+          new Date().toISOString().split("T")[0] +
+          ".pdf",
+      );
+      showToast("PDF 6 pages exporté avec succès", "success");
+    } catch (e) {
+      console.error(e);
+      showToast("Erreur export PDF: " + e.message, "error");
+    }
+  }
 
-      function destroyAllCharts() {
-        Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) try { chartInstances[k].destroy(); } catch (e) {} });
-        chartInstances = {};
-      }
+  function exportFullExcel() {
+    try {
+      const wb = XLSX.utils.book_new();
+      const sections = getSectionsData();
+      sections.forEach((section, index) => {
+        const sheetData = [section.headers, ...section.rows];
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        const colWidths = section.headers.map((h, i) => ({
+          wch: Math.max(
+            h.length + 5,
+            ...section.rows.map((r) => String(r[i] || "").length + 5),
+          ),
+        }));
+        ws["!cols"] = colWidths;
+        XLSX.utils.book_append_sheet(wb, ws, section.title.substring(0, 31));
+      });
+      XLSX.writeFile(
+        wb,
+        "rapport_cejec_complet_" +
+          new Date().toISOString().split("T")[0] +
+          ".xlsx",
+      );
+      showToast("Excel 6 feuilles exporté avec succès", "success");
+    } catch (e) {
+      console.error(e);
+      showToast("Erreur export Excel: " + e.message, "error");
+    }
+  }
 
-      function renderPage(page) {
-        const mc = document.getElementById('mainContent');
-        destroyAllCharts();
-        switch (page) {
-          case 'academique': mc.innerHTML = renderAcademique(); setupSectionTabs('acadTabs'); setTimeout(initAcademiqueCharts, 200); break;
-          case 'financier': mc.innerHTML = renderFinancier(); setTimeout(initFinancierCharts, 200); break;
-          case 'rh': mc.innerHTML = renderRH(); break;
-          case 'formations': mc.innerHTML = renderFormations(); setTimeout(initFormationsCharts, 200); break;
-          case 'partenariats': mc.innerHTML = renderPartenariats(); break;
-          case 'evenements': mc.innerHTML = renderEvenements(); break;
-          default: mc.innerHTML = renderAcademique(); setupSectionTabs('acadTabs'); setTimeout(initAcademiqueCharts, 200);
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      function setupSectionTabs(containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.querySelectorAll('.section-tab').forEach(tab => {
-          tab.addEventListener('click', function() {
-            container.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            filterAcademiqueTable(this.dataset.filter);
-          });
+  function exportCurrentTablePDF() {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+      doc.setFontSize(14);
+      doc.text("Rapport CEJEC", 14, 15);
+      const table = document.querySelector("table");
+      if (table) {
+        doc.autoTable({
+          html: table,
+          startY: 22,
+          theme: "grid",
+          styles: { fontSize: 7 },
+          headStyles: { fillColor: [10, 77, 140] },
         });
+        doc.save("rapport_cejec_section.pdf");
+        showToast("PDF exporté", "success");
       }
-      function filterAcademiqueTable(filter) {
-        const tbody = document.getElementById('acadTbody');
-        if (!tbody) return;
-        tbody.querySelectorAll('tr').forEach(row => {
-          const statut = row.getAttribute('data-statut');
-          const isNew = row.getAttribute('data-new') === 'true';
-          if (filter === 'all') { row.style.display = ''; } else if (filter === 'nouveaux') { row.style.display = isNew ? '' : 'none'; } else if (filter === 'dettes') {
-            const solde = parseInt(row.getAttribute('data-solde') || '0');
-            row.style.display = solde > 0 ? '' : 'none';
-          } else { row.style.display = statut === filter ? '' : 'none'; }
-        });
+    } catch (e) {
+      showToast("Erreur PDF", "error");
+    }
+  }
+  function exportCurrentTableExcel() {
+    try {
+      const table = document.querySelector("table");
+      if (table) {
+        const wb = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(wb, "rapport_cejec_section.xlsx");
+        showToast("Excel exporté", "success");
       }
-      window.searchTable = function(val) {
-        const tbody = document.getElementById('acadTbody');
-        if (!tbody) return;
-        const term = val.toLowerCase();
-        tbody.querySelectorAll('tr').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none'; });
-      };
+    } catch (e) {
+      showToast("Erreur Excel", "error");
+    }
+  }
 
-      // ----- ACADEMIQUE -----
-      function initAcademiqueCharts() {
-        const series = enrollmentSeries();
-        const ctx1 = document.getElementById('acadInscriptionChart');
-        if (ctx1 && !chartInstances['acadInscription']) {
-          chartInstances['acadInscription'] = new Chart(ctx1, {
-            type: 'line', data: { labels: series.labels, datasets: [{ label: 'Inscriptions', data: series.values, borderColor: '#0A4D8C', backgroundColor: 'rgba(10,77,140,0.1)', fill: true, tension: 0.4, borderWidth: 2 }] },
-            options: { responsive: true, maintainAspectRatio: false }
-          });
-        }
-        const ctx2 = document.getElementById('acadReussiteChart');
-        if (ctx2 && !chartInstances['acadReussite']) {
-          const graduated = etudiantsListe.filter(student => student.statut === 'Diplômé').length;
-          const rate = etudiantsListe.length ? Math.round((graduated / etudiantsListe.length) * 100) : 0;
-          chartInstances['acadReussite'] = new Chart(ctx2, {
-            type: 'bar', data: { labels: ['Taux de diplomation'], datasets: [{ label: 'Diplômés (%)', data: [rate], backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 6 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
-          });
-        }
+  // ----- NAVIGATION -----
+  document.querySelectorAll("#navRH button").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      document
+        .querySelectorAll("#navRH button")
+        .forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
+      currentPage = this.dataset.page;
+      renderPage(currentPage);
+    });
+  });
+
+  function destroyAllCharts() {
+    Object.keys(chartInstances).forEach((k) => {
+      if (chartInstances[k])
+        try {
+          chartInstances[k].destroy();
+        } catch (e) {}
+    });
+    chartInstances = {};
+  }
+
+  function renderPage(page) {
+    const mc = document.getElementById("mainContent");
+    destroyAllCharts();
+    switch (page) {
+      case "academique":
+        mc.innerHTML = renderAcademique();
+        setupSectionTabs("acadTabs");
+        setTimeout(initAcademiqueCharts, 200);
+        break;
+      case "financier":
+        mc.innerHTML = renderFinancier();
+        setTimeout(initFinancierCharts, 200);
+        break;
+      case "rh":
+        mc.innerHTML = renderRH();
+        break;
+      case "formations":
+        mc.innerHTML = renderFormations();
+        setTimeout(initFormationsCharts, 200);
+        break;
+      case "partenariats":
+        mc.innerHTML = renderPartenariats();
+        break;
+      case "evenements":
+        mc.innerHTML = renderEvenements();
+        break;
+      default:
+        mc.innerHTML = renderAcademique();
+        setupSectionTabs("acadTabs");
+        setTimeout(initAcademiqueCharts, 200);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function setupSectionTabs(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll(".section-tab").forEach((tab) => {
+      tab.addEventListener("click", function () {
+        container
+          .querySelectorAll(".section-tab")
+          .forEach((t) => t.classList.remove("active"));
+        this.classList.add("active");
+        filterAcademiqueTable(this.dataset.filter);
+      });
+    });
+  }
+  function filterAcademiqueTable(filter) {
+    const tbody = document.getElementById("acadTbody");
+    if (!tbody) return;
+    tbody.querySelectorAll("tr").forEach((row) => {
+      const statut = row.getAttribute("data-statut");
+      const isNew = row.getAttribute("data-new") === "true";
+      if (filter === "all") {
+        row.style.display = "";
+      } else if (filter === "nouveaux") {
+        row.style.display = isNew ? "" : "none";
+      } else if (filter === "dettes") {
+        const solde = parseInt(row.getAttribute("data-solde") || "0");
+        row.style.display = solde > 0 ? "" : "none";
+      } else {
+        row.style.display = statut === filter ? "" : "none";
       }
-      function renderAcademique() {
-        const nouveauxCount = etudiantsListe.filter(e => e.nouvelInscrit).length;
-        const detteTotal = etudiantsListe.reduce((s, e) => s + (e.solde || 0), 0);
-        const detteCount = etudiantsListe.filter(e => (e.solde || 0) > 0).length;
-        let rows = etudiantsListe.map(e => `
+    });
+  }
+  window.searchTable = function (val) {
+    const tbody = document.getElementById("acadTbody");
+    if (!tbody) return;
+    const term = val.toLowerCase();
+    tbody.querySelectorAll("tr").forEach((row) => {
+      row.style.display = row.innerText.toLowerCase().includes(term)
+        ? ""
+        : "none";
+    });
+  };
+
+  // ----- ACADEMIQUE -----
+  function initAcademiqueCharts() {
+    const series = enrollmentSeries();
+    const ctx1 = document.getElementById("acadInscriptionChart");
+    if (ctx1 && !chartInstances["acadInscription"]) {
+      chartInstances["acadInscription"] = new Chart(ctx1, {
+        type: "line",
+        data: {
+          labels: series.labels,
+          datasets: [
+            {
+              label: "Inscriptions",
+              data: series.values,
+              borderColor: "#0A4D8C",
+              backgroundColor: "rgba(10,77,140,0.1)",
+              fill: true,
+              tension: 0.4,
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: false },
+      });
+    }
+    const ctx2 = document.getElementById("acadReussiteChart");
+    if (ctx2 && !chartInstances["acadReussite"]) {
+      const graduated = etudiantsListe.filter(
+        (student) => student.statut === "Diplômé",
+      ).length;
+      const rate = etudiantsListe.length
+        ? Math.round((graduated / etudiantsListe.length) * 100)
+        : 0;
+      chartInstances["acadReussite"] = new Chart(ctx2, {
+        type: "bar",
+        data: {
+          labels: ["Taux de diplomation"],
+          datasets: [
+            {
+              label: "Diplômés (%)",
+              data: [rate],
+              backgroundColor: "rgba(16,185,129,0.7)",
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, max: 100 } },
+        },
+      });
+    }
+  }
+  function renderAcademique() {
+    const nouveauxCount = etudiantsListe.filter((e) => e.nouvelInscrit).length;
+    const detteTotal = etudiantsListe.reduce((s, e) => s + (e.solde || 0), 0);
+    const detteCount = etudiantsListe.filter((e) => (e.solde || 0) > 0).length;
+    let rows = etudiantsListe
+      .map(
+        (e) => `
           <tr data-statut="${e.statut}" data-new="${e.nouvelInscrit}" data-solde="${e.solde || 0}">
             <td><span class="pill pill-muted">${e.id}</span></td>
-            <td class="emp-name">${e.nom} ${e.nouvelInscrit ? '<span class="pill pill-info" style="margin-left:6px;"><i class="fas fa-star"></i> Nouveau</span>' : ''}</td>
+            <td class="emp-name">${e.nom} ${e.nouvelInscrit ? '<span class="pill pill-info" style="margin-left:6px;"><i class="fas fa-star"></i> Nouveau</span>' : ""}</td>
             <td>${e.sexe}</td><td>${e.cours}</td>
-            <td><span class="pill ${e.statut==='Actif'?'pill-success':e.statut==='Diplômé'?'pill-info':'pill-danger'}">${e.statut}</span></td>
+            <td><span class="pill ${e.statut === "Actif" ? "pill-success" : e.statut === "Diplômé" ? "pill-info" : "pill-danger"}">${e.statut}</span></td>
             <td>${e.moyenne}%</td><td>${e.presences}%</td>
-            <td style="font-weight:600; color:${(e.solde||0) > 0 ? 'var(--red)' : 'var(--success)'}">${(e.solde||0) > 0 ? (e.solde).toLocaleString() + ' HTG' : 'Soldé'}</td>
-          </tr>`).join('');
-        return `
+            <td style="font-weight:600; color:${(e.solde || 0) > 0 ? "var(--red)" : "var(--success)"}">${(e.solde || 0) > 0 ? e.solde.toLocaleString() + " HTG" : "Soldé"}</td>
+          </tr>`,
+      )
+      .join("");
+    return `
           <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
             <div class="stat-card"><div class="stat-info"><span>Total étudiants</span><h2>${etudiantsListe.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-user-graduate"></i></div></div>
             <div class="stat-card"><div class="stat-info"><span>Nouveaux inscrits</span><h2>${nouveauxCount}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-user-plus"></i></div></div>
@@ -448,16 +801,20 @@
             <div class="search-box"><i class="fas fa-search"></i><input placeholder="Rechercher par nom, matricule ou cours..." oninput="searchTable(this.value)"></div>
             <div class="table-wrap"><table><thead><tr><th>Matricule</th><th>Nom complet</th><th>Sexe</th><th>Cours</th><th>Statut</th><th>Moyenne</th><th>Présences</th><th>Solde</th></tr></thead><tbody id="acadTbody">${rows}</tbody></table></div>
           </div>`;
-      }
+  }
 
-      // ----- RH -----
-      function renderRH() {
-        let rows = employesRH.map(e => `
-          <tr><td class="emp-name">${e.nom}</td><td>${e.fonction}</td><td><span class="pill pill-success">${e.presences}j</span></td><td><span class="pill ${e.absences>0?'pill-danger':'pill-muted'}">${e.absences}j</span></td><td><span class="pill pill-info">${e.conges}j</span></td><td>${e.salaire.toLocaleString()} HTG</td></tr>`).join('');
-        return `
+  // ----- RH -----
+  function renderRH() {
+    let rows = employesRH
+      .map(
+        (e) => `
+          <tr><td class="emp-name">${e.nom}</td><td>${e.sexe}</td><td>${e.fonction}</td><td><span class="pill pill-success">${e.presences}j</span></td><td><span class="pill ${e.absences > 0 ? "pill-danger" : "pill-muted"}">${e.absences}j</span></td><td><span class="pill pill-info">${e.conges}j</span></td><td>${e.salaire.toLocaleString()} HTG</td></tr>`,
+      )
+      .join("");
+    return `
           <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
             <div class="stat-card"><div class="stat-info"><span>Personnel total</span><h2>${employesRH.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-users"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Professeurs</span><h2>${employesRH.filter(e => /professeur/i.test(e.fonction)).length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-chalkboard-teacher"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Professeurs</span><h2>${employesRH.filter((e) => /professeur/i.test(e.fonction)).length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-chalkboard-teacher"></i></div></div>
             <div class="stat-card"><div class="stat-info"><span>Présents</span><h2>${employesRH.reduce((total, employee) => total + employee.presences, 0)}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
             <div class="stat-card"><div class="stat-info"><span>Masse salariale</span><h2>${(employesRH.reduce((total, employee) => total + employee.salaire, 0) / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-money-bill-wave"></i></div></div>
           </div>
@@ -467,29 +824,35 @@
               <button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button>
               <button class="btn btn-sm btn-outline" onclick="window.print()">Imprimer</button>
             </div></div>
-            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Fonction</th><th>Présences</th><th>Absences</th><th>Congés</th><th>Salaire</th></tr></thead><tbody>${rows}</tbody></table></div>
+            <div class="table-wrap"><table><thead><tr><th>Employé</th><th>Sexe</th><th>Fonction</th><th>Présences</th><th>Absences</th><th>Congés</th><th>Salaire</th></tr></thead><tbody>${rows}</tbody></table></div>
           </div>`;
-      }
+  }
 
-      // ----- FINANCIER -----
-      function renderFinancier() {
-        const series = financialSeries(); const revenusMensuels = series.revenus; const depensesMensuels = series.depenses;
-        let rows = revenusMensuels.map((r, i) => `
-          <tr><td>${series.labels[i]}</td><td>${r.toLocaleString()} HTG</td><td>${depensesMensuels[i].toLocaleString()} HTG</td><td style="font-weight:800;color:var(--success)">${(r-depensesMensuels[i]).toLocaleString()} HTG</td><td><span class="pill ${r ? 'pill-success' : 'pill-warning'}">${r ? Math.round((r-depensesMensuels[i])/r*100) : 0}%</span></td></tr>`).join('');
-        const totalRevenus = revenusMensuels.reduce((a, b) => a + b, 0);
-        const totalDepenses = depensesMensuels.reduce((a, b) => a + b, 0);
-        const totalBenefices = totalRevenus - totalDepenses;
-        return `
+  // ----- FINANCIER -----
+  function renderFinancier() {
+    const series = financialSeries();
+    const revenusMensuels = series.revenus;
+    const depensesMensuels = series.depenses;
+    let rows = revenusMensuels
+      .map(
+        (r, i) => `
+          <tr><td>${series.labels[i]}</td><td>${r.toLocaleString()} HTG</td><td>${depensesMensuels[i].toLocaleString()} HTG</td><td style="font-weight:800;color:var(--success)">${(r - depensesMensuels[i]).toLocaleString()} HTG</td><td><span class="pill ${r ? "pill-success" : "pill-warning"}">${r ? Math.round(((r - depensesMensuels[i]) / r) * 100) : 0}%</span></td></tr>`,
+      )
+      .join("");
+    const totalRevenus = revenusMensuels.reduce((a, b) => a + b, 0);
+    const totalDepenses = depensesMensuels.reduce((a, b) => a + b, 0);
+    const totalBenefices = totalRevenus - totalDepenses;
+    return `
           <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-            <div class="stat-card"><div class="stat-info"><span>Revenus totaux</span><h2>${(totalRevenus/1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-coins"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Dépenses</span><h2>${(totalDepenses/1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-arrow-down"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><span>Bénéfices</span><h2>${(totalBenefices/1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-chart-line"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Revenus totaux</span><h2>${(totalRevenus / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-coins"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Dépenses</span><h2>${(totalDepenses / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-arrow-down"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><span>Bénéfices</span><h2>${(totalBenefices / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-chart-line"></i></div></div>
           </div>
           <div class="charts-row">
             <div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Revenus mensuels</h3><div class="chart-wrap"><canvas id="finRevChart"></canvas></div></div>
             <div class="chart-box"><h3><i class="fas fa-chart-line"></i> Comparaison Revenus/Dépenses</h3><div class="chart-wrap"><canvas id="finCompChart"></canvas></div></div>
           </div>
-          <div class="alert-box alert-warning"><i class="fas fa-exclamation-triangle"></i> <strong>${invoices.filter(invoice => invoice.status !== 'paid').length} facture(s) non soldée(s)</strong> — Vérifier la comptabilité</div>
+          <div class="alert-box alert-warning"><i class="fas fa-exclamation-triangle"></i> <strong>${invoices.filter((invoice) => invoice.status !== "paid").length} facture(s) non soldée(s)</strong> — Vérifier la comptabilité</div>
           <div class="card">
             <div class="card-header"><h2><i class="fas fa-file-invoice-dollar"></i> Détail Financier</h2><div class="btn-group">
               <button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button>
@@ -498,51 +861,130 @@
             </div></div>
             <div class="table-wrap"><table><thead><tr><th>Mois</th><th>Revenus</th><th>Dépenses</th><th>Bénéfices</th><th>Marge</th></tr></thead><tbody>${rows}</tbody></table></div>
           </div>`;
-      }
-      function initFinancierCharts() {
-        const series = financialSeries();
-        const ctx1 = document.getElementById('finRevChart');
-        if (ctx1 && !chartInstances['finRev']) chartInstances['finRev'] = new Chart(ctx1, { type: 'bar', data: { labels: series.labels, datasets: [{ label: 'Revenus (HTG)', data: series.revenus, backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false } });
-        const ctx2 = document.getElementById('finCompChart');
-        if (ctx2 && !chartInstances['finComp']) chartInstances['finComp'] = new Chart(ctx2, { type: 'line', data: { labels: series.labels, datasets: [{ label: 'Revenus', data: series.revenus, borderColor: '#10b981', borderWidth: 2, tension: 0.3 }, { label: 'Dépenses', data: series.depenses, borderColor: '#D62828', borderWidth: 2, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
-      }
+  }
+  function initFinancierCharts() {
+    const series = financialSeries();
+    const ctx1 = document.getElementById("finRevChart");
+    if (ctx1 && !chartInstances["finRev"])
+      chartInstances["finRev"] = new Chart(ctx1, {
+        type: "bar",
+        data: {
+          labels: series.labels,
+          datasets: [
+            {
+              label: "Revenus (HTG)",
+              data: series.revenus,
+              backgroundColor: "rgba(10,77,140,0.7)",
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: false },
+      });
+    const ctx2 = document.getElementById("finCompChart");
+    if (ctx2 && !chartInstances["finComp"])
+      chartInstances["finComp"] = new Chart(ctx2, {
+        type: "line",
+        data: {
+          labels: series.labels,
+          datasets: [
+            {
+              label: "Revenus",
+              data: series.revenus,
+              borderColor: "#10b981",
+              borderWidth: 2,
+              tension: 0.3,
+            },
+            {
+              label: "Dépenses",
+              data: series.depenses,
+              borderColor: "#D62828",
+              borderWidth: 2,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: false },
+      });
+  }
 
-      // ----- FORMATIONS -----
-      function renderFormations() {
-        let rows = coursStats.map(c => `<tr><td class="fw-600">${c.nom}</td><td>${c.etudiants}</td><td>—</td><td>—</td></tr>`).join('');
-        return `
+  // ----- FORMATIONS -----
+  function renderFormations() {
+    let rows = coursStats
+      .map(
+        (c) =>
+          `<tr><td class="fw-600">${c.nom}</td><td>${c.etudiants}</td><td>—</td><td>—</td></tr>`,
+      )
+      .join("");
+    return `
           <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Cours actifs</span><h2>${coursCEJEC.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-book-open"></i></div></div><div class="stat-card"><div class="stat-info"><span>Réussite</span><h2>Non disponible</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-chart-line"></i></div></div><div class="stat-card"><div class="stat-info"><span>Abandon</span><h2>Non disponible</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-exclamation-triangle"></i></div></div></div>
           <div class="chart-box"><h3><i class="fas fa-chart-bar"></i> Étudiants par cours</h3><div class="chart-wrap"><canvas id="coursBarChart"></canvas></div></div>
           <div class="card"><div class="card-header"><h2><i class="fas fa-list"></i> Les 12 Cours CEJEC</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Cours</th><th>Étudiants</th><th>Réussite</th><th>Abandon</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
-      }
-      function initFormationsCharts() {
-        const ctx1 = document.getElementById('coursBarChart');
-        if (ctx1 && !chartInstances['coursBar']) chartInstances['coursBar'] = new Chart(ctx1, { type: 'bar', data: { labels: coursCEJEC.slice(0, 8), datasets: [{ label: 'Étudiants', data: coursStats.slice(0, 8).map(c => c.etudiants), backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' } });
-      }
-
-      // ----- PARTENARIATS -----
-      function renderPartenariats() {
-        let rows = partenaires.map(p => `<tr><td class="fw-600">${p.nom}</td><td><span class="pill pill-info">${p.type}</span></td><td>${p.contrats}</td><td>${p.stages}</td></tr>`).join('');
-        return `
-          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Partenaires</span><h2>${partenaires.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-handshake"></i></div></div><div class="stat-card"><div class="stat-info"><span>Contrats actifs</span><h2>${partenaires.reduce((s,p)=>s+p.contrats,0)}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-file-contract"></i></div></div><div class="stat-card"><div class="stat-info"><span>Stages</span><h2>${partenaires.reduce((s,p)=>s+p.stages,0)}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-briefcase"></i></div></div></div>
-          <div class="card"><div class="card-header"><h2><i class="fas fa-handshake"></i> Partenariats</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Partenaire</th><th>Type</th><th>Contrats</th><th>Stages</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
-      }
-
-      // ----- EVENEMENTS -----
-      function renderEvenements() {
-        let rows = evenements.map(ev => `<tr><td class="fw-600">${ev.nom}</td><td>${ev.date}</td><td>${ev.participants}</td><td>${ev.cout.toLocaleString()} HTG</td><td><span class="pill ${ev.retombees.includes('Très')?'pill-success':ev.retombees.includes('Bonnes')?'pill-info':'pill-warning'}">${ev.retombees}</span></td></tr>`).join('');
-        return `
-          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Événements</span><h2>${evenements.length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-calendar-star"></i></div></div><div class="stat-card"><div class="stat-info"><span>Participants</span><h2>${evenements.reduce((s,e)=>s+e.participants,0)}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-users"></i></div></div><div class="stat-card"><div class="stat-info"><span>Budget total</span><h2>${evenements.reduce((s,e)=>s+e.cout,0).toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-coins"></i></div></div></div>
-          <div class="card"><div class="card-header"><h2><i class="fas fa-calendar-star"></i> Événements</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Nom</th><th>Date</th><th>Participants</th><th>Coût</th><th>Retombées</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
-      }
-
-      async function refreshAll() { await loadReportData(); showToast('Données actualisées (filtre: ' + currentFilter + ')', 'info'); }
-
-      // ----- INIT -----
-      document.addEventListener('DOMContentLoaded', () => {
-        initDateFilter();
-        loadReportData();
-        document.querySelector('#navRH button[data-page="academique"]').classList.add('active');
-        console.log('CEJEC Rapports & Analytics prêt - Export 6 sections fonctionnel.');
+  }
+  function initFormationsCharts() {
+    const ctx1 = document.getElementById("coursBarChart");
+    if (ctx1 && !chartInstances["coursBar"])
+      chartInstances["coursBar"] = new Chart(ctx1, {
+        type: "bar",
+        data: {
+          labels: coursCEJEC.slice(0, 8),
+          datasets: [
+            {
+              label: "Étudiants",
+              data: coursStats.slice(0, 8).map((c) => c.etudiants),
+              backgroundColor: "rgba(10,77,140,0.7)",
+              borderRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: "y",
+        },
       });
-    })();
+  }
+
+  // ----- PARTENARIATS -----
+  function renderPartenariats() {
+    let rows = partenaires
+      .map(
+        (p) =>
+          `<tr><td class="fw-600">${p.nom}</td><td><span class="pill pill-info">${p.type}</span></td><td>${p.contrats}</td><td>${p.stages}</td></tr>`,
+      )
+      .join("");
+    return `
+          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Partenaires</span><h2>${partenaires.length}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-handshake"></i></div></div><div class="stat-card"><div class="stat-info"><span>Contrats actifs</span><h2>${partenaires.reduce((s, p) => s + p.contrats, 0)}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-file-contract"></i></div></div><div class="stat-card"><div class="stat-info"><span>Stages</span><h2>${partenaires.reduce((s, p) => s + p.stages, 0)}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-briefcase"></i></div></div></div>
+          <div class="card"><div class="card-header"><h2><i class="fas fa-handshake"></i> Partenariats</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Partenaire</th><th>Type</th><th>Contrats</th><th>Stages</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+
+  // ----- EVENEMENTS -----
+  function renderEvenements() {
+    let rows = evenements
+      .map(
+        (ev) =>
+          `<tr><td class="fw-600">${ev.nom}</td><td>${ev.date}</td><td>${ev.participants}</td><td>${ev.cout.toLocaleString()} HTG</td><td><span class="pill ${ev.retombees.includes("Très") ? "pill-success" : ev.retombees.includes("Bonnes") ? "pill-info" : "pill-warning"}">${ev.retombees}</span></td></tr>`,
+      )
+      .join("");
+    return `
+          <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><div class="stat-info"><span>Événements</span><h2>${evenements.length}</h2></div><div class="stat-icon" style="color:var(--purple)"><i class="fas fa-calendar-star"></i></div></div><div class="stat-card"><div class="stat-info"><span>Participants</span><h2>${evenements.reduce((s, e) => s + e.participants, 0)}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-users"></i></div></div><div class="stat-card"><div class="stat-info"><span>Budget total</span><h2>${evenements.reduce((s, e) => s + e.cout, 0).toLocaleString()}</h2></div><div class="stat-icon" style="color:var(--warning)"><i class="fas fa-coins"></i></div></div></div>
+          <div class="card"><div class="card-header"><h2><i class="fas fa-calendar-star"></i> Événements</h2><div class="btn-group"><button class="btn btn-sm btn-outline" onclick="exportCurrentTablePDF()">PDF</button><button class="btn btn-sm btn-outline" onclick="exportCurrentTableExcel()">Excel</button></div></div><div class="table-wrap"><table><thead><tr><th>Nom</th><th>Date</th><th>Participants</th><th>Coût</th><th>Retombées</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+
+  async function refreshAll() {
+    await loadReportData();
+    showToast("Données actualisées (filtre: " + currentFilter + ")", "info");
+  }
+
+  // ----- INIT -----
+  document.addEventListener("DOMContentLoaded", () => {
+    initDateFilter();
+    loadReportData();
+    document
+      .querySelector('#navRH button[data-page="academique"]')
+      .classList.add("active");
+    console.log(
+      "CEJEC Rapports & Analytics prêt - Export 6 sections fonctionnel.",
+    );
+  });
+})();

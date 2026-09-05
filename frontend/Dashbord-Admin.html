@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/StyleBordAD.css" />
     <link rel="stylesheet" href="css/AI_Styles.css" />
     <link rel="stylesheet" href="css/styles_dash.css" />
-      <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <script src="js/session-bootstrap.js"></script>
     <script src="sw-register.js" defer></script>
   </head>
@@ -108,7 +108,7 @@
           <div class="header-actions">
             <div class="notification-bell">
               <i class="fa-regular fa-bell"></i>
-              <span class="badge44">5</span>
+              <span class="badge44" hidden>0</span>
             </div>
           </div>
         </div>
@@ -166,7 +166,9 @@
               <a class="dropdown22-item" href="gestion_notes.html"
                 ><i class="fa-solid fa-sticky-note"></i> Notes</a
               >
-              <a class="dropdown22-item" href="gestion_utilisateurs.html#presences"
+              <a
+                class="dropdown22-item"
+                href="gestion_utilisateurs.html#presences"
                 ><i class="fa-solid fa-clock"></i> Présences</a
               >
               <a class="dropdown22-item" href="gestion_medias.html">
@@ -476,7 +478,6 @@
             </div>
           </div> -->
 
-
           <div class="kpi-card red-variant">
             <div class="kpi-top">
               <span class="kpi-title">Publications & Actualités</span>
@@ -553,7 +554,10 @@
                 d'activités récentes
               </h3>
             </div>
-            <div class="activity-list" id="recentActivityList" aria-live="polite">
+            <div
+              class="activity-list"
+              id="recentActivityList"
+              aria-live="polite">
               <div class="activity-item green-item">
                 <div class="activity-indicator"></div>
                 <div class="activity-details">
@@ -658,7 +662,8 @@
       // Ainsi l'ouverture directe du PWA fonctionne aussi après l'expiration
       // normale du jeton d'accès.
       window.cejecSessionReady.then(function (authenticated) {
-        if (!authenticated) window.location.replace('Se connecter - Admin.html');
+        if (!authenticated)
+          window.location.replace("Se connecter - Admin.html");
       });
     </script>
     <script src="js/api-client.js"></script>

@@ -44,7 +44,7 @@
         border: 1px solid #f5cf87;
       }
     </style>
-      <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <script src="sw-register.js" defer></script>
   </head>
   <body>
@@ -128,7 +128,7 @@
           <div class="header-actions">
             <div class="notification-bell">
               <i class="fa-regular fa-bell"></i>
-              <span class="badge44">5</span>
+              <span class="badge44" hidden>0</span>
             </div>
           </div>
         </div>
@@ -325,7 +325,9 @@
             <button class="btn btn-success" onclick="openEncaissementModal()">
               <i class="fas fa-money-bill-wave"></i> Encaisser
             </button>
-            <button class="btn btn-outline" onclick="openTuitionFeesModal()"><i class="fas fa-coins"></i> Frais de scolarité</button>
+            <button class="btn btn-outline" onclick="openTuitionFeesModal()">
+              <i class="fas fa-coins"></i> Frais de scolarité
+            </button>
             <button class="btn btn-outline" onclick="exportListePDF()">
               <i class="fas fa-file-pdf"></i> PDF
             </button>
@@ -342,7 +344,9 @@
           <button data-page="dettes">
             <i class="fas fa-exclamation-triangle"></i> Dettes
           </button>
-          <button data-page="frais"><i class="fas fa-coins"></i> Frais de scolarité</button>
+          <button data-page="frais">
+            <i class="fas fa-coins"></i> Frais de scolarité
+          </button>
           <button data-page="recus">
             <i class="fas fa-receipt"></i> Reçus
           </button>
@@ -351,7 +355,57 @@
         <div id="mainContent"></div>
       </div>
 
-      <div class="modal-overlay" id="tuitionFeesModal"><div class="modal" style="max-width:850px"><div class="modal-header"><h3><i class="fas fa-coins"></i> Frais de scolarité</h3><button class="modal-close" onclick="closeModal('tuitionFeesModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><form onsubmit="saveTuitionFee(event)" class="form-grid"><div class="form-group"><label>Classe *</label><select id="tuitionFeeClass" required onchange="selectTuitionFeeClass()"></select></div><div class="form-group"><label>Montant (HTG) *</label><input id="tuitionFeeAmount" type="number" min="0" step="0.01" required></div><div class="form-group full"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button></div></form><div class="table-wrap"><table><thead><tr><th>Classe</th><th>Spécialisation</th><th>Frais</th><th>Actions</th></tr></thead><tbody id="tuitionFeesRows"></tbody></table></div></div></div></div>      <!-- MODAL DÉTAILS ÉTUDIANT -->
+      <div class="modal-overlay" id="tuitionFeesModal">
+        <div class="modal" style="max-width: 850px">
+          <div class="modal-header">
+            <h3><i class="fas fa-coins"></i> Frais de scolarité</h3>
+            <button
+              class="modal-close"
+              onclick="closeModal('tuitionFeesModal')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form onsubmit="saveTuitionFee(event)" class="form-grid">
+              <div class="form-group">
+                <label>Classe *</label
+                ><select
+                  id="tuitionFeeClass"
+                  required
+                  onchange="selectTuitionFeeClass()"></select>
+              </div>
+              <div class="form-group">
+                <label>Montant (HTG) *</label
+                ><input
+                  id="tuitionFeeAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required />
+              </div>
+              <div class="form-group full">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Enregistrer
+                </button>
+              </div>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Spécialisation</th>
+                    <th>Frais</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tuitionFeesRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- MODAL DÉTAILS ÉTUDIANT -->
       <div class="modal-overlay" id="detailsEtudiantModal">
         <div class="modal" style="max-width: 650px">
           <div class="modal-header">
@@ -502,7 +556,10 @@
               </div>
               <div class="form-group">
                 <label>Statut</label
-                ><select id="modStatut" disabled title="Le statut se modifie via les actions Approuver / Rejeter / Transition (voir onglet Détails)">
+                ><select
+                  id="modStatut"
+                  disabled
+                  title="Le statut se modifie via les actions Approuver / Rejeter / Transition (voir onglet Détails)">
                   <option>Pré-inscrit</option>
                   <option>Inscrit</option>
                   <option>Suspendu</option>
@@ -872,15 +929,17 @@
       <div class="modal-overlay" id="convertModal">
         <div class="modal" style="max-width: 450px">
           <div class="modal-header">
-            <h3><i class="fas fa-user-check"></i> Convertir & Inscrire l'étudiant</h3>
-            <button
-              class="modal-close"
-              onclick="closeModal('convertModal')">
+            <h3>
+              <i class="fas fa-user-check"></i> Convertir & Inscrire l'étudiant
+            </h3>
+            <button class="modal-close" onclick="closeModal('convertModal')">
               <i class="fas fa-times"></i>
             </button>
           </div>
           <div class="modal-body">
-            <p id="convertEtudiantNom" style="font-weight: 600; margin-bottom: 12px;"></p>
+            <p
+              id="convertEtudiantNom"
+              style="font-weight: 600; margin-bottom: 12px"></p>
             <div class="form-group full">
               <label>Assigner à une classe *</label>
               <select id="convertClasseSelect"></select>
@@ -924,7 +983,11 @@
               </div>
               <div class="form-group">
                 <label>Prénom *</label>
-                <input type="text" id="prePrenom" placeholder="Prénom" required />
+                <input
+                  type="text"
+                  id="prePrenom"
+                  placeholder="Prénom"
+                  required />
               </div>
               <div class="form-group">
                 <label>Sexe</label>
@@ -939,15 +1002,25 @@
               </div>
               <div class="form-group">
                 <label>Téléphone *</label>
-                <input type="tel" id="preTel" placeholder="+509 xxxx" required />
+                <input
+                  type="tel"
+                  id="preTel"
+                  placeholder="+509 xxxx"
+                  required />
               </div>
               <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="preEmail" placeholder="email@exemple.com" />
+                <input
+                  type="email"
+                  id="preEmail"
+                  placeholder="email@exemple.com" />
               </div>
               <div class="form-group full">
                 <label>Adresse</label>
-                <input type="text" id="preAdresse" placeholder="Adresse complète" />
+                <input
+                  type="text"
+                  id="preAdresse"
+                  placeholder="Adresse complète" />
               </div>
               <div class="form-group">
                 <label>Commune</label>
@@ -1038,8 +1111,3 @@
     <script src="js/user-profile.js"></script>
   </body>
 </html>
-
-
-
-
-

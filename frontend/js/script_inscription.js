@@ -10,69 +10,238 @@
 // ------------------------------------------
 const MOCK_ETUDIANTS = [
   {
-    id: "ETU-2026-001", nom: "Pierre Antoine", prenom: "Pierre", sexe: "Homme",
-    tel: "+509 41 22 33 44", email: "pierre@email.com", adresse: "Rue des Miracles, Delmas",
-    commune: "Delmas", departement: "Ouest", dateNaissance: "1998-05-15",
-    parentNom: "Jean Antoine", parentTel: "+509 40 11 22 33", parentProfession: "Commerçant",
-    parentAdresse: "Delmas 75", promo: "Promotion 2026", statut: "Inscrit",
-    dateInscription: "2026-01-15", plan: "VIP", montantPaye: 25000, resteAPayer: 25000, totalFormation: 50000,
+    id: "ETU-2026-001",
+    nom: "Pierre Antoine",
+    prenom: "Pierre",
+    sexe: "Homme",
+    tel: "+509 41 22 33 44",
+    email: "pierre@email.com",
+    adresse: "Rue des Miracles, Delmas",
+    commune: "Delmas",
+    departement: "Ouest",
+    dateNaissance: "1998-05-15",
+    parentNom: "Jean Antoine",
+    parentTel: "+509 40 11 22 33",
+    parentProfession: "Commerçant",
+    parentAdresse: "Delmas 75",
+    promo: "Promotion 2026",
+    statut: "Inscrit",
+    dateInscription: "2026-01-15",
+    plan: "VIP",
+    montantPaye: 25000,
+    resteAPayer: 25000,
+    totalFormation: 50000,
   },
   {
-    id: "ETU-2026-002", nom: "Marie Joseph", prenom: "Marie", sexe: "Femme",
-    tel: "+509 42 33 44 55", email: "marie@email.com", adresse: "Avenue du Centre, Pétion-Ville",
-    commune: "Pétion-Ville", departement: "Ouest", dateNaissance: "1999-08-22",
-    parentNom: "Paul Joseph", parentTel: "+509 41 22 44 55", parentProfession: "Enseignante",
-    parentAdresse: "Pétion-Ville 45", promo: "Promotion 2026", statut: "Inscrit",
-    dateInscription: "2026-02-01", plan: "Standard", montantPaye: 50000, resteAPayer: 0, totalFormation: 50000,
+    id: "ETU-2026-002",
+    nom: "Marie Joseph",
+    prenom: "Marie",
+    sexe: "Femme",
+    tel: "+509 42 33 44 55",
+    email: "marie@email.com",
+    adresse: "Avenue du Centre, Pétion-Ville",
+    commune: "Pétion-Ville",
+    departement: "Ouest",
+    dateNaissance: "1999-08-22",
+    parentNom: "Paul Joseph",
+    parentTel: "+509 41 22 44 55",
+    parentProfession: "Enseignante",
+    parentAdresse: "Pétion-Ville 45",
+    promo: "Promotion 2026",
+    statut: "Inscrit",
+    dateInscription: "2026-02-01",
+    plan: "Standard",
+    montantPaye: 50000,
+    resteAPayer: 0,
+    totalFormation: 50000,
   },
   {
-    id: "ETU-2026-003", nom: "Jameson Pierre", prenom: "Jameson", sexe: "Homme",
-    tel: "+509 43 55 66 77", email: "jameson@email.com", adresse: "Boulevard 15 Octobre, Tabarre",
-    commune: "Tabarre", departement: "Ouest", dateNaissance: "2000-01-10",
-    parentNom: "Rose Pierre", parentTel: "+509 40 33 66 77", parentProfession: "Avocat",
-    parentAdresse: "Tabarre 12", promo: "Promotion 2026", statut: "Suspendu",
-    dateInscription: "2026-03-10", plan: "VIP", montantPaye: 10000, resteAPayer: 40000, totalFormation: 50000,
+    id: "ETU-2026-003",
+    nom: "Jameson Pierre",
+    prenom: "Jameson",
+    sexe: "Homme",
+    tel: "+509 43 55 66 77",
+    email: "jameson@email.com",
+    adresse: "Boulevard 15 Octobre, Tabarre",
+    commune: "Tabarre",
+    departement: "Ouest",
+    dateNaissance: "2000-01-10",
+    parentNom: "Rose Pierre",
+    parentTel: "+509 40 33 66 77",
+    parentProfession: "Avocat",
+    parentAdresse: "Tabarre 12",
+    promo: "Promotion 2026",
+    statut: "Suspendu",
+    dateInscription: "2026-03-10",
+    plan: "VIP",
+    montantPaye: 10000,
+    resteAPayer: 40000,
+    totalFormation: 50000,
   },
   {
-    id: "ETU-2026-004", nom: "Mireille Dumont", prenom: "Mireille", sexe: "Femme",
-    tel: "+509 44 66 77 88", email: "mireille@email.com", adresse: "Rue Lamarre, Cap-Haïtien",
-    commune: "Cap-Haïtien", departement: "Nord", dateNaissance: "1997-12-03",
-    parentNom: "André Dumont", parentTel: "+509 42 77 88 99", parentProfession: "Médecin",
-    parentAdresse: "Cap-Haïtien 78", promo: "Promotion 2026", statut: "Inscrit",
-    dateInscription: "2026-04-05", plan: "Standard", montantPaye: 50000, resteAPayer: 0, totalFormation: 50000,
+    id: "ETU-2026-004",
+    nom: "Mireille Dumont",
+    prenom: "Mireille",
+    sexe: "Femme",
+    tel: "+509 44 66 77 88",
+    email: "mireille@email.com",
+    adresse: "Rue Lamarre, Cap-Haïtien",
+    commune: "Cap-Haïtien",
+    departement: "Nord",
+    dateNaissance: "1997-12-03",
+    parentNom: "André Dumont",
+    parentTel: "+509 42 77 88 99",
+    parentProfession: "Médecin",
+    parentAdresse: "Cap-Haïtien 78",
+    promo: "Promotion 2026",
+    statut: "Inscrit",
+    dateInscription: "2026-04-05",
+    plan: "Standard",
+    montantPaye: 50000,
+    resteAPayer: 0,
+    totalFormation: 50000,
   },
   {
-    id: "ETU-2026-005", nom: "Frantz Louis", prenom: "Frantz", sexe: "Homme",
-    tel: "+509 45 77 88 99", email: "frantz@email.com", adresse: "Rue des Fleurs, Jacmel",
-    commune: "Jacmel", departement: "Sud", dateNaissance: "1996-06-28",
-    parentNom: "Marie Louis", parentTel: "+509 43 88 99 00", parentProfession: "Ingénieur",
-    parentAdresse: "Jacmel 34", promo: "Promotion 2025", statut: "Diplômé",
-    dateInscription: "2025-09-01", plan: "VIP", montantPaye: 50000, resteAPayer: 0, totalFormation: 50000,
+    id: "ETU-2026-005",
+    nom: "Frantz Louis",
+    prenom: "Frantz",
+    sexe: "Homme",
+    tel: "+509 45 77 88 99",
+    email: "frantz@email.com",
+    adresse: "Rue des Fleurs, Jacmel",
+    commune: "Jacmel",
+    departement: "Sud",
+    dateNaissance: "1996-06-28",
+    parentNom: "Marie Louis",
+    parentTel: "+509 43 88 99 00",
+    parentProfession: "Ingénieur",
+    parentAdresse: "Jacmel 34",
+    promo: "Promotion 2025",
+    statut: "Diplômé",
+    dateInscription: "2025-09-01",
+    plan: "VIP",
+    montantPaye: 50000,
+    resteAPayer: 0,
+    totalFormation: 50000,
   },
   {
-    id: "ETU-2026-006", nom: "Marc Antoine Pierre", prenom: "Marc", sexe: "Homme",
-    tel: "+509 46 99 00 11", email: "marc@email.com", adresse: "Avenue des Palmiers, Gonaïves",
-    commune: "Gonaïves", departement: "Artibonite", dateNaissance: "1999-03-14",
-    parentNom: "Lucie Pierre", parentTel: "+509 44 00 11 22", parentProfession: "Entrepreneur",
-    parentAdresse: "Gonaïves 56", promo: "Promotion 2026", statut: "Inscrit",
-    dateInscription: "2026-05-20", plan: "Standard", montantPaye: 18000, resteAPayer: 32000, totalFormation: 50000,
+    id: "ETU-2026-006",
+    nom: "Marc Antoine Pierre",
+    prenom: "Marc",
+    sexe: "Homme",
+    tel: "+509 46 99 00 11",
+    email: "marc@email.com",
+    adresse: "Avenue des Palmiers, Gonaïves",
+    commune: "Gonaïves",
+    departement: "Artibonite",
+    dateNaissance: "1999-03-14",
+    parentNom: "Lucie Pierre",
+    parentTel: "+509 44 00 11 22",
+    parentProfession: "Entrepreneur",
+    parentAdresse: "Gonaïves 56",
+    promo: "Promotion 2026",
+    statut: "Inscrit",
+    dateInscription: "2026-05-20",
+    plan: "Standard",
+    montantPaye: 18000,
+    resteAPayer: 32000,
+    totalFormation: 50000,
   },
 ];
 
 const MOCK_PAIEMENTS = [
-  { id: "PAY-001", date: "2026-06-01", etudiantId: "ETU-2026-001", etudiantNom: "Pierre Antoine", montant: 5000, mode: "MonCash", ref: "REF-12345", agent: "Admin", statut: "Validé", recu: "RECU-2026-0001" },
-  { id: "PAY-002", date: "2026-05-15", etudiantId: "ETU-2026-002", etudiantNom: "Marie Joseph", montant: 25000, mode: "Virement bancaire", ref: "VIR-67890", agent: "Admin", statut: "Validé", recu: "RECU-2026-0002" },
-  { id: "PAY-003", date: "2026-04-20", etudiantId: "ETU-2026-003", etudiantNom: "Jameson Pierre", montant: 5000, mode: "Espèces", ref: "ESP-11111", agent: "Admin", statut: "Validé", recu: "RECU-2026-0003" },
-  { id: "PAY-004", date: "2026-03-10", etudiantId: "ETU-2026-004", etudiantNom: "Mireille Dumont", montant: 25000, mode: "MonCash", ref: "REF-22222", agent: "Admin", statut: "Validé", recu: "RECU-2026-0004" },
-  { id: "PAY-005", date: "2026-06-05", etudiantId: "ETU-2026-006", etudiantNom: "Marc Antoine Pierre", montant: 18000, mode: "NatCash", ref: "REF-33333", agent: "Admin", statut: "Validé", recu: "RECU-2026-0005" },
+  {
+    id: "PAY-001",
+    date: "2026-06-01",
+    etudiantId: "ETU-2026-001",
+    etudiantNom: "Pierre Antoine",
+    montant: 5000,
+    mode: "MonCash",
+    ref: "REF-12345",
+    agent: "Admin",
+    statut: "Validé",
+    recu: "RECU-2026-0001",
+  },
+  {
+    id: "PAY-002",
+    date: "2026-05-15",
+    etudiantId: "ETU-2026-002",
+    etudiantNom: "Marie Joseph",
+    montant: 25000,
+    mode: "Virement bancaire",
+    ref: "VIR-67890",
+    agent: "Admin",
+    statut: "Validé",
+    recu: "RECU-2026-0002",
+  },
+  {
+    id: "PAY-003",
+    date: "2026-04-20",
+    etudiantId: "ETU-2026-003",
+    etudiantNom: "Jameson Pierre",
+    montant: 5000,
+    mode: "Espèces",
+    ref: "ESP-11111",
+    agent: "Admin",
+    statut: "Validé",
+    recu: "RECU-2026-0003",
+  },
+  {
+    id: "PAY-004",
+    date: "2026-03-10",
+    etudiantId: "ETU-2026-004",
+    etudiantNom: "Mireille Dumont",
+    montant: 25000,
+    mode: "MonCash",
+    ref: "REF-22222",
+    agent: "Admin",
+    statut: "Validé",
+    recu: "RECU-2026-0004",
+  },
+  {
+    id: "PAY-005",
+    date: "2026-06-05",
+    etudiantId: "ETU-2026-006",
+    etudiantNom: "Marc Antoine Pierre",
+    montant: 18000,
+    mode: "NatCash",
+    ref: "REF-33333",
+    agent: "Admin",
+    statut: "Validé",
+    recu: "RECU-2026-0005",
+  },
 ];
 
 const MOCK_PAYMENT_METHODS = [
-  { id: 1, code: "moncash", name: "MonCash", is_active: true, is_online: false },
-  { id: 2, code: "natcash", name: "NatCash", is_active: true, is_online: false },
-  { id: 3, code: "bank_transfer", name: "Virement bancaire", is_active: true, is_online: false },
+  {
+    id: 1,
+    code: "moncash",
+    name: "MonCash",
+    is_active: true,
+    is_online: false,
+  },
+  {
+    id: 2,
+    code: "natcash",
+    name: "NatCash",
+    is_active: true,
+    is_online: false,
+  },
+  {
+    id: 3,
+    code: "bank_transfer",
+    name: "Virement bancaire",
+    is_active: true,
+    is_online: false,
+  },
   { id: 4, code: "cash", name: "Espèces", is_active: true, is_online: false },
-  { id: 5, code: "mobile_money", name: "Mobile Money", is_active: true, is_online: false },
+  {
+    id: 5,
+    code: "mobile_money",
+    name: "Mobile Money",
+    is_active: true,
+    is_online: false,
+  },
 ];
 
 // ------------------------------------------
@@ -116,17 +285,29 @@ const STATUT_UI_VERS_TRANSITION = {
 // CHARGEMENT DES DONNÉES (API réelle ; aucun dossier fictif en production)
 // ==========================================
 async function chargerDonnees() {
-  const [inscriptionsR, classesR, preInscripR, academicYearsR] = await Promise.allSettled([
-    currentAcademicYearSelected ? InscriptionsAPI.list({ academic_year: currentAcademicYearSelected }) : InscriptionsAPI.list(),
-    currentAcademicYearSelected ? ClassesAPI.list({ academic_year: currentAcademicYearSelected }) : ClassesAPI.list(),
-    typeof PreInscriptionsAPI !== "undefined" ? PreInscriptionsAPI.list() : Promise.resolve([]),
-    typeof AcademicYearsAPI !== "undefined" ? AcademicYearsAPI.list() : Promise.resolve([]),
-  ]);
+  const [inscriptionsR, classesR, preInscripR, academicYearsR] =
+    await Promise.allSettled([
+      currentAcademicYearSelected
+        ? InscriptionsAPI.list({ academic_year: currentAcademicYearSelected })
+        : InscriptionsAPI.list(),
+      currentAcademicYearSelected
+        ? ClassesAPI.list({ academic_year: currentAcademicYearSelected })
+        : ClassesAPI.list(),
+      typeof PreInscriptionsAPI !== "undefined"
+        ? PreInscriptionsAPI.list()
+        : Promise.resolve([]),
+      typeof AcademicYearsAPI !== "undefined"
+        ? AcademicYearsAPI.list()
+        : Promise.resolve([]),
+    ]);
 
-  if (academicYearsR.status === "fulfilled" && Array.isArray(academicYearsR.value)) {
+  if (
+    academicYearsR.status === "fulfilled" &&
+    Array.isArray(academicYearsR.value)
+  ) {
     academicYearsDisponibles = academicYearsR.value;
     if (!currentAcademicYearSelected && academicYearsDisponibles.length > 0) {
-      const activeYear = academicYearsDisponibles.find(y => y.is_active);
+      const activeYear = academicYearsDisponibles.find((y) => y.is_active);
       if (activeYear) {
         currentAcademicYearSelected = activeYear.label;
       }
@@ -134,28 +315,38 @@ async function chargerDonnees() {
   }
 
   if (inscriptionsR.status === "rejected") {
-    console.error("GET /enrollments/inscriptions/ a échoué :", inscriptionsR.reason);
+    console.error(
+      "GET /enrollments/inscriptions/ a échoué :",
+      inscriptionsR.reason,
+    );
   }
   if (classesR.status === "rejected") {
     console.error("GET /students/classes/ a échoué :", classesR.reason);
   }
   if (preInscripR.status === "rejected") {
-    console.error("GET /enrollments/pre-inscriptions/ a échoué :", preInscripR.reason);
+    console.error(
+      "GET /enrollments/pre-inscriptions/ a échoué :",
+      preInscripR.reason,
+    );
   }
 
   if (inscriptionsR.status === "fulfilled") {
     API_DISPONIBLE = true;
     etudiants = (inscriptionsR.value || []).map(mapInscriptionToEtudiant);
-    
+
     // Add pre-inscriptions
-    const preInscriptions = (preInscripR.status === "fulfilled" ? (preInscripR.value || []) : []).map(mapPreInscriptionToEtudiant);
+    const preInscriptions = (
+      preInscripR.status === "fulfilled" ? preInscripR.value || [] : []
+    ).map(mapPreInscriptionToEtudiant);
     etudiants = etudiants.concat(preInscriptions);
 
     paiements = [];
     await enrichirDetailsEtudiants(etudiants);
     paiements = await chargerPaiementsAPI();
   } else {
-    console.error("API d'inscription indisponible : aucune donnée fictive n'est affichée.");
+    console.error(
+      "API d'inscription indisponible : aucune donnée fictive n'est affichée.",
+    );
     API_DISPONIBLE = false;
     etudiants = [];
     paiements = [];
@@ -196,13 +387,20 @@ async function chargerDonnees() {
 async function enrichirDetailsEtudiants(list) {
   if (!API_DISPONIBLE) return;
   const results = await Promise.allSettled(
-    list.map((e) => (e.studentId ? StudentsAPI.get(e.studentId) : Promise.reject("no studentId")))
+    list.map((e) =>
+      e.studentId
+        ? StudentsAPI.get(e.studentId)
+        : Promise.reject("no studentId"),
+    ),
   );
 
   results.forEach((res, i) => {
     if (res.status !== "fulfilled" || !res.value) {
       if (list[i].studentId) {
-        console.warn(`GET /students/students/${list[i].studentId}/ a échoué`, res.reason);
+        console.warn(
+          `GET /students/students/${list[i].studentId}/ a échoué`,
+          res.reason,
+        );
       }
       return;
     }
@@ -218,11 +416,14 @@ async function enrichirDetailsEtudiants(list) {
       e.commune = parts[1] || e.commune;
       e.departement = parts[2] || e.departement;
     }
-    const contact = Array.isArray(student.emergency_contacts) ? student.emergency_contacts[0] : null;
+    const contact = Array.isArray(student.emergency_contacts)
+      ? student.emergency_contacts[0]
+      : null;
     if (contact) {
       e.parentNom = contact.name || e.parentNom;
       e.parentTel = contact.phone || e.parentTel;
-      e.parentProfession = contact.profession || contact.relationship || e.parentProfession;
+      e.parentProfession =
+        contact.profession || contact.relationship || e.parentProfession;
       e.parentAdresse = contact.address || e.parentAdresse;
     }
   });
@@ -267,11 +468,13 @@ function mapInscriptionToEtudiant(insc) {
     montantPaye: amountPaid,
     resteAPayer: balanceDue,
     totalFormation: fees,
-    school_class_id: typeof insc.school_class === "number" ? insc.school_class : null,
+    school_class_id:
+      typeof insc.school_class === "number" ? insc.school_class : null,
     courseId: typeof insc.course === "number" ? insc.course : null,
     studentId: typeof insc.student === "number" ? insc.student : null,
     userId: insc.student_user_id || null,
     synced: insc.synced !== false,
+    ...insc.metadata,
   };
 }
 
@@ -314,22 +517,26 @@ function mapPreInscriptionToEtudiant(pre) {
 async function chargerPaiementsAPI() {
   try {
     const payments = await FinanceAPI.listPayments();
-    return (payments || []).map((p) => {
-      const etudiant = etudiants.find((e) => String(e.studentId) === String(p.student));
-      if (!etudiant) return null;
-      return {
-        id: p.id,
-        date: (p.paid_at || p.created_at || "").slice(0, 10),
-        etudiantId: etudiant.id,
-        etudiantNom: `${etudiant.prenom} ${etudiant.nom}`,
-        montant: Number(p.amount) || 0,
-        mode: p.payment_method?.name || "—",
-        ref: p.reference || "—",
-        agent: "Administration",
-        statut: p.status === "completed" ? "Validé" : p.status,
-        recu: p.receipt?.receipt_number || "En cours",
-      };
-    }).filter(Boolean);
+    return (payments || [])
+      .map((p) => {
+        const etudiant = etudiants.find(
+          (e) => String(e.studentId) === String(p.student),
+        );
+        if (!etudiant) return null;
+        return {
+          id: p.id,
+          date: (p.paid_at || p.created_at || "").slice(0, 10),
+          etudiantId: etudiant.id,
+          etudiantNom: `${etudiant.prenom} ${etudiant.nom}`,
+          montant: Number(p.amount) || 0,
+          mode: p.payment_method?.name || "—",
+          ref: p.reference || "—",
+          agent: "Administration",
+          statut: p.status === "completed" ? "Validé" : p.status,
+          recu: p.receipt?.receipt_number || "En cours",
+        };
+      })
+      .filter(Boolean);
   } catch (err) {
     console.warn("Impossible de charger l'historique des paiements", err);
     return [];
@@ -344,7 +551,11 @@ function formatPrix(m) {
 }
 
 function showToast(msg, type = "success") {
-  const icons = { success: "fa-check-circle", error: "fa-times-circle", info: "fa-info-circle" };
+  const icons = {
+    success: "fa-check-circle",
+    error: "fa-times-circle",
+    info: "fa-info-circle",
+  };
   const el = document.createElement("div");
   el.className = `toast toast-${type}`;
   el.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
@@ -357,32 +568,50 @@ function showToast(msg, type = "success") {
   }, 3000);
 }
 
-function openModal(id) { document.getElementById(id).classList.add("open"); }
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function openModal(id) {
+  document.getElementById(id).classList.add("open");
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove("open");
+}
 
 document.querySelectorAll(".modal-overlay").forEach((m) => {
-  m.addEventListener("click", function (e) { if (e.target === this) this.classList.remove("open"); });
+  m.addEventListener("click", function (e) {
+    if (e.target === this) this.classList.remove("open");
+  });
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") document.querySelectorAll(".modal-overlay.open").forEach((m) => m.classList.remove("open"));
+  if (e.key === "Escape")
+    document
+      .querySelectorAll(".modal-overlay.open")
+      .forEach((m) => m.classList.remove("open"));
 });
 
 function navigateTo(page) {
-  document.querySelectorAll("#navTabs button").forEach((b) => b.classList.remove("active"));
+  document
+    .querySelectorAll("#navTabs button")
+    .forEach((b) => b.classList.remove("active"));
   const btn = document.querySelector(`#navTabs button[data-page="${page}"]`);
   if (btn) btn.classList.add("active");
   currentPage = page;
   document.getElementById("breadcrumbCurrent").textContent =
-    page === "etudiants" ? "Étudiants" :
-    page === "paiements" ? "Paiements" :
-    page === "dettes" ? "Dettes" :
-    page === "recus" ? "Reçus" : "Inscription & Encaissement";
+    page === "etudiants"
+      ? "Étudiants"
+      : page === "paiements"
+        ? "Paiements"
+        : page === "dettes"
+          ? "Dettes"
+          : page === "recus"
+            ? "Reçus"
+            : "Inscription & Encaissement";
   renderPage(page);
 }
 
 document.querySelectorAll("#navTabs button").forEach((btn) => {
-  btn.addEventListener("click", function () { navigateTo(this.dataset.page); });
+  btn.addEventListener("click", function () {
+    navigateTo(this.dataset.page);
+  });
 });
 
 // ==========================================
@@ -417,7 +646,10 @@ async function forcerSynchronisation() {
   if (res.offline) {
     showToast("Toujours hors-ligne, réessai plus tard", "error");
   } else {
-    showToast(`${res.synced} inscription(s) synchronisée(s), ${res.errors} erreur(s)`, res.errors ? "error" : "success");
+    showToast(
+      `${res.synced} inscription(s) synchronisée(s), ${res.errors} erreur(s)`,
+      res.errors ? "error" : "success",
+    );
     await chargerDonnees();
     renderPage(currentPage);
   }
@@ -439,8 +671,11 @@ function getSectionKpis(section) {
   const resteAPayer = etudiants.reduce((s, e) => s + e.resteAPayer, 0);
   const debiteurs = etudiants.filter((e) => e.resteAPayer > 0).length;
   const totalPaiements = paiements.length;
-  const paiementsCeMois = paiements.filter((p) => p.date >= "2026-06-01").length;
-  const moyenneTransaction = totalPaiements > 0 ? Math.round(totalEncaisse / totalPaiements) : 0;
+  const paiementsCeMois = paiements.filter(
+    (p) => p.date >= "2026-06-01",
+  ).length;
+  const moyenneTransaction =
+    totalPaiements > 0 ? Math.round(totalEncaisse / totalPaiements) : 0;
 
   switch (section) {
     case "etudiants":
@@ -464,8 +699,13 @@ function getSectionKpis(section) {
             </div>`;
 
     case "dettes":
-      const critiques = etudiants.filter((e) => e.resteAPayer > 0 && e.montantPaye < e.totalFormation * 0.3).length;
-      const tauxRecouvrement = totalEncaisse + resteAPayer > 0 ? Math.round((totalEncaisse / (totalEncaisse + resteAPayer)) * 100) : 100;
+      const critiques = etudiants.filter(
+        (e) => e.resteAPayer > 0 && e.montantPaye < e.totalFormation * 0.3,
+      ).length;
+      const tauxRecouvrement =
+        totalEncaisse + resteAPayer > 0
+          ? Math.round((totalEncaisse / (totalEncaisse + resteAPayer)) * 100)
+          : 100;
       return `
             <div class="stats-grid">
                 <div class="stat-card" style="border-left:4px solid var(--red)"><div class="stat-info"><span>Débiteurs</span><h3>${debiteurs}</h3></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-users-slash"></i></div></div>
@@ -475,7 +715,9 @@ function getSectionKpis(section) {
             </div>`;
 
     case "recus":
-      const recusCeMois = paiements.filter((p) => p.date >= "2026-06-01").length;
+      const recusCeMois = paiements.filter(
+        (p) => p.date >= "2026-06-01",
+      ).length;
       const monCash = paiements.filter((p) => p.mode === "MonCash").length;
       const especes = paiements.filter((p) => p.mode === "Espèces").length;
       return `
@@ -496,14 +738,23 @@ function getSectionKpis(section) {
 // ==========================================
 function voirDetailsEtudiant(id) {
   const e = etudiants.find((x) => String(x.id) === String(id));
-  if (!e) { showToast("Étudiant non trouvé", "error"); return; }
+  if (!e) {
+    showToast("Étudiant non trouvé", "error");
+    return;
+  }
   currentDetailEtudiantId = id;
   const paiementsEtudiant = paiements.filter((p) => p.etudiantId === id);
-  const pct = e.totalFormation ? Math.round((e.montantPaye / e.totalFormation) * 100) : 0;
+  const pct = e.totalFormation
+    ? Math.round((e.montantPaye / e.totalFormation) * 100)
+    : 0;
   const statutColor =
-    e.statut === "Inscrit" ? "var(--success)" :
-    e.statut === "Suspendu" ? "var(--warning)" :
-    e.statut === "Diplômé" ? "var(--info)" : "var(--muted)";
+    e.statut === "Inscrit"
+      ? "var(--success)"
+      : e.statut === "Suspendu"
+        ? "var(--warning)"
+        : e.statut === "Diplômé"
+          ? "var(--info)"
+          : "var(--muted)";
 
   document.getElementById("detailsEtudiantContent").innerHTML = `
         <div style="text-align:center;margin-bottom:16px;">
@@ -539,32 +790,54 @@ function voirDetailsEtudiant(id) {
                     <span style="font-weight:700;font-size:.8rem;">${pct}%</span>
                 </div>
             </div>
-            ${!e.offline ? `
+            ${
+              !e.offline
+                ? `
             <div class="detail-item" style="grid-column:1/-1">
                 <label>Statut du dossier (backend)</label>
                 <div class="btn-group" style="margin-top:6px;flex-wrap:wrap">
-                    ${e.statutApi === "pending" ? `<button class="btn btn-sm btn-success" onclick="approuverInscription('${e.id}')"><i class="fas fa-check"></i> Approuver</button>
-                    <button class="btn btn-sm btn-danger" onclick="rejeterInscription('${e.id}')"><i class="fas fa-times"></i> Rejeter</button>` : ""}
+                    ${
+                      e.statutApi === "pending"
+                        ? `<button class="btn btn-sm btn-success" onclick="approuverInscription('${e.id}')"><i class="fas fa-check"></i> Approuver</button>
+                    <button class="btn btn-sm btn-danger" onclick="rejeterInscription('${e.id}')"><i class="fas fa-times"></i> Rejeter</button>`
+                        : ""
+                    }
                     ${e.statutApi === "approved" ? `<button class="btn btn-sm btn-primary" onclick="transitionerInscription('${e.id}','active')"><i class="fas fa-play"></i> Activer</button>` : ""}
-                    ${e.statutApi === "active" ? `<button class="btn btn-sm btn-outline" onclick="transitionerInscription('${e.id}','suspended')"><i class="fas fa-pause"></i> Suspendre</button>
-                    <button class="btn btn-sm btn-info" onclick="transitionerInscription('${e.id}','validated')"><i class="fas fa-graduation-cap"></i> Valider (diplômer)</button>` : ""}
+                    ${
+                      e.statutApi === "active"
+                        ? `<button class="btn btn-sm btn-outline" onclick="transitionerInscription('${e.id}','suspended')"><i class="fas fa-pause"></i> Suspendre</button>
+                    <button class="btn btn-sm btn-info" onclick="transitionerInscription('${e.id}','validated')"><i class="fas fa-graduation-cap"></i> Valider (diplômer)</button>`
+                        : ""
+                    }
                     ${e.statutApi === "suspended" ? `<button class="btn btn-sm btn-primary" onclick="transitionerInscription('${e.id}','active')"><i class="fas fa-play"></i> Réactiver</button>` : ""}
                     ${e.is_pre_inscription && e.statutApi !== "converted" ? `<button class="btn btn-sm btn-success" onclick="ouvrirModalConversion('${e.id}')"><i class="fas fa-user-check"></i> Convertir en Inscription</button>` : ""}
                 </div>
-            </div>` : ""}
-            ${paiementsEtudiant.length > 0 ? `
+            </div>`
+                : ""
+            }
+            ${
+              paiementsEtudiant.length > 0
+                ? `
             <div class="detail-item" style="grid-column:1/-1">
                 <label>Derniers paiements</label>
                 <div style="margin-top:4px;">
-                    ${paiementsEtudiant.slice(-3).reverse().map((p) => `
+                    ${paiementsEtudiant
+                      .slice(-3)
+                      .reverse()
+                      .map(
+                        (p) => `
                         <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border-light);font-size:.75rem;">
                             <span>${p.date}</span>
                             <span>${p.mode}</span>
                             <span style="color:var(--success);font-weight:600;">${formatPrix(p.montant)}</span>
                         </div>
-                    `).join("")}
+                    `,
+                      )
+                      .join("")}
                 </div>
-            </div>` : ""}
+            </div>`
+                : ""
+            }
         </div>
     `;
   openModal("detailsEtudiantModal");
@@ -574,7 +847,10 @@ function voirDetailsEtudiant(id) {
 // Actions de workflow (approve / reject / transition)
 // ------------------------------------------
 async function approuverInscription(id) {
-  if (!API_DISPONIBLE) { showToast("Action indisponible en mode démo", "error"); return; }
+  if (!API_DISPONIBLE) {
+    showToast("Action indisponible en mode démo", "error");
+    return;
+  }
   try {
     await InscriptionsAPI.approve(id);
     showToast("Inscription approuvée", "success");
@@ -582,13 +858,18 @@ async function approuverInscription(id) {
     closeModal("detailsEtudiantModal");
     renderPage(currentPage);
   } catch (err) {
-
-    showToast("Erreur lors de l'approbation : " + (err.detail?.detail || err.message), "error");
+    showToast(
+      "Erreur lors de l'approbation : " + (err.detail?.detail || err.message),
+      "error",
+    );
   }
 }
 
 async function rejeterInscription(id) {
-  if (!API_DISPONIBLE) { showToast("Action indisponible en mode démo", "error"); return; }
+  if (!API_DISPONIBLE) {
+    showToast("Action indisponible en mode démo", "error");
+    return;
+  }
   const reason = prompt("Motif du rejet :");
   if (!reason) return;
   try {
@@ -598,13 +879,18 @@ async function rejeterInscription(id) {
     closeModal("detailsEtudiantModal");
     renderPage(currentPage);
   } catch (err) {
-
-    showToast("Erreur lors du rejet : " + (err.detail?.detail || err.message), "error");
+    showToast(
+      "Erreur lors du rejet : " + (err.detail?.detail || err.message),
+      "error",
+    );
   }
 }
 
 async function transitionerInscription(id, targetStatus) {
-  if (!API_DISPONIBLE) { showToast("Action indisponible en mode démo", "error"); return; }
+  if (!API_DISPONIBLE) {
+    showToast("Action indisponible en mode démo", "error");
+    return;
+  }
   try {
     await InscriptionsAPI.transition(id, targetStatus);
     showToast("Statut mis à jour", "success");
@@ -612,8 +898,10 @@ async function transitionerInscription(id, targetStatus) {
     closeModal("detailsEtudiantModal");
     renderPage(currentPage);
   } catch (err) {
-
-    showToast("Transition refusée : " + (err.detail?.detail || err.message), "error");
+    showToast(
+      "Transition refusée : " + (err.detail?.detail || err.message),
+      "error",
+    );
   }
 }
 
@@ -625,13 +913,17 @@ function ouvrirModalConversion(id) {
   preInscriptionToConvertId = id;
 
   const nomEl = document.getElementById("convertEtudiantNom");
-  if (nomEl) nomEl.textContent = `Étudiant : ${e.prenom} ${e.nom} (${e.matricule || e.id})`;
+  if (nomEl)
+    nomEl.textContent = `Étudiant : ${e.prenom} ${e.nom} (${e.matricule || e.id})`;
 
   const select = document.getElementById("convertClasseSelect");
   if (select) {
-    select.innerHTML = classesDisponibles.map((c) =>
-      `<option value="${c.id}">${c.name}${c.specialization_name ? " — " + c.specialization_name : ""}${c.tuition_fee ? " (" + Number(c.tuition_fee).toLocaleString("fr-FR") + " HTG)" : ""}</option>`
-    ).join("");
+    select.innerHTML = classesDisponibles
+      .map(
+        (c) =>
+          `<option value="${c.id}">${c.name}${c.specialization_name ? " — " + c.specialization_name : ""}${c.tuition_fee ? " (" + Number(c.tuition_fee).toLocaleString("fr-FR") + " HTG)" : ""}</option>`,
+      )
+      .join("");
   }
 
   openModal("convertModal");
@@ -639,7 +931,10 @@ function ouvrirModalConversion(id) {
 
 async function executerConversionPreInscription() {
   if (!preInscriptionToConvertId) return;
-  if (!API_DISPONIBLE) { showToast("Action indisponible en mode démo", "error"); return; }
+  if (!API_DISPONIBLE) {
+    showToast("Action indisponible en mode démo", "error");
+    return;
+  }
 
   const select = document.getElementById("convertClasseSelect");
   const classId = select ? Number(select.value) || null : null;
@@ -648,14 +943,22 @@ async function executerConversionPreInscription() {
     const btn = document.getElementById("btnConfirmerConversion");
     if (btn) btn.disabled = true;
 
-    const res = await PreInscriptionsAPI.convert(preInscriptionToConvertId, { class_id: classId });
-    showToast("Pré-inscription convertie et inscrite en classe avec succès !", "success");
+    const res = await PreInscriptionsAPI.convert(preInscriptionToConvertId, {
+      class_id: classId,
+    });
+    showToast(
+      "Pré-inscription convertie et inscrite en classe avec succès !",
+      "success",
+    );
     closeModal("convertModal");
     closeModal("detailsEtudiantModal");
     await chargerDonnees();
     renderPage(currentPage);
   } catch (err) {
-    showToast("Erreur lors de la conversion : " + (err.detail?.detail || err.message), "error");
+    showToast(
+      "Erreur lors de la conversion : " + (err.detail?.detail || err.message),
+      "error",
+    );
   } finally {
     const btn = document.getElementById("btnConfirmerConversion");
     if (btn) btn.disabled = false;
@@ -665,7 +968,10 @@ async function executerConversionPreInscription() {
 
 function ouvrirModifierEtudiant(id) {
   const e = etudiants.find((x) => String(x.id) === String(id));
-  if (!e) { showToast("Étudiant non trouvé", "error"); return; }
+  if (!e) {
+    showToast("Étudiant non trouvé", "error");
+    return;
+  }
   currentModifEtudiantId = id;
 
   document.getElementById("modMatricule").value = e.id;
@@ -680,7 +986,8 @@ function ouvrirModifierEtudiant(id) {
   document.getElementById("modDepartement").value = e.departement || "Ouest";
   document.getElementById("modParentNom").value = e.parentNom || "";
   document.getElementById("modParentTel").value = e.parentTel || "";
-  document.getElementById("modParentProfession").value = e.parentProfession || "";
+  document.getElementById("modParentProfession").value =
+    e.parentProfession || "";
   document.getElementById("modParentAdresse").value = e.parentAdresse || "";
   document.getElementById("modPromotion").value = e.promo;
   document.getElementById("modStatut").value = e.statut;
@@ -698,7 +1005,11 @@ async function sauvegarderModifications() {
 
   const nom = document.getElementById("modNom").value;
   const prenom = document.getElementById("modPrenom").value;
-  if (!nom || !prenom) { showToast("Le nom et le prénom sont obligatoires", "error"); inscriptionEnregistrementEnCours = false; return; }
+  if (!nom || !prenom) {
+    showToast("Le nom et le prénom sont obligatoires", "error");
+    inscriptionEnregistrementEnCours = false;
+    return;
+  }
 
   e.nom = nom;
   e.prenom = prenom;
@@ -716,8 +1027,10 @@ async function sauvegarderModifications() {
   e.promo = document.getElementById("modPromotion").value;
   e.statut = document.getElementById("modStatut").value;
   e.plan = document.getElementById("modPlan").value;
-  e.totalFormation = parseInt(document.getElementById("modTotalFormation").value) || 50000;
-  e.montantPaye = parseInt(document.getElementById("modMontantPaye").value) || 0;
+  e.totalFormation =
+    parseInt(document.getElementById("modTotalFormation").value) || 50000;
+  e.montantPaye =
+    parseInt(document.getElementById("modMontantPaye").value) || 0;
   e.resteAPayer = e.totalFormation - e.montantPaye;
 
   paiements.forEach((p) => {
@@ -747,10 +1060,18 @@ async function sauvegarderModifications() {
         try {
           await apiFetch(`/auth/users/${e.userId}/`, {
             method: "PATCH",
-            body: { first_name: prenom, last_name: nom, phone: e.tel },
+            body: {
+              first_name: prenom,
+              last_name: nom,
+              email: e.email,
+              phone: e.tel,
+            },
           });
         } catch (err) {
-          console.warn("PATCH /auth/users/ a échoué, modification gardée en local uniquement", err);
+          console.warn(
+            "PATCH /auth/users/ a échoué, modification gardée en local uniquement",
+            err,
+          );
         }
       }
       if (e.studentId) {
@@ -759,15 +1080,49 @@ async function sauvegarderModifications() {
             method: "PATCH",
             body: {
               date_of_birth: e.dateNaissance || null,
-              address: [e.adresse, e.commune, e.departement].filter(Boolean).join(", "),
-              emergency_contacts: [{
-                name: e.parentNom, phone: e.parentTel,
-                profession: e.parentProfession, address: e.parentAdresse,
-              }],
+              address: [e.adresse, e.commune, e.departement]
+                .filter(Boolean)
+                .join(", "),
+              emergency_contacts: [
+                {
+                  name: e.parentNom,
+                  phone: e.parentTel,
+                  profession: e.parentProfession,
+                  address: e.parentAdresse,
+                },
+              ],
             },
           });
         } catch (err) {
           console.warn("PATCH /students/students/ a échoué", err);
+        }
+      }
+      if (e.id && !String(e.id).includes("-")) {
+        try {
+          await InscriptionsAPI.update(e.id, {
+            promotion: e.promo || "",
+            metadata: {
+              sexe: e.sexe || "",
+              dateNaissance: e.dateNaissance || "",
+              commune: e.commune || "",
+              departement: e.departement || "",
+              parentNom: e.parentNom || "",
+              parentTel: e.parentTel || "",
+              parentProfession: e.parentProfession || "",
+              parentAdresse: e.parentAdresse || "",
+              plan: e.plan || "Standard",
+              totalFormation: Number(e.totalFormation) || 0,
+              montantPaye: Number(e.montantPaye) || 0,
+              statut: e.statut || "",
+            },
+          });
+        } catch (err) {
+          console.warn("PATCH /enrollments/inscriptions/ a échoué", err);
+          showToast(
+            "Les informations de l'inscription n'ont pas pu être enregistrées.",
+            "error",
+          );
+          return;
         }
       }
     }
@@ -782,7 +1137,12 @@ async function supprimerEtudiant() {
   const id = currentModifEtudiantId;
   const etudiant = etudiants.find((x) => String(x.id) === String(id));
 
-  if (!confirm(`Voulez-vous vraiment supprimer cet enregistrement (${id}) ? Cette action est irréversible.`)) return;
+  if (
+    !confirm(
+      `Voulez-vous vraiment supprimer cet enregistrement (${id}) ? Cette action est irréversible.`,
+    )
+  )
+    return;
 
   const estIdBackendReel = API_DISPONIBLE && !String(id).includes("-");
 
@@ -792,19 +1152,29 @@ async function supprimerEtudiant() {
         await PreInscriptionsAPI.delete(id);
       } catch (err) {
         console.error("DELETE /enrollments/pre-inscriptions/ a échoué :", err);
-        showToast("Échec de la suppression : " + (err.detail?.detail || err.message), "error");
+        showToast(
+          "Échec de la suppression : " + (err.detail?.detail || err.message),
+          "error",
+        );
         return;
       }
     } else {
       if (!etudiant?.userId) {
-        showToast("Impossible de supprimer : identifiant utilisateur introuvable côté API", "error");
+        showToast(
+          "Impossible de supprimer : identifiant utilisateur introuvable côté API",
+          "error",
+        );
         return;
       }
       try {
         await apiFetch(`/auth/users/${etudiant.userId}/`, { method: "DELETE" });
       } catch (err) {
         console.error("DELETE /auth/users/ a échoué :", err);
-        showToast("Échec de la suppression côté serveur : " + (err.detail?.detail || err.message), "error");
+        showToast(
+          "Échec de la suppression côté serveur : " +
+            (err.detail?.detail || err.message),
+          "error",
+        );
         return;
       }
       try {
@@ -876,8 +1246,11 @@ function imprimerFicheEtudiantPOS() {
 // MODALS
 // ==========================================
 function openInscriptionModal() {
-  document.getElementById("matricule").value = "ETU-2026-" + String(nextMatricule).padStart(3, "0");
-  document.getElementById("dateInscription").value = new Date().toISOString().split("T")[0];
+  document.getElementById("matricule").value =
+    "ETU-2026-" + String(nextMatricule).padStart(3, "0");
+  document.getElementById("dateInscription").value = new Date()
+    .toISOString()
+    .split("T")[0];
   peuplerSelectFormation();
   openModal("inscriptionModal");
 }
@@ -913,7 +1286,8 @@ async function savePreInscription() {
     adresse: document.getElementById("preAdresse").value.trim(),
     commune: document.getElementById("preCommune").value.trim(),
     departement: document.getElementById("preDepartement").value,
-    programme: document.getElementById("preProgramme").value.trim() || "Entrepreneuriat",
+    programme:
+      document.getElementById("preProgramme").value.trim() || "Entrepreneuriat",
     promotion: document.getElementById("prePromotion").value,
     date_inscription: new Date().toISOString().split("T")[0],
   };
@@ -926,10 +1300,15 @@ async function savePreInscription() {
       await chargerDonnees();
       renderPage(currentPage);
     } catch (err) {
-      showToast("Erreur lors de l'enregistrement : " + (err.detail?.detail || err.message), "error");
+      showToast(
+        "Erreur lors de l'enregistrement : " +
+          (err.detail?.detail || err.message),
+        "error",
+      );
     }
   } else {
-    const fakeRef = "PRE-2026-" + String(Math.floor(1000 + Math.random() * 9000));
+    const fakeRef =
+      "PRE-2026-" + String(Math.floor(1000 + Math.random() * 9000));
     etudiants.push({
       id: fakeRef,
       matricule: fakeRef,
@@ -967,15 +1346,23 @@ async function savePreInscription() {
 function peuplerSelectFormation() {
   const select = document.getElementById("classeSelect");
   if (!select) return;
-  select.innerHTML = classesDisponibles.map((c) =>
-    `<option value="${c.id}">${c.name}${c.specialization_name ? " — " + c.specialization_name : ""}${c.tuition_fee ? " (" + Number(c.tuition_fee).toLocaleString("fr-FR") + " HTG)" : ""}</option>`
-  ).join("");
+  select.innerHTML = classesDisponibles
+    .map(
+      (c) =>
+        `<option value="${c.id}">${c.name}${c.specialization_name ? " — " + c.specialization_name : ""}${c.tuition_fee ? " (" + Number(c.tuition_fee).toLocaleString("fr-FR") + " HTG)" : ""}</option>`,
+    )
+    .join("");
 }
 
 function iconePaiement(pm) {
   const icons = {
-    moncash: "📱", natcash: "📲", bank_transfer: "🏦", cash: "💵",
-    mobile_money: "📶", stripe: "💳", paypal: "🅿️",
+    moncash: "📱",
+    natcash: "📲",
+    bank_transfer: "🏦",
+    cash: "💵",
+    mobile_money: "📶",
+    stripe: "💳",
+    paypal: "🅿️",
   };
   return icons[pm.code] || "💰";
 }
@@ -987,19 +1374,28 @@ async function peuplerSelectModePaiement() {
   if (API_DISPONIBLE) {
     try {
       const methods = await FinanceAPI.listPaymentMethods();
-      paymentMethodsCache = (methods || []).filter((pm) => pm.is_active && !pm.is_online);
-      if (paymentMethodsCache.length === 0) showToast("Aucun moyen de paiement actif configuré", "error");
+      paymentMethodsCache = (methods || []).filter(
+        (pm) => pm.is_active && !pm.is_online,
+      );
+      if (paymentMethodsCache.length === 0)
+        showToast("Aucun moyen de paiement actif configuré", "error");
     } catch (err) {
-      console.warn("Impossible de charger les moyens de paiement, repli sur la liste locale", err);
+      console.warn(
+        "Impossible de charger les moyens de paiement, repli sur la liste locale",
+        err,
+      );
       paymentMethodsCache = MOCK_PAYMENT_METHODS;
     }
   } else {
     paymentMethodsCache = MOCK_PAYMENT_METHODS;
   }
 
-  select.innerHTML = paymentMethodsCache.map((pm) =>
-    `<option value="${pm.id}">${iconePaiement(pm)} ${pm.name}</option>`
-  ).join("");
+  select.innerHTML = paymentMethodsCache
+    .map(
+      (pm) =>
+        `<option value="${pm.id}">${iconePaiement(pm)} ${pm.name}</option>`,
+    )
+    .join("");
 }
 
 async function resoudreInvoicePourEtudiant(etudiant) {
@@ -1007,35 +1403,51 @@ async function resoudreInvoicePourEtudiant(etudiant) {
   if (!API_DISPONIBLE) return;
 
   if (!etudiant.studentId) {
-    showToast("Impossible de retrouver la facture (étudiant sans compte lié) : le paiement restera local", "error");
+    showToast(
+      "Impossible de retrouver la facture (étudiant sans compte lié) : le paiement restera local",
+      "error",
+    );
     return;
   }
 
   try {
     const invoices = await FinanceAPI.listInvoices(etudiant.studentId);
     if (!invoices || invoices.length === 0) {
-      showToast(`Aucune facture trouvée pour ${etudiant.prenom} ${etudiant.nom} : le paiement restera local`, "error");
+      showToast(
+        `Aucune facture trouvée pour ${etudiant.prenom} ${etudiant.nom} : le paiement restera local`,
+        "error",
+      );
       return;
     }
-    currentInvoiceForEncaissement = invoices.find((inv) => (inv.balance_due ?? 0) > 0) || invoices[0];
+    currentInvoiceForEncaissement =
+      invoices.find((inv) => (inv.balance_due ?? 0) > 0) || invoices[0];
   } catch (err) {
     console.warn("Impossible de charger la facture de l'étudiant", err);
-    showToast(`Impossible de charger la facture de ${etudiant.prenom} ${etudiant.nom} : le paiement restera local`, "error");
+    showToast(
+      `Impossible de charger la facture de ${etudiant.prenom} ${etudiant.nom} : le paiement restera local`,
+      "error",
+    );
   }
 }
 
 function openEncaissementModal(etudiantId = null) {
   const select = document.getElementById("encEtudiant");
-  const debiteurs = etudiants.filter((e) => e.resteAPayer > 0 && e.statutApi !== "pending");
+  const debiteurs = etudiants.filter(
+    (e) => e.resteAPayer > 0 && e.statutApi !== "pending",
+  );
 
-  select.innerHTML = debiteurs.map((e) =>
-    `<option value="${e.id}" ${etudiantId === e.id ? "selected" : ""}>${e.prenom} ${e.nom} (${e.id})</option>`
-  ).join("");
+  select.innerHTML = debiteurs
+    .map(
+      (e) =>
+        `<option value="${e.id}" ${etudiantId === e.id ? "selected" : ""}>${e.prenom} ${e.nom} (${e.id})</option>`,
+    )
+    .join("");
 
   (async () => {
     await peuplerSelectModePaiement();
     if (etudiantId) await updateEncaissementForm(etudiantId);
-    else if (debiteurs.length > 0) await updateEncaissementForm(debiteurs[0].id);
+    else if (debiteurs.length > 0)
+      await updateEncaissementForm(debiteurs[0].id);
   })();
 
   select.onchange = () => updateEncaissementForm(select.value);
@@ -1054,8 +1466,14 @@ async function updateEncaissementForm(etudiantId) {
 
   if (currentInvoiceForEncaissement) {
     total = Number(currentInvoiceForEncaissement.amount) || total;
-    paye = currentInvoiceForEncaissement.amount_paid != null ? Number(currentInvoiceForEncaissement.amount_paid) : paye;
-    reste = currentInvoiceForEncaissement.balance_due != null ? Number(currentInvoiceForEncaissement.balance_due) : reste;
+    paye =
+      currentInvoiceForEncaissement.amount_paid != null
+        ? Number(currentInvoiceForEncaissement.amount_paid)
+        : paye;
+    reste =
+      currentInvoiceForEncaissement.balance_due != null
+        ? Number(currentInvoiceForEncaissement.balance_due)
+        : reste;
     e.totalFormation = total;
     e.montantPaye = paye;
     e.resteAPayer = reste;
@@ -1065,7 +1483,9 @@ async function updateEncaissementForm(etudiantId) {
   document.getElementById("encDejaPaye").value = formatPrix(paye);
   document.getElementById("encSoldeRestant").value = formatPrix(reste);
   document.getElementById("montantVerse").value = Math.min(5000, reste);
-  document.getElementById("datePaiement").value = new Date().toISOString().split("T")[0];
+  document.getElementById("datePaiement").value = new Date()
+    .toISOString()
+    .split("T")[0];
 }
 
 let inscriptionEnregistrementEnCours = false;
@@ -1075,17 +1495,29 @@ async function saveInscription() {
   inscriptionEnregistrementEnCours = true;
   const nom = document.getElementById("nom").value.trim();
   const prenom = document.getElementById("prenom").value.trim();
-  if (!nom || !prenom) { showToast("Le nom et le prénom sont obligatoires", "error"); inscriptionEnregistrementEnCours = false; return; }
+  if (!nom || !prenom) {
+    showToast("Le nom et le prénom sont obligatoires", "error");
+    inscriptionEnregistrementEnCours = false;
+    return;
+  }
 
   const tel = document.getElementById("tel").value.trim();
   const classeSelect = document.getElementById("classeSelect");
   const classeId = classeSelect ? Number(classeSelect.value) || null : null;
-  const classeChoisie = classesDisponibles.find((c) => Number(c.id) === classeId);
+  const classeChoisie = classesDisponibles.find(
+    (c) => Number(c.id) === classeId,
+  );
 
-  if (!classeId) { showToast("Veuillez sélectionner une classe", "error"); inscriptionEnregistrementEnCours = false; return; }
+  if (!classeId) {
+    showToast("Veuillez sélectionner une classe", "error");
+    inscriptionEnregistrementEnCours = false;
+    return;
+  }
 
   const dateInscription = document.getElementById("dateInscription").value;
-  const requestedAt = dateInscription ? new Date(dateInscription).toISOString() : new Date().toISOString();
+  const requestedAt = dateInscription
+    ? new Date(dateInscription).toISOString()
+    : new Date().toISOString();
 
   if (!API_DISPONIBLE) {
     etudiants.push(construireEtudiantLocal());
@@ -1100,14 +1532,23 @@ async function saveInscription() {
   if (!navigator.onLine) {
     const localUuid = generateLocalUuid();
     OfflineQueue.push({
-      local_uuid: localUuid, student: null, school_class: classeId,
-      requested_at: requestedAt, created_offline: true,
-      nomAffiche: `${prenom} ${nom}`, telAffiche: tel,
-      first_name: prenom, last_name: nom, phone: tel,
+      local_uuid: localUuid,
+      student: null,
+      school_class: classeId,
+      requested_at: requestedAt,
+      created_offline: true,
+      nomAffiche: `${prenom} ${nom}`,
+      telAffiche: tel,
+      first_name: prenom,
+      last_name: nom,
+      phone: tel,
       feesAmount: classeChoisie?.tuition_fee || 50000,
     });
     closeModal("inscriptionModal");
-    showToast("Hors-ligne : inscription mise en file d'attente, sera synchronisée automatiquement", "info");
+    showToast(
+      "Hors-ligne : inscription mise en file d'attente, sera synchronisée automatiquement",
+      "info",
+    );
     await chargerDonnees();
     renderPage("etudiants");
     updateStatusBanner();
@@ -1117,7 +1558,10 @@ async function saveInscription() {
 
   try {
     const userRes = await AuthAPI.registerStudent({
-      first_name: prenom, last_name: nom, phone: tel,
+      first_name: prenom,
+      last_name: nom,
+      email: document.getElementById("email").value.trim(),
+      phone: tel,
       password: genererMotDePasseTemporaire(),
     });
     // 🔧 FIX #6 — extraction défensive au lieu de `userRes.user?.student_id`
@@ -1126,9 +1570,20 @@ async function saveInscription() {
     const studentId = extractStudentId(userRes);
 
     if (!studentId) {
-      showToast("Erreur: impossible de récupérer l'ID étudiant depuis le serveur (voir la console pour la réponse brute)", "error");
+      showToast(
+        "Erreur: impossible de récupérer l'ID étudiant depuis le serveur (voir la console pour la réponse brute)",
+        "error",
+      );
       inscriptionEnregistrementEnCours = false;
       return;
+    }
+
+    const userId = userRes.user?.id || userRes.user_id || userRes.id;
+    if (userId && document.getElementById("email").value.trim()) {
+      await apiFetch(`/auth/users/${userId}/`, {
+        method: "PATCH",
+        body: { email: document.getElementById("email").value.trim() },
+      });
     }
 
     // Le compte est créé par /auth/users/register/. On sauvegarde ensuite
@@ -1139,16 +1594,26 @@ async function saveInscription() {
         document.getElementById("adresse").value.trim(),
         document.getElementById("commune").value.trim(),
         document.getElementById("departement").value.trim(),
-      ].filter(Boolean).join(", "),
-      emergency_contacts: document.getElementById("parentNom").value.trim() || document.getElementById("parentTel").value.trim()
-        ? [{
-            name: document.getElementById("parentNom").value.trim() || "Contact d'urgence",
-            relationship: "Responsable",
-            profession: document.getElementById("parentProfession").value.trim(),
-            address: document.getElementById("parentAdresse").value.trim(),
-            phone: document.getElementById("parentTel").value.trim() || tel,
-          }]
-        : [],
+      ]
+        .filter(Boolean)
+        .join(", "),
+      emergency_contacts:
+        document.getElementById("parentNom").value.trim() ||
+        document.getElementById("parentTel").value.trim()
+          ? [
+              {
+                name:
+                  document.getElementById("parentNom").value.trim() ||
+                  "Contact d'urgence",
+                relationship: "Responsable",
+                profession: document
+                  .getElementById("parentProfession")
+                  .value.trim(),
+                address: document.getElementById("parentAdresse").value.trim(),
+                phone: document.getElementById("parentTel").value.trim() || tel,
+              },
+            ]
+          : [],
     });
     // 🔧 FIX #1 appliqué automatiquement ici : InscriptionsAPI.create() ne
     // passe plus jamais local_uuid: null.
@@ -1156,6 +1621,7 @@ async function saveInscription() {
       student: studentId,
       school_class: classeId,
       promotion: document.getElementById("promotion").value.trim(),
+      metadata: collectInscriptionMetadata(),
       requested_at: requestedAt,
       created_offline: false,
     });
@@ -1164,20 +1630,33 @@ async function saveInscription() {
     closeModal("inscriptionModal");
     await chargerDonnees();
     renderPage("etudiants");
-    showToast("Étudiant inscrit avec succès dans la classe " + (classeChoisie?.name || ""), "success");
+    showToast(
+      "Étudiant inscrit avec succès dans la classe " +
+        (classeChoisie?.name || ""),
+      "success",
+    );
     inscriptionEnregistrementEnCours = false;
   } catch (err) {
     if (err.message === "NETWORK_ERROR") {
       const localUuid = generateLocalUuid();
       OfflineQueue.push({
-        local_uuid: localUuid, student: null, school_class: classeId,
-        requested_at: requestedAt, created_offline: true,
-        nomAffiche: `${prenom} ${nom}`, telAffiche: tel,
-        first_name: prenom, last_name: nom, phone: tel,
+        local_uuid: localUuid,
+        student: null,
+        school_class: classeId,
+        requested_at: requestedAt,
+        created_offline: true,
+        nomAffiche: `${prenom} ${nom}`,
+        telAffiche: tel,
+        first_name: prenom,
+        last_name: nom,
+        phone: tel,
         feesAmount: classeChoisie?.tuition_fee || 50000,
       });
       closeModal("inscriptionModal");
-      showToast("Connexion perdue : inscription mise en file d'attente", "info");
+      showToast(
+        "Connexion perdue : inscription mise en file d'attente",
+        "info",
+      );
       renderPage("etudiants");
       updateStatusBanner();
     } else {
@@ -1185,15 +1664,22 @@ async function saveInscription() {
       // apiFetch() lui-même (voir api-client.js), donc plus besoin de
       // deviner : ouvrez la console pour voir exactement quel champ le
       // backend a refusé.
-      showToast("Erreur API : " + (err.detail ? JSON.stringify(err.detail) : err.message), "error");
+      showToast(
+        "Erreur API : " +
+          (err.detail ? JSON.stringify(err.detail) : err.message),
+        "error",
+      );
       inscriptionEnregistrementEnCours = false;
     }
   }
 
   function construireEtudiantLocal() {
     return {
-      id: document.getElementById("matricule").value, nom, prenom,
-      sexe: document.getElementById("sexe").value, tel,
+      id: document.getElementById("matricule").value,
+      nom,
+      prenom,
+      sexe: document.getElementById("sexe").value,
+      tel,
       adresse: document.getElementById("adresse").value,
       commune: document.getElementById("commune").value,
       departement: document.getElementById("departement").value,
@@ -1204,12 +1690,33 @@ async function saveInscription() {
       parentAdresse: document.getElementById("parentAdresse").value,
       promo: document.getElementById("promotion").value,
       statut: document.getElementById("statut").value,
-      classe: classeChoisie?.name || "", filiere: classeChoisie?.specialization_name || "",
-      dateInscription, plan: "Standard", montantPaye: 0,
+      classe: classeChoisie?.name || "",
+      filiere: classeChoisie?.specialization_name || "",
+      dateInscription,
+      plan: "Standard",
+      montantPaye: 0,
       resteAPayer: classeChoisie?.tuition_fee || 50000,
       totalFormation: classeChoisie?.tuition_fee || 50000,
     };
   }
+}
+
+function collectInscriptionMetadata(prefix = "") {
+  const get = (id) => document.getElementById(prefix + id)?.value?.trim() || "";
+  return {
+    sexe: get("sexe"),
+    dateNaissance: get("dateNaissance"),
+    commune: get("commune"),
+    departement: get("departement"),
+    parentNom: get("parentNom"),
+    parentTel: get("parentTel"),
+    parentProfession: get("parentProfession"),
+    parentAdresse: get("parentAdresse"),
+    plan: get("plan") || "Standard",
+    totalFormation: Number(get("totalFormation")) || 0,
+    montantPaye: Number(get("montantPaye")) || 0,
+    statut: get("statut"),
+  };
 }
 
 async function validerPaiement() {
@@ -1222,20 +1729,35 @@ async function validerPaiement() {
   const date = document.getElementById("datePaiement").value;
   const observation = document.getElementById("observation").value;
 
-  if (montant <= 0) { showToast("Veuillez entrer un montant valide", "error"); return; }
-  if (!ref.trim()) { showToast("La référence de transaction est obligatoire", "error"); return; }
+  if (montant <= 0) {
+    showToast("Veuillez entrer un montant valide", "error");
+    return;
+  }
+  if (!ref.trim()) {
+    showToast("La référence de transaction est obligatoire", "error");
+    return;
+  }
 
   const etudiant = etudiants.find((e) => String(e.id) === String(etudiantId));
-  if (!etudiant) { console.error("Impossible de trouver l'étudiant avec l'ID", etudiantId); return; }
+  if (!etudiant) {
+    console.error("Impossible de trouver l'étudiant avec l'ID", etudiantId);
+    return;
+  }
 
-  if (montant > etudiant.resteAPayer) { showToast("Le montant dépasse le solde restant", "error"); return; }
+  if (montant > etudiant.resteAPayer) {
+    showToast("Le montant dépasse le solde restant", "error");
+    return;
+  }
 
   const paiementId = "PAY-" + String(paiements.length + 1).padStart(3, "0");
   const recuId = "RECU-2026-" + String(Math.floor(1000 + Math.random() * 9000));
 
   if (API_DISPONIBLE) {
     if (!currentInvoiceForEncaissement) {
-      showToast(`Aucune facture liée à ${etudiant.prenom} ${etudiant.nom} : paiement enregistré localement seulement, non transmis au backend`, "error");
+      showToast(
+        `Aucune facture liée à ${etudiant.prenom} ${etudiant.nom} : paiement enregistré localement seulement, non transmis au backend`,
+        "error",
+      );
     } else {
       try {
         await FinanceAPI.addPayment({
@@ -1246,28 +1768,56 @@ async function validerPaiement() {
           payment_date: date,
         });
       } catch (err) {
-        console.warn("Échec de l'enregistrement du paiement côté API, conservé localement uniquement", err);
-        showToast("Échec de l'enregistrement côté serveur (" + (err.detail ? JSON.stringify(err.detail) : err.message) + ") : paiement gardé localement seulement", "error");
+        console.warn(
+          "Échec de l'enregistrement du paiement côté API, conservé localement uniquement",
+          err,
+        );
+        showToast(
+          "Échec de l'enregistrement côté serveur (" +
+            (err.detail ? JSON.stringify(err.detail) : err.message) +
+            ") : paiement gardé localement seulement",
+          "error",
+        );
         return;
       }
     }
   }
 
   paiements.push({
-    id: paiementId, date: date, etudiantId: etudiantId,
-    etudiantNom: etudiant.prenom + " " + etudiant.nom, montant: montant,
-    mode: modeLabel, ref: ref, agent: "Admin", statut: "Validé",
-    recu: recuId, observation: observation,
+    id: paiementId,
+    date: date,
+    etudiantId: etudiantId,
+    etudiantNom: etudiant.prenom + " " + etudiant.nom,
+    montant: montant,
+    mode: modeLabel,
+    ref: ref,
+    agent: "Admin",
+    statut: "Validé",
+    recu: recuId,
+    observation: observation,
   });
 
-  etudiant.montantPaye = Math.min(etudiant.totalFormation, etudiant.montantPaye + montant);
-  etudiant.resteAPayer = Math.max(0, etudiant.totalFormation - etudiant.montantPaye);
+  etudiant.montantPaye = Math.min(
+    etudiant.totalFormation,
+    etudiant.montantPaye + montant,
+  );
+  etudiant.resteAPayer = Math.max(
+    0,
+    etudiant.totalFormation - etudiant.montantPaye,
+  );
 
   currentRecuData = {
-    recuId: recuId, paiementId: paiementId, date: date, etudiantId: etudiantId,
-    etudiantNom: etudiant.prenom + " " + etudiant.nom, montant: montant,
-    mode: modeLabel, ref: ref, observation: observation,
-    soldeRestant: etudiant.resteAPayer, totalFormation: etudiant.totalFormation,
+    recuId: recuId,
+    paiementId: paiementId,
+    date: date,
+    etudiantId: etudiantId,
+    etudiantNom: etudiant.prenom + " " + etudiant.nom,
+    montant: montant,
+    mode: modeLabel,
+    ref: ref,
+    observation: observation,
+    soldeRestant: etudiant.resteAPayer,
+    totalFormation: etudiant.totalFormation,
     montantPayeTotal: etudiant.montantPaye,
   };
 
@@ -1284,16 +1834,21 @@ function genererRecu() {
   if (!etudiant) return;
 
   const modeSelect = document.getElementById("modePaiement");
-  const modeLabel = modeSelect.selectedOptions[0]?.textContent || modeSelect.value;
+  const modeLabel =
+    modeSelect.selectedOptions[0]?.textContent || modeSelect.value;
 
   currentRecuData = {
     recuId: "RECU-2026-" + String(Math.floor(1000 + Math.random() * 9000)),
-    paiementId: "PAY-PREVIEW", date: document.getElementById("datePaiement").value,
-    etudiantId: etudiantId, etudiantNom: etudiant.prenom + " " + etudiant.nom,
+    paiementId: "PAY-PREVIEW",
+    date: document.getElementById("datePaiement").value,
+    etudiantId: etudiantId,
+    etudiantNom: etudiant.prenom + " " + etudiant.nom,
     montant: parseInt(document.getElementById("montantVerse").value) || 0,
-    mode: modeLabel, ref: document.getElementById("refTransaction").value,
+    mode: modeLabel,
+    ref: document.getElementById("refTransaction").value,
     observation: document.getElementById("observation").value,
-    soldeRestant: etudiant.resteAPayer, totalFormation: etudiant.totalFormation,
+    soldeRestant: etudiant.resteAPayer,
+    totalFormation: etudiant.totalFormation,
     montantPayeTotal: etudiant.montantPaye,
   };
 
@@ -1331,7 +1886,10 @@ function genererRecuContent() {
 }
 
 function imprimerRecuThermique() {
-  if (!currentRecuData) { showToast("Aucune donnée de reçu disponible", "error"); return; }
+  if (!currentRecuData) {
+    showToast("Aucune donnée de reçu disponible", "error");
+    return;
+  }
   const d = currentRecuData;
   const printArea = document.getElementById("pos-print-area");
   printArea.innerHTML = `
@@ -1370,11 +1928,18 @@ function imprimerRecuThermique() {
 }
 
 function telechargerRecuPDF() {
-  if (!currentRecuData) { showToast("Aucune donnée de reçu disponible", "error"); return; }
+  if (!currentRecuData) {
+    showToast("Aucune donnée de reçu disponible", "error");
+    return;
+  }
 
   try {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a5",
+    });
     const d = currentRecuData;
     const pageW = doc.internal.pageSize.getWidth();
     let y = 15;
@@ -1386,7 +1951,11 @@ function telechargerRecuPDF() {
     doc.setFont("helvetica", "bold");
     doc.text("CEJEC", 15, 15);
     doc.setFontSize(7);
-    doc.text("Centre d'Études des Jeunes en Entrepreneuriat et Commerce", 15, 20);
+    doc.text(
+      "Centre d'Études des Jeunes en Entrepreneuriat et Commerce",
+      15,
+      20,
+    );
 
     doc.setTextColor(31, 41, 55);
     doc.setFontSize(14);
@@ -1408,8 +1977,10 @@ function telechargerRecuPDF() {
     y += 6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(`Nom: ${d.etudiantNom}`, 15, y); y += 5;
-    doc.text(`Matricule: ${d.etudiantId}`, 15, y); y += 8;
+    doc.text(`Nom: ${d.etudiantNom}`, 15, y);
+    y += 5;
+    doc.text(`Matricule: ${d.etudiantId}`, 15, y);
+    y += 8;
 
     doc.setDrawColor(229, 231, 235);
     doc.line(15, y, pageW - 15, y);
@@ -1423,7 +1994,10 @@ function telechargerRecuPDF() {
       ["Montant versé:", formatPrix(d.montant)],
       ["Mode de paiement:", d.mode],
       ["Référence:", d.ref || "N/A"],
-      ["Total payé:", `${formatPrix(d.montantPayeTotal)} / ${formatPrix(d.totalFormation)}`],
+      [
+        "Total payé:",
+        `${formatPrix(d.montantPayeTotal)} / ${formatPrix(d.totalFormation)}`,
+      ],
     ];
     details.forEach(([label, value]) => {
       doc.setFont("helvetica", "bold");
@@ -1439,13 +2013,19 @@ function telechargerRecuPDF() {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(`SOLDE RESTANT: ${formatPrix(d.soldeRestant)}`, pageW / 2, y + 8, { align: "center" });
+    doc.text(`SOLDE RESTANT: ${formatPrix(d.soldeRestant)}`, pageW / 2, y + 8, {
+      align: "center",
+    });
 
     y += 20;
     doc.setTextColor(107, 114, 128);
     doc.setFontSize(7);
-    doc.text("Merci de votre confiance en CEJEC!", pageW / 2, y, { align: "center" });
-    doc.text("contact@cejec.edu.ht | Port-au-Prince, Haiti", pageW / 2, y + 4, { align: "center" });
+    doc.text("Merci de votre confiance en CEJEC!", pageW / 2, y, {
+      align: "center",
+    });
+    doc.text("contact@cejec.edu.ht | Port-au-Prince, Haiti", pageW / 2, y + 4, {
+      align: "center",
+    });
 
     doc.save(`CEJEC_${d.recuId}.pdf`);
     showToast("Reçu téléchargé en PDF", "success");
@@ -1476,24 +2056,43 @@ function renderPage(page) {
   const mc = document.getElementById("mainContent");
   updateStatusBanner();
   switch (page) {
-    case "etudiants": mc.innerHTML = renderEtudiants(); break;
-    case "paiements": mc.innerHTML = renderPaiements(); break;
-    case "dettes": mc.innerHTML = renderDettes(); break;
-    case "recus": mc.innerHTML = renderRecus(); break;
-    case "frais": mc.innerHTML = renderTuitionFeesPage(); renderTuitionFees(); break;
-    default: mc.innerHTML = renderEtudiants();
+    case "etudiants":
+      mc.innerHTML = renderEtudiants();
+      break;
+    case "paiements":
+      mc.innerHTML = renderPaiements();
+      break;
+    case "dettes":
+      mc.innerHTML = renderDettes();
+      break;
+    case "recus":
+      mc.innerHTML = renderRecus();
+      break;
+    case "frais":
+      mc.innerHTML = renderTuitionFeesPage();
+      renderTuitionFees();
+      break;
+    default:
+      mc.innerHTML = renderEtudiants();
   }
 }
 
-function renderTuitionFeesPage() { return `<div class="card"><div class="card-header"><h2><i class="fas fa-coins"></i> Frais de scolarité par classe</h2><button class="btn btn-primary" onclick="openTuitionFeesModal()"><i class="fas fa-edit"></i> Gérer les frais</button></div><div class="table-wrap"><table><thead><tr><th>Classe</th><th>Spécialisation</th><th>Frais (HTG)</th><th>Actions</th></tr></thead><tbody id="tuitionFeesRows"></tbody></table></div></div>`; }
+function renderTuitionFeesPage() {
+  return `<div class="card"><div class="card-header"><h2><i class="fas fa-coins"></i> Frais de scolarité par classe</h2><button class="btn btn-primary" onclick="openTuitionFeesModal()"><i class="fas fa-edit"></i> Gérer les frais</button></div><div class="table-wrap"><table><thead><tr><th>Classe</th><th>Spécialisation</th><th>Frais (HTG)</th><th>Actions</th></tr></thead><tbody id="tuitionFeesRows"></tbody></table></div></div>`;
+}
 
 function renderEtudiants() {
-  let rows = etudiants.map((e) => {
-    const statutPill =
-      e.statut === "Inscrit" ? "pill-success" :
-      e.statut === "Suspendu" ? "pill-warning" :
-      e.statut === "Diplômé" ? "pill-info" : "pill-muted";
-    return `<tr>
+  let rows = etudiants
+    .map((e) => {
+      const statutPill =
+        e.statut === "Inscrit"
+          ? "pill-success"
+          : e.statut === "Suspendu"
+            ? "pill-warning"
+            : e.statut === "Diplômé"
+              ? "pill-info"
+              : "pill-muted";
+      return `<tr>
             <td><span class="pill pill-muted">${e.id}</span> ${e.offline ? '<i class="fas fa-cloud-upload-alt" style="color:var(--warning)" title="Non synchronisé"></i>' : ""}</td>
             <td style="font-weight:600">${e.prenom} ${e.nom}</td>
             <td>${e.tel}</td>
@@ -1511,7 +2110,8 @@ function renderEtudiants() {
                 </div>
             </td>
         </tr>`;
-  }).join("");
+    })
+    .join("");
 
   return `
     ${getSectionKpis("etudiants")}
@@ -1519,7 +2119,7 @@ function renderEtudiants() {
         <div class="search-box"><i class="fas fa-search"></i><input placeholder="Rechercher..." oninput="filterEtudiants(this.value)"></div>
         <select class="filter-select" id="academicYearFilterSelect" onchange="filterByAcademicYear(this.value)">
             <option value="tous">Toutes les années</option>
-            ${academicYearsDisponibles.map(y => `<option value="${y.label}" ${currentAcademicYearSelected === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('')}
+            ${academicYearsDisponibles.map((y) => `<option value="${y.label}" ${currentAcademicYearSelected === y.label ? "selected" : ""}>${y.label}${y.is_active ? " (Active)" : ""}</option>`).join("")}
         </select>
         <select class="filter-select" onchange="filterByStatut(this.value)">
             <option value="tous">Tous les statuts</option>
@@ -1566,21 +2166,27 @@ async function filterEtudiants(val) {
   if (!tbody) return;
   const query = val.trim();
   if (!query) {
-    tbody.querySelectorAll("tr").forEach((tr) => { tr.style.display = ""; });
+    tbody.querySelectorAll("tr").forEach((tr) => {
+      tr.style.display = "";
+    });
     return;
   }
   clearTimeout(inscriptionSearchTimer);
   inscriptionSearchTimer = setTimeout(async () => {
     try {
       const remote = await InscriptionsAPI.search(query);
-      const ids = new Set(remote.map(item => String(item.id)));
+      const ids = new Set(remote.map((item) => String(item.id)));
       tbody.querySelectorAll("tr").forEach((tr, index) => {
         tr.style.display = ids.has(String(etudiants[index]?.id)) ? "" : "none";
       });
     } catch (error) {
       console.error("Recherche des inscriptions impossible", error);
       tbody.querySelectorAll("tr").forEach((tr) => {
-        tr.style.display = tr.innerText.toLowerCase().includes(query.toLowerCase()) ? "" : "none";
+        tr.style.display = tr.innerText
+          .toLowerCase()
+          .includes(query.toLowerCase())
+          ? ""
+          : "none";
       });
     }
   }, 250);
@@ -1592,9 +2198,14 @@ function filterByStatut(val) {
   tbody.querySelectorAll("tr").forEach((tr) => {
     const pills = tr.querySelectorAll(".pill");
     const statutPill = Array.from(pills).find((p) =>
-      ["Inscrit", "Suspendu", "Diplômé", "Pré-inscrit"].some((s) => p.innerText.includes(s))
+      ["Inscrit", "Suspendu", "Diplômé", "Pré-inscrit"].some((s) =>
+        p.innerText.includes(s),
+      ),
     );
-    tr.style.display = val === "tous" || (statutPill && statutPill.innerText.includes(val)) ? "" : "none";
+    tr.style.display =
+      val === "tous" || (statutPill && statutPill.innerText.includes(val))
+        ? ""
+        : "none";
   });
 }
 
@@ -1602,7 +2213,8 @@ function filterByPromo(val) {
   const tbody = document.getElementById("etudiantTbody");
   if (!tbody) return;
   tbody.querySelectorAll("tr").forEach((tr) => {
-    tr.style.display = val === "tous" || tr.innerText.includes(val) ? "" : "none";
+    tr.style.display =
+      val === "tous" || tr.innerText.includes(val) ? "" : "none";
   });
 }
 
@@ -1613,7 +2225,11 @@ async function filterByAcademicYear(val) {
 }
 
 function renderPaiements() {
-  let rows = paiements.slice().reverse().map((p) => `
+  let rows = paiements
+    .slice()
+    .reverse()
+    .map(
+      (p) => `
         <tr>
             <td>${p.date}</td>
             <td>${p.etudiantNom}</td>
@@ -1630,7 +2246,9 @@ function renderPaiements() {
                 </div>
             </td>
         </tr>
-    `).join("");
+    `,
+    )
+    .join("");
 
   return `
     ${getSectionKpis("paiements")}
@@ -1666,10 +2284,18 @@ function voirRecuPaiement(paiementId) {
   if (!e) return;
 
   currentRecuData = {
-    recuId: p.recu, paiementId: p.id, date: p.date, etudiantId: p.etudiantId,
-    etudiantNom: p.etudiantNom, montant: p.montant, mode: p.mode, ref: p.ref,
-    observation: p.observation || "", soldeRestant: e.resteAPayer,
-    totalFormation: e.totalFormation, montantPayeTotal: e.montantPaye,
+    recuId: p.recu,
+    paiementId: p.id,
+    date: p.date,
+    etudiantId: p.etudiantId,
+    etudiantNom: p.etudiantNom,
+    montant: p.montant,
+    mode: p.mode,
+    ref: p.ref,
+    observation: p.observation || "",
+    soldeRestant: e.resteAPayer,
+    totalFormation: e.totalFormation,
+    montantPayeTotal: e.montantPaye,
   };
 
   genererRecuContent();
@@ -1683,10 +2309,18 @@ function imprimerRecuDepuisPaiement(paiementId) {
   if (!e) return;
 
   currentRecuData = {
-    recuId: p.recu, paiementId: p.id, date: p.date, etudiantId: p.etudiantId,
-    etudiantNom: p.etudiantNom, montant: p.montant, mode: p.mode, ref: p.ref,
-    observation: p.observation || "", soldeRestant: e.resteAPayer,
-    totalFormation: e.totalFormation, montantPayeTotal: e.montantPaye,
+    recuId: p.recu,
+    paiementId: p.id,
+    date: p.date,
+    etudiantId: p.etudiantId,
+    etudiantNom: p.etudiantNom,
+    montant: p.montant,
+    mode: p.mode,
+    ref: p.ref,
+    observation: p.observation || "",
+    soldeRestant: e.resteAPayer,
+    totalFormation: e.totalFormation,
+    montantPayeTotal: e.montantPaye,
   };
 
   imprimerRecuThermique();
@@ -1699,25 +2333,45 @@ function telechargerRecuDepuisPaiement(paiementId) {
   if (!e) return;
 
   currentRecuData = {
-    recuId: p.recu, paiementId: p.id, date: p.date, etudiantId: p.etudiantId,
-    etudiantNom: p.etudiantNom, montant: p.montant, mode: p.mode, ref: p.ref,
-    observation: p.observation || "", soldeRestant: e.resteAPayer,
-    totalFormation: e.totalFormation, montantPayeTotal: e.montantPaye,
+    recuId: p.recu,
+    paiementId: p.id,
+    date: p.date,
+    etudiantId: p.etudiantId,
+    etudiantNom: p.etudiantNom,
+    montant: p.montant,
+    mode: p.mode,
+    ref: p.ref,
+    observation: p.observation || "",
+    soldeRestant: e.resteAPayer,
+    totalFormation: e.totalFormation,
+    montantPayeTotal: e.montantPaye,
   };
 
   telechargerRecuPDF();
 }
 
 function renderDettes() {
-  const debiteurs = etudiants.filter((e) => e.resteAPayer > 0 && e.statutApi !== "pending");
+  const debiteurs = etudiants.filter(
+    (e) => e.resteAPayer > 0 && e.statutApi !== "pending",
+  );
 
-  let rows = debiteurs.map((e) => {
-    const pct = e.totalFormation ? Math.round((e.montantPaye / e.totalFormation) * 100) : 0;
-    const color = pct >= 80 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--red)";
-    const statutText = pct >= 80 ? "À jour" : pct >= 50 ? "Partiel" : "En retard";
-    const statutClass = pct >= 80 ? "pill-success" : pct >= 50 ? "pill-warning" : "pill-danger";
+  let rows = debiteurs
+    .map((e) => {
+      const pct = e.totalFormation
+        ? Math.round((e.montantPaye / e.totalFormation) * 100)
+        : 0;
+      const color =
+        pct >= 80
+          ? "var(--success)"
+          : pct >= 50
+            ? "var(--warning)"
+            : "var(--red)";
+      const statutText =
+        pct >= 80 ? "À jour" : pct >= 50 ? "Partiel" : "En retard";
+      const statutClass =
+        pct >= 80 ? "pill-success" : pct >= 50 ? "pill-warning" : "pill-danger";
 
-    return `<tr>
+      return `<tr>
             <td style="font-weight:600">${e.prenom} ${e.nom} ${e.plan === "VIP" ? '<span class="badge-vip">VIP</span>' : ""}</td>
             <td>${e.promo}</td>
             <td>${formatPrix(e.montantPaye)}</td>
@@ -1739,7 +2393,8 @@ function renderDettes() {
                 </div>
             </td>
         </tr>`;
-  }).join("");
+    })
+    .join("");
 
   return `
     ${getSectionKpis("dettes")}
@@ -1754,9 +2409,13 @@ function renderDettes() {
         </div>
         
         <div class="debtor-grid" style="margin-bottom:16px">
-            ${debiteurs.slice(0, 3).map((e) => {
-              const pct = e.totalFormation ? Math.round((e.montantPaye / e.totalFormation) * 100) : 0;
-              return `
+            ${debiteurs
+              .slice(0, 3)
+              .map((e) => {
+                const pct = e.totalFormation
+                  ? Math.round((e.montantPaye / e.totalFormation) * 100)
+                  : 0;
+                return `
                 <div class="debtor-card" onclick="openEncaissementModal('${e.id}')">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start">
                         <div>
@@ -1775,7 +2434,8 @@ function renderDettes() {
                         </div>
                     </div>
                 </div>`;
-            }).join("")}
+              })
+              .join("")}
         </div>
         
         <div class="table-wrap">
@@ -1798,7 +2458,11 @@ function renderDettes() {
 }
 
 function renderRecus() {
-  let rows = paiements.slice().reverse().map((p) => `
+  let rows = paiements
+    .slice()
+    .reverse()
+    .map(
+      (p) => `
         <tr>
             <td><strong>${p.recu}</strong></td>
             <td>${p.date}</td>
@@ -1813,7 +2477,9 @@ function renderRecus() {
                 </div>
             </td>
         </tr>
-    `).join("");
+    `,
+    )
+    .join("");
 
   return `
     ${getSectionKpis("recus")}
@@ -1848,19 +2514,78 @@ function renderRecus() {
 
 // ==========================================
 function renderTuitionFees() {
-  const rows = document.getElementById("tuitionFeesRows"); if (!rows) return;
-  rows.innerHTML = classesDisponibles.map(c => `<tr><td>${c.name || "Classe"}</td><td>${c.specialization_name || "—"}</td><td>${Number(c.tuition_fee || 0).toLocaleString("fr-FR")} HTG</td><td><button class="btn btn-sm btn-outline" onclick="editTuitionFee(${c.id})"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline" onclick="deleteTuitionFee(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`).join("");
+  const rows = document.getElementById("tuitionFeesRows");
+  if (!rows) return;
+  rows.innerHTML = classesDisponibles
+    .map(
+      (c) =>
+        `<tr><td>${c.name || "Classe"}</td><td>${c.specialization_name || "—"}</td><td>${Number(c.tuition_fee || 0).toLocaleString("fr-FR")} HTG</td><td><button class="btn btn-sm btn-outline" onclick="editTuitionFee(${c.id})"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline" onclick="deleteTuitionFee(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`,
+    )
+    .join("");
 }
-function openTuitionFeesModal() { const s=document.getElementById("tuitionFeeClass"); s.innerHTML=classesDisponibles.map(c=>`<option value="${c.id}">${c.name || "Classe"}</option>`).join(""); selectTuitionFeeClass(); renderTuitionFees(); openModal("tuitionFeesModal"); }
-function selectTuitionFeeClass() { const id=Number(document.getElementById("tuitionFeeClass").value); const c=classesDisponibles.find(x=>Number(x.id)===id); document.getElementById("tuitionFeeAmount").value=c?.tuition_fee ?? 0; }
-function editTuitionFee(id) { document.getElementById("tuitionFeeClass").value=id; selectTuitionFeeClass(); }
-async function saveTuitionFee(e) { e.preventDefault(); if(!API_DISPONIBLE) return showToast("Action indisponible en mode démo","error"); const id=Number(document.getElementById("tuitionFeeClass").value), amount=Number(document.getElementById("tuitionFeeAmount").value); try { const updated=await ClassesAPI.update(id,{tuition_fee:amount}); classesDisponibles=classesDisponibles.map(c=>Number(c.id)===id?{...c,...updated}:c); renderTuitionFees(); showToast("Frais de scolarité enregistrés","success"); } catch(err) { showToast(`Erreur : ${err.detail || err.message}`,"error"); } }
-async function deleteTuitionFee(id) { if(!API_DISPONIBLE) return showToast("Action indisponible en mode démo","error"); if(!confirm("Supprimer ce montant ? La classe sera conservée avec des frais à 0 HTG.")) return; try { const updated=await ClassesAPI.update(id,{tuition_fee:0}); classesDisponibles=classesDisponibles.map(c=>Number(c.id)===id?{...c,...updated,tuition_fee:0}:c); renderTuitionFees(); selectTuitionFeeClass(); showToast("Frais supprimés","success"); } catch(err) { showToast(`Erreur : ${err.detail || err.message}`,"error"); } }
+function openTuitionFeesModal() {
+  const s = document.getElementById("tuitionFeeClass");
+  s.innerHTML = classesDisponibles
+    .map((c) => `<option value="${c.id}">${c.name || "Classe"}</option>`)
+    .join("");
+  selectTuitionFeeClass();
+  renderTuitionFees();
+  openModal("tuitionFeesModal");
+}
+function selectTuitionFeeClass() {
+  const id = Number(document.getElementById("tuitionFeeClass").value);
+  const c = classesDisponibles.find((x) => Number(x.id) === id);
+  document.getElementById("tuitionFeeAmount").value = c?.tuition_fee ?? 0;
+}
+function editTuitionFee(id) {
+  document.getElementById("tuitionFeeClass").value = id;
+  selectTuitionFeeClass();
+}
+async function saveTuitionFee(e) {
+  e.preventDefault();
+  if (!API_DISPONIBLE)
+    return showToast("Action indisponible en mode démo", "error");
+  const id = Number(document.getElementById("tuitionFeeClass").value),
+    amount = Number(document.getElementById("tuitionFeeAmount").value);
+  try {
+    const updated = await ClassesAPI.update(id, { tuition_fee: amount });
+    classesDisponibles = classesDisponibles.map((c) =>
+      Number(c.id) === id ? { ...c, ...updated } : c,
+    );
+    renderTuitionFees();
+    showToast("Frais de scolarité enregistrés", "success");
+  } catch (err) {
+    showToast(`Erreur : ${err.detail || err.message}`, "error");
+  }
+}
+async function deleteTuitionFee(id) {
+  if (!API_DISPONIBLE)
+    return showToast("Action indisponible en mode démo", "error");
+  if (
+    !confirm(
+      "Supprimer ce montant ? La classe sera conservée avec des frais à 0 HTG.",
+    )
+  )
+    return;
+  try {
+    const updated = await ClassesAPI.update(id, { tuition_fee: 0 });
+    classesDisponibles = classesDisponibles.map((c) =>
+      Number(c.id) === id ? { ...c, ...updated, tuition_fee: 0 } : c,
+    );
+    renderTuitionFees();
+    selectTuitionFeeClass();
+    showToast("Frais supprimés", "success");
+  } catch (err) {
+    showToast(`Erreur : ${err.detail || err.message}`, "error");
+  }
+}
 // INITIALISATION
 // ==========================================
 document.addEventListener("DOMContentLoaded", async () => {
   const mc = document.getElementById("mainContent");
-  if (mc) mc.innerHTML = '<div style="text-align:center;padding:60px"><i class="fas fa-spinner fa-spin" style="font-size:2rem"></i><p style="margin-top:10px;color:var(--muted)">Chargement des inscriptions...</p></div>';
+  if (mc)
+    mc.innerHTML =
+      '<div style="text-align:center;padding:60px"><i class="fas fa-spinner fa-spin" style="font-size:2rem"></i><p style="margin-top:10px;color:var(--muted)">Chargement des inscriptions...</p></div>';
   await chargerDonnees();
   await OfflineQueue.sync();
   renderPage("etudiants");
@@ -1872,7 +2597,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const targetStudentId = params.get("studentId") || params.get("matricule");
   if (targetStudentId) {
-    const student = etudiants.find(e => String(e.id) === String(targetStudentId) || String(e._apiId) === String(targetStudentId) || String(e.registrationNumber) === String(targetStudentId));
+    const student = etudiants.find(
+      (e) =>
+        String(e.id) === String(targetStudentId) ||
+        String(e._apiId) === String(targetStudentId) ||
+        String(e.registrationNumber) === String(targetStudentId),
+    );
     if (student) {
       setTimeout(() => voirDetailsEtudiant(student.id), 150);
     }

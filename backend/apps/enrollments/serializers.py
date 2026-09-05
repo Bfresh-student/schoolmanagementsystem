@@ -71,7 +71,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inscription
         fields = [
-            "id", "local_uuid", "student", "course", "school_class", "promotion", "academic_year", "academic_year_label",
+            "id", "local_uuid", "student", "course", "school_class", "promotion", "metadata", "academic_year", "academic_year_label",
             "student_name", "student_first_name", "student_last_name",
             "student_phone", "student_email", "student_user_id",
             "class_name", "specialization_name", "specialization_id", "tuition_fee",
@@ -197,7 +197,7 @@ class InscriptionCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Inscription
-        fields = ["local_uuid", "student", "school_class", "promotion", "academic_year", "requested_at", "created_offline"]
+        fields = ["local_uuid", "student", "school_class", "promotion", "metadata", "academic_year", "requested_at", "created_offline"]
 
     def validate(self, attrs):
         local_uuid = attrs.get("local_uuid")
