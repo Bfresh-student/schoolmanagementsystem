@@ -41,6 +41,20 @@
                 toggle.setAttribute('aria-checked', Boolean(value) ? 'true' : 'false');
             }
         });
+        if (section === 'utilisateurs' && values.permissions) {
+            document.querySelectorAll('.permission-control').forEach(control => {
+                const key = `${control.dataset.role}:${control.dataset.resource}`;
+                if (values.permissions[key]) control.value = values.permissions[key];
+            });
+        }
+        if (section === 'general' && values.logo) {
+            const preview = document.getElementById('logo-preview');
+            if (preview) preview.innerHTML = `<img src="${escapeHtml(values.logo)}" alt="Logo CEJEC" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+        }
+        if (section === 'profile' && values.photo) {
+            const avatar = document.getElementById('profile-avatar');
+            if (avatar) avatar.innerHTML = `<img src="${escapeHtml(values.photo)}" alt="Photo du profil" style="width:100%;height:100%;object-fit:cover;">`;
+        }
     }
 
     function generalSettingsPayload() {
@@ -48,6 +62,50 @@
             'cejec-name', 'slogan', 'address', 'phone', 'email', 'website',
             'timezone', 'lang-system', 'date-format'
         ].map(id => [id, document.getElementById(id)?.value || '']));
+    }
+
+    function sectionPayload(section) {
+        const values = {};
+        DOM.contentDiv.querySelectorAll('input[id], select[id], textarea[id]').forEach(input => {
+            if (input.type !== 'file') values[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+        });
+        DOM.contentDiv.querySelectorAll('.toggle-switch[data-id]').forEach(toggle => {
+            values[toggle.dataset.id] = toggle.classList.contains('checked');
+        });
+        if (section === 'general') values.logo = document.querySelector('#logo-preview img')?.src || '';
+        if (section === 'profile') values.photo = document.querySelector('#profile-avatar img')?.src || '';
+        if (section === 'utilisateurs') {
+            values.permissions = {};
+            DOM.contentDiv.querySelectorAll('.permission-control').forEach(control => {
+                values.permissions[`${control.dataset.role}:${control.dataset.resource}`] = control.value;
+            });
+        }
+        return values;
+    }
+
+    function preparePermissionControls() {
+        const table = DOM.contentDiv.querySelector('.permissions-table');
+        if (!table || table.dataset.editable === 'true') return;
+        const resources = [...table.querySelectorAll('thead th')].slice(1).map(cell => cell.textContent.trim());
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const role = row.cells[0].textContent.trim();
+            [...row.cells].slice(1).forEach((cell, index) => {
+                const badge = cell.querySelector('.perm-badge');
+                if (!badge || !resources[index]) return;
+                const select = document.createElement('select');
+                select.className = 'permission-control';
+                select.dataset.role = role;
+                select.dataset.resource = resources[index];
+                [['full', 'Complet'], ['read', 'Lecture'], ['self', 'Soi-même'], ['none', 'Aucun']].forEach(([value, label]) => {
+                    const option = new Option(label, value);
+                    select.appendChild(option);
+                });
+                const current = badge.textContent.trim().toLowerCase();
+                select.value = current === 'complet' ? 'full' : current === 'soi-même' ? 'self' : current === 'lecture' ? 'read' : 'none';
+                cell.replaceChildren(select);
+            });
+        });
+        table.dataset.editable = 'true';
     }
 
     async function persistSettings(section, values) {
@@ -278,11 +336,11 @@
                             <tbody>
                                 <tr>
                                     <td><div class="role-name"><div class="role-icon role-admin"><i class="fas fa-user-shield" aria-hidden="true"></i></div> Administrateur</div></td>
-                                    <td><span class="perm-badge perm-full">Complet</span></td>
-                                    <td><span class="perm-badge perm-full">Complet</span></td>
-                                    <td><span class="perm-badge perm-full">Complet</span></td>
-                                    <td><span class="perm-badge perm-full">Complet</span></td>
-                                    <td><span class="perm-badge perm-full">Complet</span></td>
+                                    <td><span class="perm-badge perm-full permission-value">Complet</span></td>
+                                    <td><span class="perm-badge perm-full permission-value">Complet</span></td>
+                                    <td><span class="perm-badge perm-full permission-value">Complet</span></td>
+                                    <td><span class="perm-badge perm-full permission-value">Complet</span></td>
+                                    <td><span class="perm-badge perm-full permission-value">Complet</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
@@ -294,17 +352,17 @@
                                     <td><span class="perm-badge perm-limited">Lecture</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
                                     <td><span class="perm-badge perm-limited">Lecture</span></td>
-                                    <td><span class="perm-badge perm-none">Aucun</span></td>
+                                    <td><span class="perm-badge perm-none permission-value">Aucun</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
                                 </tr>
                                 <tr>
                                     <td><div class="role-name"><div class="role-icon role-secretariat"><i class="fas fa-user-cog" aria-hidden="true"></i></div> Secrétariat</div></td>
-                                    <td><span class="perm-badge perm-limited">Lecture</span></td>
+                                    <td><span class="perm-badge perm-limited permission-value">Lecture</span></td>
                                     <td><span class="perm-badge perm-full">Complet</span></td>
-                                    <td><span class="perm-badge perm-limited">Lecture</span></td>
-                                    <td><span class="perm-badge perm-limited">Lecture</span></td>
-                                    <td><span class="perm-badge perm-limited">Lecture</span></td>
+                                    <td><span class="perm-badge perm-limited permission-value">Lecture</span></td>
+                                    <td><span class="perm-badge perm-limited permission-value">Lecture</span></td>
+                                    <td><span class="perm-badge perm-limited permission-value">Lecture</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
@@ -334,7 +392,7 @@
                                 <tr>
                                     <td><div class="role-name"><div class="role-icon role-etudiant"><i class="fas fa-user-graduate" aria-hidden="true"></i></div> Étudiants</div></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
-                                    <td><span class="perm-badge perm-limited">Soi-même</span></td>
+                                    <td><span class="perm-badge perm-limited permission-value">Soi-même</span></td>
                                     <td><span class="perm-badge perm-limited">Lecture</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
                                     <td><span class="perm-badge perm-none">Aucun</span></td>
@@ -589,6 +647,38 @@
         }
     }
 
+    async function initAdminNotifications() {
+        const bell = document.querySelector('.notification-bell');
+        const badge = document.querySelector('.badge44');
+        if (!bell || typeof apiClientRequest !== 'function') return;
+        const refresh = async () => {
+            try {
+                const response = await apiClientRequest('/notifications/notifications/?page_size=20');
+                const notifications = Array.isArray(response) ? response : (response.results || []);
+                const unread = notifications.filter(item => !item.is_read);
+                if (badge) badge.textContent = unread.length;
+                bell.title = unread.length ? `${unread.length} notification(s) non lue(s)` : 'Aucune notification non lue';
+                bell.dataset.notifications = JSON.stringify(notifications);
+            } catch (error) {
+                console.error('Chargement notifications administrateur impossible', error);
+            }
+        };
+        bell.addEventListener('click', async () => {
+            const notifications = JSON.parse(bell.dataset.notifications || '[]');
+            if (typeof Swal !== 'undefined') {
+                const content = notifications.length
+                    ? notifications.slice(0, 10).map(item => `<p style="text-align:left;margin:8px 0"><strong>${escapeHtml(item.title || 'Notification')}</strong><br><small>${escapeHtml(item.content || '')}</small></p>`).join('')
+                    : '<p>Aucune notification.</p>';
+                await Swal.fire({ title: 'Notifications', html: content, confirmButtonText: 'Fermer' });
+            }
+            if (notifications.some(item => !item.is_read)) {
+                try { await apiClientRequest('/notifications/notifications/mark-all-read/', { method: 'POST' }); } catch (error) { console.error('Marquage notifications impossible', error); }
+                refresh();
+            }
+        });
+        refresh();
+    }
+
     // ========== FILE UPLOAD ==========
     function handleLogoUpload(e) {
         const file = e.target.files[0];
@@ -610,6 +700,7 @@
                     logoPlaceholder.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="Aperçu du logo">`;
                     logoPlaceholder.classList.add('has-image');
                     logoPlaceholder.dataset.prevUrl = ev.target.result;
+                    persistSettings('general', sectionPayload('general')).catch(error => console.error('Logo non enregistré', error));
                 };
                 reader.onerror = function() {
                     showToast('Erreur lors de la lecture du fichier', 'error');
@@ -624,6 +715,18 @@
             }
             if (uploadContainer) uploadContainer.classList.remove('has-file');
         }
+    }
+
+    function handleProfilePhotoUpload(e) {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = event => {
+            const avatar = document.getElementById('profile-avatar');
+            if (avatar) avatar.innerHTML = `<img src="${event.target.result}" alt="Photo du profil" style="width:100%;height:100%;object-fit:cover;">`;
+            persistSettings('profile', sectionPayload('profile')).catch(error => console.error('Photo non enregistrée', error));
+        };
+        reader.readAsDataURL(file);
     }
 
     function handleFileSelect(e) {
@@ -1063,15 +1166,15 @@
 
     async function initAudit() {
         try {
-            const response = await apiClientRequest('/notifications/notifications/?page_size=200');
+            const response = await (window.AuditAPI ? AuditAPI.list() : apiClientRequest('/hr/audit-log/?page_size=200'));
             const notifications = Array.isArray(response) ? response : (response.results || []);
             auditData = notifications.map(notification => ({
                 id: notification.id,
-                timestamp: notification.created_at ? new Date(notification.created_at).toLocaleString('fr-FR') : '—',
-                user: 'Système CEJEC', role: 'Notification', roleDot: 'dot-admin',
-                category: 'Système', action: notification.title || 'Notification',
-                target: notification.content || '',
-                severity: notification.priority === 'urgent' || notification.priority === 'high' ? 'warning' : 'info'
+                timestamp: notification.action_at ? new Date(notification.action_at).toLocaleString('fr-FR') : '—',
+                user: notification.admin_name || notification.user_name || 'Système CEJEC', role: notification.action || 'Audit', roleDot: 'dot-admin',
+                category: notification.entity_type || 'Système', action: notification.action || 'Action enregistrée',
+                target: notification.entity_id ? `${notification.entity_type || 'Élément'} #${notification.entity_id}` : JSON.stringify(notification.changes_json || ''),
+                severity: notification.action === 'DELETE' ? 'danger' : notification.action === 'UPDATE' ? 'warning' : 'success'
             }));
         } catch (error) {
             console.error('Chargement du journal de notifications impossible', error);
@@ -1146,31 +1249,22 @@
     }
 
     function clearLog() {
-        if (auditData.length === 0) {
-            showToast("Le journal est déjà vide.", "error");
-            return;
-        }
-
-        showConfirmModal(
-            'Vider le journal d\'audit ?',
-            `⚠️ Cette action supprimera définitivement les ${auditData.length} entrée(s) du journal.`,
-            () => {
-                auditData = [];
-                currentFilteredData = [];
-                currentPage = 1;
-                renderTable([], 1);
-                updateStats([]);
-                showToast("🗑️ Journal d'audit vidé avec succès.", "success");
-            }
-        );
+        showToast("Le journal d'audit est en lecture seule.", "info");
     }
 
-    function savePermissions() {
-        showToast('✅ Permissions sauvegardées avec succès !', 'success');
+    async function savePermissions() {
+        try {
+            await persistSettings('utilisateurs', sectionPayload('utilisateurs'));
+            showToast('✅ Permissions sauvegardées dans la base.', 'success');
+        } catch (error) {
+            console.error('Sauvegarde permissions impossible', error);
+            showToast('❌ Permissions non enregistrées.', 'error');
+        }
     }
 
     // ========== ATTACHER ÉVÉNEMENTS ==========
     function attachAllEvents() {
+        preparePermissionControls();
         // Toggle switch - utiliser cloneNode pour éviter les doublons
         document.querySelectorAll('.toggle-switch').forEach(sw => {
             const newSw = sw.cloneNode(true);
@@ -1291,6 +1385,7 @@
                         email: document.getElementById('profile-email').value.trim(),
                         phone: document.getElementById('profile-phone').value.trim(),
                     });
+                    await persistSettings('profile', sectionPayload('profile'));
                     showToast('✅ Profil mis à jour sur le serveur.', 'success');
                     updateLastSaveTime();
                 } catch (error) {
@@ -1369,11 +1464,28 @@
             });
         }
 
+        const saveSection = async (section, message) => {
+            try {
+                await persistSettings(section, sectionPayload(section));
+                showToast(message, 'success');
+            } catch (error) {
+                console.error(`Sauvegarde ${section} impossible`, error);
+                showToast('❌ Enregistrement impossible sur le serveur.', 'error');
+            }
+        };
+
+        const backupButton = document.getElementById('btn-backup-manual');
+        if (backupButton) backupButton.addEventListener('click', () => saveSection('sauvegarde', '✅ Sauvegarde enregistrée dans la base.'));
+        const autoBackup = document.querySelector('.toggle-switch[data-id="auto-backup"]');
+        if (autoBackup) autoBackup.addEventListener('click', () => saveSection('sauvegarde', '✅ Préférence de sauvegarde enregistrée.'));
+
         // File uploads
         const logoInput = document.getElementById('company-logo');
         if (logoInput) {
             logoInput.addEventListener('change', handleLogoUpload);
         }
+        const profilePhotoInput = document.getElementById('profile-photo-upload');
+        if (profilePhotoInput) profilePhotoInput.addEventListener('change', handleProfilePhotoUpload);
 
         document.querySelectorAll('.file-input-styled').forEach(function(input) {
             if (input.id !== 'company-logo') {
@@ -1400,6 +1512,7 @@
         requestAnimationFrame(() => {
             DOM.contentDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
             requestAnimationFrame(() => {
+                if (key === 'utilisateurs') preparePermissionControls();
                 applyBackendSettings(key);
                 if (key === 'profile' && window.AuthAPI) {
                     AuthAPI.me().then(user => {
@@ -1441,6 +1554,7 @@
     window.saveIntegration = function(service) {
         showToast(`✅ Configuration ${service} sauvegardée !`, 'success');
         updateLastSaveTime();
+        initAdminNotifications();
     };
 
     // Exposer fonctions globales
@@ -1491,19 +1605,59 @@
 
     // ========== BOUTONS FOOTER ==========
     if (DOM.btnSaveAll) {
-        DOM.btnSaveAll.addEventListener('click', () => {
-            showToast('💾 Configuration complète sauvegardée !', 'success');
-            updateLastSaveTime();
+        DOM.btnSaveAll.addEventListener('click', async () => {
+            try {
+                await persistSettings(appState.currentSection, sectionPayload(appState.currentSection));
+                showToast('💾 Configuration sauvegardée dans la base.', 'success');
+            } catch (error) {
+                console.error('Sauvegarde globale impossible', error);
+                showToast('❌ Configuration non enregistrée.', 'error');
+            }
         });
     }
 
     if (DOM.btnExport) {
-        DOM.btnExport.addEventListener('click', () => showToast('📁 Export JSON de la configuration prêt', 'success'));
+        DOM.btnExport.addEventListener('click', () => {
+            const blob = new Blob([JSON.stringify(appState.backendSettings, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `cejec-parametres-${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('📁 Configuration exportée.', 'success');
+        });
     }
 
     if (DOM.btnImport) {
-        DOM.btnImport.addEventListener('click', () => showToast('📥 Importation de configuration simulée', 'info'));
+        DOM.btnImport.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json,.json';
+            input.addEventListener('change', () => {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const imported = JSON.parse(reader.result);
+                        if (!imported || typeof imported !== 'object' || Array.isArray(imported)) throw new Error('FORMAT');
+                        const response = await SettingsAPI.save(imported);
+                        appState.backendSettings = response.settings || imported;
+                        renderSection(appState.currentSection);
+                        showToast('📥 Configuration importée et enregistrée.', 'success');
+                    } catch (error) {
+                        console.error('Import configuration impossible', error);
+                        showToast('❌ Fichier de configuration invalide.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            input.click();
+        });
     }
+
+    const restoreButton = document.getElementById('btn-restore');
+    if (restoreButton && DOM.btnImport) restoreButton.addEventListener('click', () => DOM.btnImport.click());
 
     // ========== KEYBOARD SHORTCUTS ==========
     document.addEventListener('keydown', function(e) {

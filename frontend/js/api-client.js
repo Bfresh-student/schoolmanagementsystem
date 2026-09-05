@@ -175,6 +175,11 @@ const SettingsAPI = {
 };
 window.SettingsAPI = SettingsAPI;
 
+const AuditAPI = {
+    list() { return apiClientRequest('/hr/audit-log/?page_size=200'); },
+};
+window.AuditAPI = AuditAPI;
+
 const GlobalSearchAPI = {
     search(query) {
         return apiClientRequest(`/auth/users/global-search/?q=${encodeURIComponent(query)}`);
