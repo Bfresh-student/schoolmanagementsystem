@@ -1247,7 +1247,7 @@ function imprimerFicheEtudiantPOS() {
 // ==========================================
 function openInscriptionModal() {
   document.getElementById("matricule").value =
-    "ETU-2026-" + String(nextMatricule).padStart(3, "0");
+    "elv" + String(nextMatricule).padStart(6, "0");
   document.getElementById("dateInscription").value = new Date()
     .toISOString()
     .split("T")[0];

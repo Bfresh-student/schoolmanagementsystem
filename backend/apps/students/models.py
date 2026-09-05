@@ -1,5 +1,3 @@
-import uuid
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -127,7 +125,7 @@ class Student(models.Model):
         related_name="student_profile",
     )
 
-    # Identifiant métier unique, ex: "PROF-2024-001"
+    # Identifiant métier unique partagé par tous les écrans élève.
     registration_number = models.CharField(max_length=30, editable=False)
 
     specialization = models.ForeignKey(
@@ -189,23 +187,11 @@ class Student(models.Model):
         super().save(*args, **kwargs)
 
     def _generate_registration_number(self):
-        """Génère un numéro du type PROF-2024-000123."""
-        year = self.enrollment_date.year if self.enrollment_date else uuid.uuid1().time
-        from django.utils import timezone
-
-        current_year = timezone.now().year
-        last = (
-            Student.objects.filter(registration_number__startswith=f"PROF-{current_year}-")
-            .order_by("-id")
-            .first()
-        )
+        """Génère le matricule élève partagé, par exemple ``elv000001``."""
         next_number = 1
-        if last:
-            try:
-                next_number = int(last.registration_number.split("-")[-1]) + 1
-            except (ValueError, IndexError):
-                next_number = last.id + 1
-        return f"PROF-{current_year}-{next_number:06d}"
+        while Student.objects.filter(registration_number=f"elv{next_number:06d}").exists():
+            next_number += 1
+        return f"elv{next_number:06d}"
 
     def anonymize(self):
         """

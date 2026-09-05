@@ -94,8 +94,8 @@ class TestTeacherCreation:
         assert user.teacher_profile.status == 'ACTIVE'
     
     def test_teacher_id_format(self, teacher):
-        """Test: teacher_id est au bon format (T0001, T0002, etc)"""
-        assert teacher.teacher_id.startswith('T')
+        """Test: teacher_id est au format pf0001, pf0002, etc."""
+        assert teacher.teacher_id.startswith('pf')
         assert len(teacher.teacher_id) >= 4
 
 

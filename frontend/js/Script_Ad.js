@@ -1,174 +1,940 @@
-function toggleUserMenu() {
-  document.getElementById("userMenu").classList.toggle("show");
-}
+document.addEventListener("DOMContentLoaded", function () {
+  /* ============================================================
+       0) PANNO NOTIFIKASYON LATERAL BÒ DWAT - #sidebar-nocti
+       (jenere ak injekte nan DOM lan via JS, olye l ekri an dur nan HTML)
+    ============================================================ */
+  const sidebarNoctiTemplate = `
+        <div class="sidebar-nocti-overlay" id="sidebarNoctiOverlay"></div>
 
-document.addEventListener("click", function (e) {
-  if (!e.target.closest(".user-section")) {
-    document.getElementById("userMenu").classList.remove("show");
+        <aside class="sidebar-nocti" id="sidebar-nocti" aria-hidden="true">
+            <div class="sidebar-nocti-header">
+                <h2><i class="fa-regular fa-bell"></i> Notifications</h2>
+                <button type="button" class="sidebar-nocti-close" id="sidebarNoctiClose" aria-label="Fermer les notifications">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-nocti-tabs" id="sidebarNoctiTabs">
+                <button type="button" class="sidebar-nocti-tab active" data-filter="all">Toutes</button>
+                <button type="button" class="sidebar-nocti-tab" data-filter="unread">Non lues</button>
+            </div>
+
+            <div class="sidebar-nocti-toolbar">
+                <label class="sidebar-nocti-select-all">
+                    <input type="checkbox" id="sidebarNoctiSelectAll">
+                    Tout sélectionner
+                </label>
+                <button type="button" class="sidebar-nocti-mark-all" id="sidebarNoctiMarkAll">
+                    Tout marquer comme lu
+                </button>
+            </div>
+
+            <button type="button" class="sidebar-nocti-delete-selected" id="sidebarNoctiDeleteSelected">
+                <i class="fa-solid fa-trash"></i> Supprimer la sélection (<span id="sidebarNoctiSelectedCount">0</span>)
+            </button>
+
+            <div class="sidebar-nocti-list" id="sidebarNoctiList">
+
+                <!-- INSCRIPTION -->
+                <div class="sidebar-nocti-item unread">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Nouvelle inscription</div>
+                        <div class="notif-desc">
+                            Une nouvelle demande d'inscription vient d'être enregistrée
+                            pour la prochaine promotion du CEJEC.
+                        </div>
+                        <div class="notif-time">Il y a 5 min</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- PAIEMENT -->
+                <div class="sidebar-nocti-item unread">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Paiement reçu</div>
+                        <div class="notif-desc">
+                            Un paiement de frais de formation a été enregistré
+                            pour un étudiant du CEJEC.
+                        </div>
+                        <div class="notif-time">Il y a 32 min</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- NOTES -->
+                <div class="sidebar-nocti-item unread">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Notes mises à jour</div>
+                        <div class="notif-desc">
+                            De nouvelles notes ont été enregistrées pour les étudiants
+                            de la promotion du CEJEC.
+                        </div>
+                        <div class="notif-time">Il y a 1 h</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- PROFESSEUR -->
+                <div class="sidebar-nocti-item unread">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Nouveau professeur</div>
+                        <div class="notif-desc">
+                            Un nouveau professeur a été ajouté au personnel académique
+                            du CEJEC et son profil est maintenant disponible.
+                        </div>
+                        <div class="notif-time">Il y a 2 h</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- INCUBATEUR -->
+                <div class="sidebar-nocti-item unread">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Nouveau projet entrepreneurial</div>
+                        <div class="notif-desc">
+                            Un nouveau projet vient d'être ajouté à l'Incubateur
+                            Projets du CEJEC pour accompagnement.
+                        </div>
+                        <div class="notif-time">Il y a 3 h</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- ÉVÉNEMENT -->
+                <div class="sidebar-nocti-item">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Événement à venir</div>
+                        <div class="notif-desc">
+                            Un événement académique ou entrepreneurial du CEJEC
+                            est prévu prochainement dans le calendrier.
+                        </div>
+                        <div class="notif-time">Il y a 5 h</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- RAPPORT -->
+                <div class="sidebar-nocti-item">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Rapport disponible</div>
+                        <div class="notif-desc">
+                            Le rapport académique de la promotion est maintenant
+                            disponible pour consultation dans le système de gestion CEJEC.
+                        </div>
+                        <div class="notif-time">Hier</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- COMMUNICATION -->
+                <div class="sidebar-nocti-item">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Nouvelle communication</div>
+                        <div class="notif-desc">
+                            Une nouvelle actualité ou communication institutionnelle
+                            a été publiée dans l'espace Médias & Communication du CEJEC.
+                        </div>
+                        <div class="notif-time">Hier</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- RH -->
+                <div class="sidebar-nocti-item">
+                    <input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">
+
+                    <div class="notif-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+
+                    <div class="notif-content">
+                        <div class="notif-title">Mise à jour RH</div>
+                        <div class="notif-desc">
+                            Une information concernant le personnel du CEJEC
+                            a été ajoutée ou mise à jour dans le module Ressources Humaines.
+                        </div>
+                        <div class="notif-time">Il y a 2 jours</div>
+                    </div>
+
+                    <div class="sidebar-nocti-item-actions">
+                        <button type="button" class="mark-read-btn" title="Marquer comme lu">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="delete-btn" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div class="sidebar-nocti-empty" id="sidebarNoctiEmpty" style="display:none;">
+                <i class="fa-regular fa-bell-slash"></i>
+                <p>Aucune notification dans cette catégorie.</p>
+            </div>
+
+        </aside>
+    `;
+  document.body.insertAdjacentHTML("beforeend", sidebarNoctiTemplate);
+
+  /* ---------- Ikon Lucide ---------- */
+  function initLucide() {
+    if (window.lucide) lucide.createIcons({ attrs: { "stroke-width": 1.55 } });
   }
-});
+  initLucide();
 
-const menuToggle = document.getElementById("menu-toggle");
-const sidebar = document.querySelector(".sidebar");
-const overlay = document.querySelector(".overlay");
+  /* ---------- Referans eleman yo ---------- */
+  const menuToggle = document.getElementById("menu-toggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".overlay");
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const userTrigger = document.querySelector(".user-trigger");
+  const userMenu = document.getElementById("userMenu");
+  const notifBell = document.getElementById("notifBell");
+  const notifMenu = document.getElementById("notifMenu");
+  const notifBadge = document.getElementById("notifBadge");
+  const notifList = document.getElementById("notifList");
+  const markAllRead = document.getElementById("markAllRead");
+  const notifClose = document.getElementById("notifClose");
+  const notifSeeAll = document.getElementById("notifSeeAll");
 
-// Ouvri / fèmen lè yo klike sou bouton an
-menuToggle.addEventListener("click", (e) => {
-  e.stopPropagation();
-  sidebar.classList.toggle("show");
-  overlay.classList.toggle("active");
+  /* Blokaj scroll paj la pataje ant sidebar mobil la ak panno notifikasyon
+       lateral la (#sidebar-nocti) - konsa si youn fèmen pandan lòt la toujou
+       louvri, scroll la pa dezoure paj la twò bonè. */
+  function updateBodyScrollLock() {
+    const sidebarNoctiEl = document.getElementById("sidebar-nocti");
+    const anyOpen =
+      (sidebar && sidebar.classList.contains("show")) ||
+      (sidebarNoctiEl && sidebarNoctiEl.classList.contains("show"));
+    document.body.style.overflow = anyOpen ? "hidden" : "";
+  }
 
-  const expanded = menuToggle.getAttribute("aria-expanded") === "true";
-  menuToggle.setAttribute("aria-expanded", !expanded);
-});
+  /* ============================================================
+       1) SIDEBAR MOBIL - ouvri / fèmen ak bouton hamburger la
 
-// Fèmen lè yo klike DEYÒ (sou overlay)
-overlay.addEventListener("click", () => {
-  sidebar.classList.remove("show");
-  overlay.classList.remove("active");
-  menuToggle.setAttribute("aria-expanded", "false");
-});
-
-// Fèmen sidebar si klike nan nenpòt lòt pati nan dokiman (opsyonèl)
-document.addEventListener("click", (e) => {
-  if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+       KORIJE: openSidebar()/closeSidebar() te touche sidebar.classList
+       ak overlay.classList san verifye si eleman yo egziste nan paj la.
+       Sou nenpòt paj ki pa gen .sidebar oswa .overlay (pa egzanp yon paj
+       login), sa te jete yon erè JS ("Cannot read properties of null")
+       chak fwa ou klike nenpòt kote sou paj la, akoz gwo click-listener
+       global la pi ba a. Kounye a de fonksyon yo tou senpleman pa fè
+       anyen si eleman yo pa la.
+    ============================================================ */
+  function openSidebar() {
+    if (!sidebar || !overlay) return;
+    sidebar.classList.add("show");
+    overlay.classList.add("active");
+    document.body.classList.add("sidebar-open");
+    updateBodyScrollLock();
+    if (menuToggle) menuToggle.setAttribute("aria-expanded", "true");
+  }
+  function closeSidebar() {
+    if (!sidebar || !overlay) return;
     sidebar.classList.remove("show");
     overlay.classList.remove("active");
-    menuToggle.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("sidebar-open");
+    updateBodyScrollLock();
+    if (menuToggle) menuToggle.setAttribute("aria-expanded", "false");
   }
-});
-
-// Bloke pwopagasyon pou klik andedan sidebar
-sidebar.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
-// Js pou 2 dropdown22 yo (Logistique ak Raport & RH)
-// Seleksyone tout bouton toggle ak tout meni
-const toggleBtns = document.querySelectorAll(".dropdown22-toggle");
-const menus = document.querySelectorAll(".dropdown22-menu");
-
-// Fonksyon pou ouvri yon meni espesifik
-function openMenu(menu, toggleBtn) {
-  menu.classList.add("show");
-  // Sove id meni an ki louvri
-  localStorage.setItem(`menuOpen_${menu.id}`, "true");
-}
-
-// Fonksyon pou fèmen yon meni espesifik
-function closeMenu(menu, toggleBtn) {
-  menu.classList.remove("show");
-  // Sove id meni an ki fèmen
-  localStorage.setItem(`menuOpen_${menu.id}`, "false");
-}
-
-// Fonksyon pou toggle yon meni
-function toggleMenu(menu, toggleBtn) {
-  if (menu.classList.contains("show")) {
-    closeMenu(menu, toggleBtn);
-  } else {
-    // Fèmen tout lòt meni anvan ou louvri nouvo a (si ou vle yon sel meni louvri a la fwa)
-    closeAllMenus();
-    openMenu(menu, toggleBtn);
-  }
-}
-
-// Fonksyon pou fèmen tout meni yo
-function closeAllMenus() {
-  menus.forEach((menu) => {
-    menu.classList.remove("show");
-    // Mete a jour localStorage pou chak meni
-    localStorage.setItem(`menuOpen_${menu.id}`, "false");
-  });
-}
-
-// Ajoute event listener pou chak bouton toggle
-toggleBtns.forEach((toggleBtn, index) => {
-  // Jwenn meni ki koresponn ak bouton sa a (prochain .dropdown22-menu)
-  const menu = toggleBtn.parentElement.querySelector(".dropdown22-menu");
-
-  // Si pa jwenn meni a, eseye jwenn pa id menm si id la menm?
-  // Nou bezwen asire chak meni gen yon id diferan
-
-  if (menu) {
-    // Ajoute event listener pou bouton an
-    toggleBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleMenu(menu, toggleBtn);
+  if (menuToggle) {
+    menuToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (!sidebar) return;
+      sidebar.classList.contains("show") ? closeSidebar() : openSidebar();
     });
   }
-});
-
-// Pou fèmen meni yo si itilizatè klike deyò
-document.addEventListener("click", function (event) {
-  // Verifye si klike a pa sou okenn bouton toggle oswa nan okenn meni
-  let clickedOnToggle = false;
-  let clickedOnMenu = false;
-
-  toggleBtns.forEach((toggleBtn) => {
-    if (toggleBtn.contains(event.target)) {
-      clickedOnToggle = true;
+  if (overlay) overlay.addEventListener("click", closeSidebar);
+  if (sidebar)
+    sidebar.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  document.addEventListener("click", function (e) {
+    if (
+      sidebar &&
+      window.innerWidth <= 1024 &&
+      sidebar.classList.contains("show") &&
+      !sidebar.contains(e.target) &&
+      (!menuToggle || !menuToggle.contains(e.target))
+    ) {
+      closeSidebar();
     }
   });
 
-  menus.forEach((menu) => {
-    if (menu.contains(event.target)) {
-      clickedOnMenu = true;
+  /* Lè fenèt la vin gen lajè desktop ankò (soti sou yon fòma pi piti kote
+       meni mobil la te louvri), reyinisyalize eta "mobil" la (sidebar.show,
+       overlay, body.sidebar-open) pou anyen pa rete "kole". San sa, bouton
+       hamburger la ta ka sanble li pa reponn ankò lè ekran an vin piti
+       ankò apre sa, paske eta a t ap deja fofse "louvri" san rezon. */
+  let lastWasMobile = window.innerWidth <= 1024;
+  window.addEventListener("resize", function () {
+    const isMobileNow = window.innerWidth <= 1024;
+    if (lastWasMobile && !isMobileNow) {
+      closeSidebar();
     }
+    lastWasMobile = isMobileNow;
   });
 
-  if (!clickedOnToggle && !clickedOnMenu) {
-    closeAllMenus();
+  /* ============================================================
+       2) SIDEBAR REDUI / AGRANDI (desktop) - bouton panel-left
+    ============================================================ */
+  if (sidebarToggle) {
+    function applyMinimizedState(minimized) {
+      sidebar.classList.toggle("minimized", minimized);
+      document.body.classList.toggle("sidebar-minimized", minimized);
+      sidebarToggle.title = minimized ? "Agrandir" : "Réduire";
+    }
+    let isMinimized = localStorage.getItem("sidebarMinimized") === "true";
+    applyMinimizedState(isMinimized);
+
+    sidebarToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      isMinimized = !isMinimized;
+      localStorage.setItem("sidebarMinimized", isMinimized);
+      applyMinimizedState(isMinimized);
+    });
   }
-});
 
-// Lè paj la charge, tcheke eta chak meni
-document.addEventListener("DOMContentLoaded", function () {
-  // Asire chak meni gen yon id diferan
-  menus.forEach((menu, idx) => {
-    // Si meni a pa gen id, bay li yon id
-    if (!menu.id || menu.id === "itemMenu") {
-      menu.id = `menu_${idx}_${Date.now()}`;
+  /* ============================================================
+       3) MENI ITILIZATÈ (Bruno Jean) an tèt paj la
+    ============================================================ */
+  function closeUserMenu() {
+    if (!userMenu) return;
+    userMenu.classList.remove("show");
+    userMenu.setAttribute("aria-hidden", "true");
+  }
+  function openUserMenu() {
+    if (!userMenu) return;
+    userMenu.classList.add("show");
+    userMenu.setAttribute("aria-hidden", "false");
+  }
+  function closeNotifMenu() {
+    if (!notifMenu) return;
+    notifMenu.classList.remove("show");
+    notifMenu.setAttribute("aria-hidden", "true");
+  }
+  function openNotifMenu() {
+    if (!notifMenu) return;
+    notifMenu.classList.add("show");
+    notifMenu.setAttribute("aria-hidden", "false");
+  }
+
+  const escapeNotificationHtml = (value) =>
+    String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  const notificationIcon = (type) => {
+    if (type.includes("grade")) return "fa-graduation-cap";
+    if (type.includes("payment")) return "fa-hand-holding-dollar";
+    if (type.includes("course")) return "fa-book-open";
+    if (type.includes("event")) return "fa-calendar-check";
+    if (type.includes("article")) return "fa-newspaper";
+    if (type.includes("teacher")) return "fa-chalkboard-user";
+    return "fa-bell";
+  };
+
+  function notificationTarget(notification) {
+    if (!notification.target_url) return null;
+    return {
+      url: notification.target_url,
+      modal: notification.target_modal || "",
+      id: notification.target_id || "",
+    };
+  }
+
+  async function openNotificationTarget(notification) {
+    const target = notificationTarget(notification);
+    if (!target) return;
+    try {
+      await apiClientRequest(
+        `/notifications/notifications/${notification.id}/mark-read/`,
+        { method: "PATCH" },
+      );
+    } catch (error) {
+      console.warn("Lecture de notification impossible", error);
     }
+    const currentPage = window.location.pathname.split("/").pop();
+    if (target.url.split("?")[0] !== currentPage) {
+      localStorage.setItem("cejec_notification_target", JSON.stringify(target));
+      window.location.href = target.url;
+      return;
+    }
+    if (target.modal && typeof window[target.modal] === "function") {
+      window[target.modal](target.id || undefined);
+    }
+  }
 
-    // Tcheke eta meni a nan localStorage
-    const menuWasOpen = localStorage.getItem(`menuOpen_${menu.id}`);
-    if (menuWasOpen === "true") {
-      menu.classList.add("show");
+  function notificationMarkup(notification, sidebarItem = false) {
+    const unreadClass = notification.is_read ? "" : " unread";
+    const target = notificationTarget(notification);
+    const targetAttrs = target
+      ? ` data-notification-id="${escapeNotificationHtml(notification.id)}"`
+      : "";
+    const actions = sidebarItem
+      ? `<div class="sidebar-nocti-item-actions"><button type="button" class="mark-read-btn" title="Marquer comme lu"><i class="fa-solid fa-check"></i></button><button type="button" class="delete-btn" title="Supprimer"><i class="fa-solid fa-trash"></i></button></div>`
+      : "";
+    return `<div class="${sidebarItem ? "sidebar-nocti-item" : "notif-item"}${unreadClass}"${targetAttrs}>
+      ${sidebarItem ? '<input type="checkbox" class="nocti-select" aria-label="Sélectionner cette notification">' : ""}
+      <div class="notif-icon"><i class="fa-solid ${notificationIcon(notification.trigger_type || "")}"></i></div>
+      <div class="notif-content"><div class="notif-title">${escapeNotificationHtml(notification.title)}</div>
+      <div class="notif-desc">${escapeNotificationHtml(notification.content)}</div>
+      <div class="notif-time"><i class="fa-regular fa-clock"></i> ${new Date(notification.created_at).toLocaleString("fr-FR")}</div></div>${actions}</div>`;
+  }
+
+  async function refreshNotificationMenus() {
+    if (typeof apiClientRequest !== "function") return;
+    try {
+      const response = await apiClientRequest(
+        "/notifications/notifications/?page_size=100",
+      );
+      const notifications = Array.isArray(response)
+        ? response
+        : response.results || [];
+      const unread = notifications.filter((item) => !item.is_read);
+      unreadCount = unread.length;
+      updateBadge();
+      if (notifList)
+        notifList.innerHTML =
+          notifications
+            .slice(0, 10)
+            .map((item) => notificationMarkup(item))
+            .join("") || '<p class="notif-empty">Aucune notification.</p>';
+      if (sidebarNoctiList)
+        sidebarNoctiList.innerHTML = notifications
+          .map((item) => notificationMarkup(item, true))
+          .join("");
+      applySidebarNoctiFilter();
+      updateSidebarNoctiSelectionUI();
+    } catch (error) {
+      console.warn("Chargement des notifications impossible", error);
+    }
+  }
+
+  if (userTrigger) {
+    userTrigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeNotifMenu();
+      userMenu.classList.contains("show") ? closeUserMenu() : openUserMenu();
+    });
+  }
+
+  /* ============================================================
+       4) NOTIFICATIONS - kloch la fonksyonèl kounye a
+
+       KORIJE: updateBadge() te kache/montre badge a ak style.display,
+       men refreshNotificationCount() (pi ba, sistèm API a) te kache/
+       montre MENM badge a (.badge44) ak pwopriyete .hidden. De metòd
+       sa yo pa konpatib: yon style.display="none" mete anvan pa janm
+       efase pa hidden=false apre sou menm eleman an, epi badge a te ka
+       rete kache pou tout tan. Kounye a tou de fonksyon yo itilize
+       style.display, konsa yo pa antre an konfli.
+    ============================================================ */
+  let unreadCount = notifBadge ? parseInt(notifBadge.textContent, 10) || 0 : 0;
+
+  function updateBadge() {
+    if (!notifBadge) return;
+    if (unreadCount <= 0) {
+      notifBadge.style.display = "none";
     } else {
-      menu.classList.remove("show");
+      notifBadge.style.display = "flex";
+      notifBadge.textContent = unreadCount;
+    }
+  }
+
+  if (notifBell) {
+    notifBell.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeUserMenu();
+      notifMenu.classList.contains("show") ? closeNotifMenu() : openNotifMenu();
+      refreshNotificationMenus();
+    });
+  }
+
+  if (markAllRead) {
+    markAllRead.addEventListener("click", async function (e) {
+      e.stopPropagation();
+      await apiClientRequest("/notifications/notifications/mark-all-read/", {
+        method: "POST",
+      });
+      await refreshNotificationMenus();
+    });
+  }
+
+  /* Bouton X pou fèmen panel notifikasyon an */
+  if (notifClose) {
+    notifClose.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeNotifMenu();
+    });
+  }
+
+  /* "Voir toutes les notifications" -> ouvri panno lateral la (bò dwat) */
+  if (notifSeeAll) {
+    notifSeeAll.addEventListener("click", function (e) {
+      e.preventDefault();
+      closeNotifMenu();
+      openSidebarNocti();
+    });
+  }
+
+  if (notifList) {
+    notifList.addEventListener("click", async function (e) {
+      const item = e.target.closest(".notif-item[data-notification-id]");
+      if (!item) return;
+      const response = await apiClientRequest(
+        `/notifications/notifications/${item.dataset.notificationId}/`,
+      );
+      await openNotificationTarget(response);
+      await refreshNotificationMenus();
+    });
+  }
+  updateBadge();
+
+  /* Fèmen meni itilizatè ak notifikasyon lè klike deyò */
+  document.addEventListener("click", function (e) {
+    if (userMenu && !e.target.closest(".user-section")) closeUserMenu();
+    if (notifMenu && !e.target.closest(".notification-wrapper"))
+      closeNotifMenu();
+  });
+
+  /* ============================================================
+       4b) PANNO NOTIFIKASYON LATERAL BÒ DWAT - #sidebar-nocti
+    ============================================================ */
+  const sidebarNocti = document.getElementById("sidebar-nocti");
+  const sidebarNoctiOverlay = document.getElementById("sidebarNoctiOverlay");
+  const sidebarNoctiClose = document.getElementById("sidebarNoctiClose");
+  const sidebarNoctiTabs = document.querySelectorAll(".sidebar-nocti-tab");
+  const sidebarNoctiList = document.getElementById("sidebarNoctiList");
+  const sidebarNoctiEmpty = document.getElementById("sidebarNoctiEmpty");
+  const sidebarNoctiMarkAll = document.getElementById("sidebarNoctiMarkAll");
+  const sidebarNoctiSelectAll = document.getElementById(
+    "sidebarNoctiSelectAll",
+  );
+  const sidebarNoctiDeleteSelected = document.getElementById(
+    "sidebarNoctiDeleteSelected",
+  );
+  const sidebarNoctiSelectedCount = document.getElementById(
+    "sidebarNoctiSelectedCount",
+  );
+
+  function openSidebarNocti() {
+    if (!sidebarNocti) return;
+    sidebarNocti.classList.add("show");
+    sidebarNocti.setAttribute("aria-hidden", "false");
+    sidebarNoctiOverlay && sidebarNoctiOverlay.classList.add("show");
+    updateBodyScrollLock();
+  }
+
+  function closeSidebarNocti() {
+    if (!sidebarNocti) return;
+    sidebarNocti.classList.remove("show");
+    sidebarNocti.setAttribute("aria-hidden", "true");
+    sidebarNoctiOverlay && sidebarNoctiOverlay.classList.remove("show");
+    updateBodyScrollLock();
+  }
+
+  if (sidebarNoctiClose)
+    sidebarNoctiClose.addEventListener("click", closeSidebarNocti);
+  if (sidebarNoctiOverlay)
+    sidebarNoctiOverlay.addEventListener("click", closeSidebarNocti);
+
+  /* Yon sèl "Echap" ki fèmen nenpòt panno/dropdown ki louvri kounye a,
+       an priyorite (pi espesifik la anvan): panno notifikasyon lateral la,
+       dropdown notifikasyon kloch la, meni itilizatè a, epi finalman
+       sidebar mobil la si l ouvri. */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (sidebarNocti && sidebarNocti.classList.contains("show")) {
+      closeSidebarNocti();
+    } else if (notifMenu && notifMenu.classList.contains("show")) {
+      closeNotifMenu();
+    } else if (userMenu && userMenu.classList.contains("show")) {
+      closeUserMenu();
+    } else if (sidebar && sidebar.classList.contains("show")) {
+      closeSidebar();
     }
   });
 
-  // Asire chak bouton toggle gen yon id diferan tou (si ou vle)
-  toggleBtns.forEach((btn, idx) => {
-    if (!btn.id || btn.id === "chevrToggle") {
-      btn.id = `toggle_${idx}_${Date.now()}`;
-    }
-  });
-});
+  /* Filtè Toutes / Non lues (lis la ka fè scroll otomatikman si li vin gen plis eleman) */
+  let sidebarNoctiFilter = "all";
 
-// Recherche globale : les champs d'en-tête interrogent l'API, pas les
-// données de démonstration éventuellement présentes dans une page.
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll('a[href="Se connecter - Admin.html"]').forEach((logoutLink) => {
-    logoutLink.addEventListener("click", () => {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("authUser");
+  function applySidebarNoctiFilter() {
+    if (!sidebarNoctiList) return;
+    let visible = 0;
+    sidebarNoctiList
+      .querySelectorAll(".sidebar-nocti-item")
+      .forEach(function (item) {
+        const show =
+          sidebarNoctiFilter === "all" || item.classList.contains("unread");
+        item.style.display = show ? "flex" : "none";
+        if (show) visible++;
+      });
+    if (sidebarNoctiEmpty)
+      sidebarNoctiEmpty.style.display = visible === 0 ? "block" : "none";
+  }
+
+  sidebarNoctiTabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      sidebarNoctiTabs.forEach(function (t) {
+        t.classList.remove("active");
+      });
+      tab.classList.add("active");
+      sidebarNoctiFilter = tab.getAttribute("data-filter");
+      applySidebarNoctiFilter();
+      updateSidebarNoctiSelectionUI();
     });
   });
+
+  /* Sonkwonize badge la ak sa k rete kòm "pa li" nan panno a */
+  function syncNotifBadgeFromDOM() {
+    const stillUnread = sidebarNoctiList
+      ? sidebarNoctiList.querySelectorAll(".sidebar-nocti-item.unread").length
+      : unreadCount;
+    unreadCount = stillUnread;
+    updateBadge();
+  }
+
+  /* Mete a jou konpteur seleksyon an, bouton "Supprimer la sélection" ak
+       eta checkbox "Tout sélectionner" (tache / pa tache / endeterminen) */
+  function updateSidebarNoctiSelectionUI() {
+    if (!sidebarNoctiList) return;
+    const visibleItems = Array.prototype.filter.call(
+      sidebarNoctiList.querySelectorAll(".sidebar-nocti-item"),
+      function (item) {
+        return item.style.display !== "none";
+      },
+    );
+    const visibleChecks = visibleItems
+      .map(function (item) {
+        return item.querySelector(".nocti-select");
+      })
+      .filter(Boolean);
+    const checkedCount = visibleChecks.filter(function (cb) {
+      return cb.checked;
+    }).length;
+
+    if (sidebarNoctiSelectedCount)
+      sidebarNoctiSelectedCount.textContent = checkedCount;
+    if (sidebarNoctiDeleteSelected)
+      sidebarNoctiDeleteSelected.classList.toggle("show", checkedCount > 0);
+
+    if (sidebarNoctiSelectAll) {
+      sidebarNoctiSelectAll.checked =
+        visibleChecks.length > 0 && checkedCount === visibleChecks.length;
+      sidebarNoctiSelectAll.indeterminate =
+        checkedCount > 0 && checkedCount < visibleChecks.length;
+    }
+  }
+
+  /* Delegasyon evènman sou lis la pou mark-read / delete / checkbox
+       kontinye mache menm apre nou ajoute oswa retire eleman */
+  if (sidebarNoctiList) {
+    sidebarNoctiList.addEventListener("click", function (e) {
+      const markBtn = e.target.closest(".mark-read-btn");
+      if (markBtn) {
+        const item = markBtn.closest(".sidebar-nocti-item");
+        const notificationId = item && item.dataset.notificationId;
+        if (notificationId) {
+          apiClientRequest(
+            `/notifications/notifications/${notificationId}/mark-read/`,
+            { method: "PATCH" },
+          )
+            .then(refreshNotificationMenus)
+            .catch((error) =>
+              console.warn("Lecture de notification impossible", error),
+            );
+        }
+        return;
+      }
+      const delBtn = e.target.closest(".delete-btn");
+      if (delBtn) {
+        const item = delBtn.closest(".sidebar-nocti-item");
+        const notificationId = item && item.dataset.notificationId;
+        if (notificationId) {
+          apiClientRequest(`/notifications/notifications/${notificationId}/`, {
+            method: "DELETE",
+          })
+            .then(refreshNotificationMenus)
+            .catch((error) =>
+              console.warn("Suppression de notification impossible", error),
+            );
+        }
+        return;
+      }
+      const item = e.target.closest(
+        ".sidebar-nocti-item[data-notification-id]",
+      );
+      if (item && !e.target.closest("input,button")) {
+        apiClientRequest(
+          `/notifications/notifications/${item.dataset.notificationId}/`,
+        )
+          .then(openNotificationTarget)
+          .then(refreshNotificationMenus)
+          .catch((error) =>
+            console.warn("Ouverture de notification impossible", error),
+          );
+      }
+    });
+
+    sidebarNoctiList.addEventListener("change", function (e) {
+      if (e.target.classList.contains("nocti-select")) {
+        updateSidebarNoctiSelectionUI();
+      }
+    });
+  }
+
+  if (sidebarNoctiMarkAll) {
+    sidebarNoctiMarkAll.addEventListener("click", async function () {
+      await apiClientRequest("/notifications/notifications/mark-all-read/", {
+        method: "POST",
+      });
+      await refreshNotificationMenus();
+    });
+  }
+
+  /* "Tout sélectionner" - tache/detache tout notifikasyon ki vizib selon filtè a */
+  if (sidebarNoctiSelectAll) {
+    sidebarNoctiSelectAll.addEventListener("change", function () {
+      const checked = sidebarNoctiSelectAll.checked;
+      sidebarNoctiList
+        .querySelectorAll(".sidebar-nocti-item")
+        .forEach(function (item) {
+          if (item.style.display === "none") return;
+          const cb = item.querySelector(".nocti-select");
+          if (cb) cb.checked = checked;
+        });
+      updateSidebarNoctiSelectionUI();
+    });
+  }
+
+  /* "Supprimer la sélection" - efase tout notifikasyon ki koche */
+  if (sidebarNoctiDeleteSelected) {
+    sidebarNoctiDeleteSelected.addEventListener("click", function () {
+      sidebarNoctiList
+        .querySelectorAll(".nocti-select:checked")
+        .forEach(function (cb) {
+          const item = cb.closest(".sidebar-nocti-item");
+          if (item) item.remove();
+        });
+      syncNotifBadgeFromDOM();
+      applySidebarNoctiFilter();
+      updateSidebarNoctiSelectionUI();
+    });
+  }
+
+  updateSidebarNoctiSelectionUI();
+  refreshNotificationMenus();
+
+  const pendingTarget = localStorage.getItem("cejec_notification_target");
+  if (pendingTarget) {
+    localStorage.removeItem("cejec_notification_target");
+    setTimeout(() => {
+      try {
+        const target = JSON.parse(pendingTarget);
+        if (target.modal && typeof window[target.modal] === "function") {
+          window[target.modal](target.id || undefined);
+        }
+      } catch (error) {
+        console.warn("Destination de notification invalide", error);
+      }
+    }, 0);
+  }
+
+  /* ============================================================
+       5) DROPDOWN22 (Hébergement / Opérations) nan sidebar la
+    ============================================================ */
+  const toggleBtns = document.querySelectorAll(".dropdown22-toggle");
+  const menus = document.querySelectorAll(".dropdown22-menu");
+
+  menus.forEach(function (menu, idx) {
+    if (!menu.id || menu.id === "itemMenu") menu.id = "ddMenu_" + idx;
+  });
+  toggleBtns.forEach(function (btn, idx) {
+    if (!btn.id || btn.id === "chevrToggle") btn.id = "ddToggle_" + idx;
+  });
+
+  function closeAllMenus() {
+    menus.forEach(function (menu) {
+      menu.classList.remove("show");
+      localStorage.setItem("menuOpen_" + menu.id, "false");
+    });
+  }
+
+  toggleBtns.forEach(function (toggleBtn) {
+    const menu = toggleBtn.parentElement.querySelector(".dropdown22-menu");
+    if (!menu) return;
+    toggleBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const wasOpen = menu.classList.contains("show");
+      closeAllMenus();
+      if (!wasOpen) {
+        menu.classList.add("show");
+        localStorage.setItem("menuOpen_" + menu.id, "true");
+      }
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    const clickedToggle = Array.prototype.some.call(toggleBtns, function (b) {
+      return b.contains(e.target);
+    });
+    const clickedMenu = Array.prototype.some.call(menus, function (m) {
+      return m.contains(e.target);
+    });
+    if (!clickedToggle && !clickedMenu) closeAllMenus();
+  });
+
+  menus.forEach(function (menu) {
+    if (localStorage.getItem("menuOpen_" + menu.id) === "true")
+      menu.classList.add("show");
+  });
+
+  // Recherche globale : les champs d'en-tête interrogent l'API, pas les
+  // données de démonstration éventuellement présentes dans une page.
+  document
+    .querySelectorAll('a[href="Se connecter - Admin.html"]')
+    .forEach((logoutLink) => {
+      logoutLink.addEventListener("click", () => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("authUser");
+      });
+    });
 
   const notificationBadges = document.querySelectorAll(".badge44");
   if (notificationBadges.length && typeof apiClientRequest === "function") {
     const refreshNotificationCount = async () => {
       try {
-        let unreadCount;
+        let apiUnreadCount;
         try {
           const result = await apiClientRequest(
             "/notifications/notifications/unread-count/",
           );
-          unreadCount = Number(result.unread_count);
+          apiUnreadCount = Number(result.unread_count);
         } catch (_) {
           const result = await apiClientRequest(
             "/notifications/notifications/?page_size=1000",
@@ -176,15 +942,19 @@ document.addEventListener("DOMContentLoaded", function () {
           const notifications = Array.isArray(result)
             ? result
             : result.results || [];
-          unreadCount = notifications.filter(
+          apiUnreadCount = notifications.filter(
             (notification) => !notification.is_read,
           ).length;
         }
+        const safeCount = Number.isFinite(apiUnreadCount) ? apiUnreadCount : 0;
         notificationBadges.forEach((badge) => {
-          badge.textContent = String(
-            Number.isFinite(unreadCount) ? unreadCount : 0,
-          );
-          badge.hidden = unreadCount <= 0;
+          badge.textContent = String(safeCount);
+          /* KORIJE: te itilize badge.hidden isit la pandan updateBadge()
+             pi wo a itilize style.display sou menm eleman an (.badge44).
+             Melanje .hidden ak style.display sou menm badge a te ka fè l
+             rete kache pou tout tan. Kounye a tou de sistèm yo itilize
+             style.display pou rete konsistan. */
+          badge.style.display = safeCount <= 0 ? "none" : "flex";
         });
       } catch (error) {
         console.warn("Compteur de notifications indisponible", error);

@@ -20,6 +20,7 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -124,11 +125,227 @@
             </div>
           </div>
 
-          <!-- NOTIFICATIONS -->
+          <!-- NOTIFICATIONS CEJEC -->
           <div class="header-actions">
-            <div class="notification-bell">
-              <i class="fa-regular fa-bell"></i>
-              <span class="badge44" hidden>0</span>
+            <div class="notification-wrapper">
+              <!-- BOUTON NOTIFICATION -->
+              <div
+                class="notification-bell"
+                id="notifBell"
+                role="button"
+                tabindex="0"
+                aria-label="Ouvrir les notifications">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge44" id="notifBadge">6</span>
+              </div>
+
+              <!-- MENU NOTIFICATIONS -->
+              <div class="notification-menu" id="notifMenu" aria-hidden="true">
+                <!-- HEADER -->
+                <div class="notif-header">
+                  <div>
+                    <strong>Notifications</strong>
+                    <span class="notif-subtitle"></span>
+                  </div>
+
+                  <div class="notif-header-actions">
+                    <button
+                      type="button"
+                      class="notif-mark-read"
+                      id="markAllRead">
+                      <i class="fa-solid fa-check-double"></i>
+                      Tout marquer comme lu
+                    </button>
+
+                    <button
+                      type="button"
+                      class="notif-close"
+                      id="notifClose"
+                      aria-label="Fermer les notifications">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- LISTE -->
+                <div class="notif-list" id="notifList">
+                  <!-- INSCRIPTION -->
+                  <div class="notif-item unread">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Nouvelle inscription</div>
+
+                      <div class="notif-desc">
+                        Une nouvelle demande d'inscription a été soumise pour la
+                        Promotion 2026.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 5 min
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- PAIEMENT -->
+                  <div class="notif-item unread">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Paiement reçu</div>
+
+                      <div class="notif-desc">
+                        Un paiement de frais de formation a été enregistré pour
+                        un étudiant de la Promotion 2026.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 32 min
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- NOTES -->
+                  <div class="notif-item unread">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Notes mises à jour</div>
+
+                      <div class="notif-desc">
+                        De nouvelles notes ont été enregistrées dans le cours «
+                        Marketing ».
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 1 h
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- PROFESSEUR -->
+                  <div class="notif-item unread">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Nouveau professeur</div>
+
+                      <div class="notif-desc">
+                        Un nouveau professeur a été ajouté au personnel
+                        académique du CEJEC.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 2 h
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- INCUBATEUR -->
+                  <div class="notif-item unread">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-rocket"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">
+                        Nouveau projet entrepreneurial
+                      </div>
+
+                      <div class="notif-desc">
+                        Un nouveau projet a été ajouté à l'Incubateur Projets du
+                        CEJEC.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 3 h
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- RAPPORT -->
+                  <div class="notif-item">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-chart-column"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Rapport disponible</div>
+
+                      <div class="notif-desc">
+                        Le rapport académique de la Promotion 2026 est
+                        disponible pour consultation.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Il y a 5 h
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ÉVÉNEMENT -->
+                  <div class="notif-item">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Événement à venir</div>
+
+                      <div class="notif-desc">
+                        Un événement académique ou entrepreneurial est prévu
+                        prochainement dans le calendrier CEJEC.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Hier
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- COMMUNICATION -->
+                  <div class="notif-item">
+                    <div class="notif-icon">
+                      <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+
+                    <div class="notif-content">
+                      <div class="notif-title">Nouvelle communication</div>
+
+                      <div class="notif-desc">
+                        Une nouvelle actualité a été publiée dans la section
+                        Médias & Communication.
+                      </div>
+
+                      <div class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        Hier
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- FOOTER -->
+                <a href="#" class="notif-footer" id="notifSeeAll">
+                  Voir toutes les notifications
+                  <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -146,6 +363,13 @@
             <div class="muted">Admin Panel</div>
           </div>
         </div>
+
+        <button
+          class="sidebar-toggle"
+          id="sidebarToggle"
+          title="Réduire/Agrandir">
+          <i data-lucide="panel-left"></i>
+        </button>
 
         <!-- NAVIGATION -->
         <nav>

@@ -257,9 +257,7 @@ class CandidateViewSet(AuditLogMixin, viewsets.ModelViewSet):
             if "prof" in pos_lower:
                 dept = "Professeurs"
             if not employee:
-                employee_number = f"EMP-{timezone.localdate():%Y}-{candidate.pk:06d}"
                 employee = Employee.objects.create(
-                    employee_number=employee_number,
                     first_name=candidate.first_name,
                     last_name=candidate.last_name,
                     phone=candidate.phone,

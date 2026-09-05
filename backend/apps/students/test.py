@@ -17,14 +17,14 @@ class StudentModelTests(TestCase):
 
     def test_registration_number_auto_generated(self):
         student = Student.objects.create(user=self.user, specialization=self.spec)
-        self.assertTrue(student.registration_number.startswith("PROF-"))
+        self.assertTrue(student.registration_number.startswith("elv"))
 
     def test_registration_number_increments(self):
         s1 = Student.objects.create(user=self.user, specialization=self.spec)
         user2 = User.objects.create_user(email="marie@example.com", password="testpass123")
         s2 = Student.objects.create(user=user2, specialization=self.spec)
-        n1 = int(s1.registration_number.split("-")[-1])
-        n2 = int(s2.registration_number.split("-")[-1])
+        n1 = int(s1.registration_number.removeprefix("elv"))
+        n2 = int(s2.registration_number.removeprefix("elv"))
         self.assertEqual(n2, n1 + 1)
 
     def test_anonymize_clears_sensitive_fields(self):

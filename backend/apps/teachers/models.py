@@ -180,6 +180,14 @@ class Teacher(AuditableMixin, SyncableMixin, RatingMixin):
     
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.teacher_id})"
+
+    def save(self, *args, **kwargs):
+        if not self.teacher_id or not self.teacher_id.startswith("pf"):
+            next_number = 1
+            while Teacher.objects.filter(teacher_id=f"pf{next_number:04d}").exists():
+                next_number += 1
+            self.teacher_id = f"pf{next_number:04d}"
+        super().save(*args, **kwargs)
     
     @property
     def full_name(self):

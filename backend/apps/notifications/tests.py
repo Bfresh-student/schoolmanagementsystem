@@ -52,6 +52,8 @@ class EnqueueNotificationTests(TestCase):
         self.assertEqual(len(notifications), 1)
         notification = Notification.objects.get(recipient=self.user)
         self.assertIn("Développement Web", notification.content)
+        self.assertEqual(notification.target_url, "gestion_notes.html")
+        self.assertEqual(notification.target_modal, "openPanel")
 
         entries = NotificationQueueEntry.objects.filter(notification=notification)
         self.assertEqual(entries.count(), 2)  # email + in_app

@@ -132,7 +132,7 @@ class Employee(models.Model):
     """Fiche RH persistante des collaborateurs hors app Teachers."""
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="employee_profile")
-    employee_number = models.CharField(max_length=50, unique=True)
+    employee_number = models.CharField(max_length=50, unique=True, blank=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     gender = models.CharField(max_length=20, blank=True)
@@ -153,6 +153,16 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.employee_number})"
+
+    def save(self, *args, **kwargs):
+        is_teacher = any(word in (self.job_title or "").lower() for word in ("prof", "enseign"))
+        prefix = "pf" if is_teacher else "em"
+        if not self.employee_number or not self.employee_number.startswith(prefix):
+            next_number = 1
+            while Employee.objects.filter(employee_number=f"{prefix}{next_number:06d}").exists():
+                next_number += 1
+            self.employee_number = f"{prefix}{next_number:06d}"
+        super().save(*args, **kwargs)
 
 
 class CandidateStatus(models.TextChoices):

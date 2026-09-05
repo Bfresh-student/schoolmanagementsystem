@@ -146,6 +146,9 @@ class Notification(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="normal")
+    target_url = models.CharField(max_length=255, blank=True)
+    target_modal = models.CharField(max_length=100, blank=True)
+    target_id = models.CharField(max_length=100, blank=True)
 
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)

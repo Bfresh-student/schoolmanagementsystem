@@ -117,6 +117,19 @@ def enqueue_notification(
     toute erreur est loguée, jamais levée.
     """
     context = context or {}
+    default_targets = {
+        "grade_added": ("gestion_notes.html", "openPanel", context.get("student_id")),
+        "article_published": ("gestion_medias.html", "openArticleModal", context.get("article_id")),
+        "event_reminder": ("incubateur_calendrier.html", "openEventModal", context.get("event_id")),
+        "event_published_confirmation": ("incubateur_calendrier.html", "", ""),
+        "course_assigned": ("gestion_classes.html", "openModal", context.get("course_id")),
+        "course_published": ("gestion_classes.html", "openModal", context.get("course_id")),
+        "deliverable_created": ("incubateur_calendrier.html", "openProjectModal", context.get("project_id")),
+    }
+    default_url, default_modal, default_id = default_targets.get(trigger_type, ("", "", ""))
+    target_url = context.get("target_url", default_url)
+    target_modal = context.get("target_modal", default_modal)
+    target_id = context.get("target_id", default_id or "")
     recipients = _resolve_recipients(recipient_id, broadcast_specialization_id)
     if not recipients:
         return []
@@ -152,6 +165,9 @@ def enqueue_notification(
             title=subject or trigger_type,
             content=content,
             priority=resolved_priority,
+            target_url=target_url,
+            target_modal=target_modal,
+            target_id=str(target_id) if target_id else "",
         )
         created_notifications.append(notification)
 

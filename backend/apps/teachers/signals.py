@@ -66,15 +66,10 @@ def create_teacher_profile(sender, instance, created, **kwargs):
     - Désactiver ce signal dans les tests si nécessaire avec @pytest.mark.disable_signals
     """
     if created and instance.role == 'TEACHER':
-        # Générer un ID unique pour le professeur
-        teacher_count = Teacher.objects.count() + 1
-        teacher_id = f'T{teacher_count:04d}'
-        
         # get_or_create évite les doublons si le signal s'exécute plusieurs fois
         Teacher.objects.get_or_create(
             user=instance,
             defaults={
-                'teacher_id': teacher_id,
                 'status': 'ACTIVE'
             }
         )

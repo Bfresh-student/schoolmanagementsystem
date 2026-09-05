@@ -23,6 +23,7 @@ from apps.notifications.serializers import (
 class NotificationViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
     """

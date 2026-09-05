@@ -197,7 +197,9 @@ async function loadRealData() {
   etudiants = students.map((student) => ({
     id: student.id,
     nom: student.full_name || `Étudiant #${student.id}`,
-    matricule: student.registration_number || `ETU-${student.id}`,
+    matricule:
+      student.registration_number ||
+      `elv${String(student.id).padStart(6, "0")}`,
     telephone: "",
     classe: student.school_class_name || "Sans classe",
     annee: currentYear,
