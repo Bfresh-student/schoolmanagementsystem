@@ -40,7 +40,14 @@ class Assessment(models.Model):
 
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="assessments")
     school_class = models.ForeignKey("students.SchoolClass", on_delete=models.PROTECT, related_name="assessments")
-    academic_year = models.CharField(max_length=9, help_text="Ex. 2025-2026")
+    academic_year = models.ForeignKey(
+        "students.AcademicYear",
+        on_delete=models.PROTECT,
+        null=True, blank=True,
+        related_name="assessments",
+        to_field="label",
+        help_text="Année académique (ex: 2025-2026)",
+    )
     term = models.CharField(max_length=80, blank=True)
     title = models.CharField(max_length=150)
     evaluation_type = models.CharField(max_length=20, choices=Type.choices, default=Type.ASSIGNMENT)

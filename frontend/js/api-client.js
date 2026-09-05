@@ -216,8 +216,16 @@ const StudentsAPI = {
     async get(id) {
         return apiClientRequest(`/students/students/${id}/`);
     },
-    async list() {
-        const data = await apiClientRequest('/students/students/?page_size=1000');
+    async list(params = {}) {
+        const searchParams = new URLSearchParams({ page_size: '1000' });
+        if (typeof params === 'string') {
+            searchParams.set('academic_year', params);
+        } else if (params && typeof params === 'object') {
+            Object.entries(params).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') searchParams.set(k, v);
+            });
+        }
+        const data = await apiClientRequest(`/students/students/?${searchParams.toString()}`);
         return data.results || data;
     },
     async search(query) {
@@ -230,14 +238,56 @@ const StudentsAPI = {
 // Classes (SchoolClass — données académiques)
 // ------------------------------------------
 const ClassesAPI = {
-    async list() {
-        const data = await apiClientRequest('/students/classes/?page_size=1000');
+    async list(params = {}) {
+        const searchParams = new URLSearchParams({ page_size: '1000' });
+        if (typeof params === 'string') {
+            searchParams.set('academic_year', params);
+        } else if (params && typeof params === 'object') {
+            Object.entries(params).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') searchParams.set(k, v);
+            });
+        }
+        const data = await apiClientRequest(`/students/classes/?${searchParams.toString()}`);
         return data.results || data;
     },
     async update(id, payload) {
         return apiClientRequest('/students/classes/' + id + '/', { method: 'PATCH', body: payload });
     },
 };
+
+// ------------------------------------------
+// Années Académiques
+// ------------------------------------------
+const AcademicYearsAPI = {
+    async list() {
+        const data = await apiClientRequest('/students/academic-years/');
+        return data.results || data;
+    },
+    async current() {
+        return apiClientRequest('/students/academic-years/current/');
+    },
+    async create(body) {
+        return apiClientRequest('/students/academic-years/', { method: 'POST', body });
+    },
+    async update(id, body) {
+        return apiClientRequest(`/students/academic-years/${id}/`, { method: 'PATCH', body });
+    },
+};
+window.AcademicYearsAPI = AcademicYearsAPI;
+
+let _currentAcademicYear = null;
+async function getCurrentAcademicYear() {
+    if (!_currentAcademicYear) {
+        try {
+            _currentAcademicYear = await AcademicYearsAPI.current();
+        } catch (e) {
+            console.warn("Could not fetch current academic year", e);
+            return null;
+        }
+    }
+    return _currentAcademicYear;
+}
+window.getCurrentAcademicYear = getCurrentAcademicYear;
 
 // ------------------------------------------
 // Cours (catalogue de formations)
@@ -319,8 +369,16 @@ async function apiFetchMultipart(path, formData, method = 'POST') {
 
 const HRAPI = {
     // --- Lecture générique ---
-    async list(path) {
-        const data = await apiClientRequest(`/hr/${path}/?page_size=1000`);
+    async list(path, params = {}) {
+        const searchParams = new URLSearchParams({ page_size: '1000' });
+        if (typeof params === 'string') {
+            searchParams.set('academic_year', params);
+        } else if (params && typeof params === 'object') {
+            Object.entries(params).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') searchParams.set(k, v);
+            });
+        }
+        const data = await apiClientRequest(`/hr/${path}/?${searchParams.toString()}`);
         return data.results || data;
     },
 
@@ -333,7 +391,7 @@ const HRAPI = {
     },
 
     // --- Personnel administratif ---
-    employees() { return this.list('employees'); },
+    employees(params = {}) { return this.list('employees', params); },
     searchEmployees(query) { return apiClientRequest(`/hr/employees/?search=${encodeURIComponent(query)}&page_size=1000`).then(data => data.results || data); },
     createEmployee(body) { return apiClientRequest('/hr/employees/', { method: 'POST', body }); },
     updateEmployee(id, body) { return apiClientRequest(`/hr/employees/${id}/`, { method: 'PATCH', body }); },
@@ -361,14 +419,14 @@ const HRAPI = {
     hireCandidate(id, body = {}) { return apiClientRequest(`/hr/candidates/${id}/hire/`, { method: 'POST', body }); },
     rejectCandidate(id) { return apiClientRequest(`/hr/candidates/${id}/reject_after_interview/`, { method: 'POST' }); },
     // --- Contrats ---
-    contracts() { return this.list('contracts'); },
+    contracts(params = {}) { return this.list('contracts', params); },
     createContract(body) { return apiClientRequest('/hr/contracts/', { method: 'POST', body }); },
     updateContract(id, body) { return apiClientRequest(`/hr/contracts/${id}/`, { method: 'PATCH', body }); },
     deleteContract(id) { return apiClientRequest(`/hr/contracts/${id}/`, { method: 'DELETE' }); },
     terminateContract(id, body) { return apiClientRequest(`/hr/contracts/${id}/terminate/`, { method: 'POST', body }); },
 
     // --- Salaires ---
-    salaries() { return this.list('salaries'); },
+    salaries(params = {}) { return this.list('salaries', params); },
     createSalary(body) { return apiClientRequest('/hr/salaries/', { method: 'POST', body }); },
     updateSalary(id, body) { return apiClientRequest(`/hr/salaries/${id}/`, { method: 'PATCH', body }); },
     deleteSalary(id) { return apiClientRequest(`/hr/salaries/${id}/`, { method: 'DELETE' }); },
@@ -376,7 +434,7 @@ const HRAPI = {
     salaryBalance(teacherId) { return apiClientRequest(`/hr/salaries/?teacher=${teacherId}&page_size=100`).then(d => d.results || d); },
 
     // --- Congés ---
-    leaves() { return this.list('leaves'); },
+    leaves(params = {}) { return this.list('leaves', params); },
     leaveTypes() { return this.list('leave-types'); },
     createLeave(body) { return apiClientRequest('/hr/leaves/', { method: 'POST', body }); },
     updateLeave(id, body) { return apiClientRequest(`/hr/leaves/${id}/`, { method: 'PATCH', body }); },
@@ -386,7 +444,7 @@ const HRAPI = {
     leaveBalance() { return apiClientRequest('/hr/leaves/balance/'); },
 
     // --- Évaluations ---
-    evaluations() { return this.list('evaluations'); },
+    evaluations(params = {}) { return this.list('evaluations', params); },
     createEvaluation(body) { return apiClientRequest('/hr/evaluations/', { method: 'POST', body }); },
     updateEvaluation(id, body) { return apiClientRequest(`/hr/evaluations/${id}/`, { method: 'PATCH', body }); },
     deleteEvaluation(id) { return apiClientRequest(`/hr/evaluations/${id}/`, { method: 'DELETE' }); },
@@ -418,8 +476,17 @@ const InscriptionStatus = {
 };
 
 const InscriptionsAPI = {
-    async list() {
-        const data = await apiClientRequest('/enrollments/inscriptions/');
+    async list(params = {}) {
+        const searchParams = new URLSearchParams();
+        if (typeof params === 'string') {
+            searchParams.set('academic_year', params);
+        } else if (params && typeof params === 'object') {
+            Object.entries(params).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') searchParams.set(k, v);
+            });
+        }
+        const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
+        const data = await apiClientRequest(`/enrollments/inscriptions/${qs}`);
         return data.results || data;
     },
     async get(id) {
@@ -429,17 +496,9 @@ const InscriptionsAPI = {
         const data = await apiClientRequest(`/enrollments/inscriptions/?search=${encodeURIComponent(query)}&page_size=1000`);
         return data.results || data;
     },
-    async create({ student, school_class, promotion = '', requested_at, created_offline = false, local_uuid = null }) {
-        // 🔧 FIX #1 — bug principal du CRUD cassé.
-        // InscriptionCreateSerializer déclare :
-        //   local_uuid = serializers.UUIDField(required=False)
-        // `required=False` signifie "la CLÉ peut être absente du JSON",
-        // PAS "la valeur peut être null". Envoyer explicitement
-        // "local_uuid": null faisait échouer TOUTE création en ligne avec
-        // une erreur 400 { "local_uuid": ["This field may not be null."] }.
-        // On construit maintenant le body sans la clé du tout quand il n'y
-        // a pas de local_uuid réel à envoyer.
+    async create({ student, school_class, promotion = '', academic_year = null, requested_at, created_offline = false, local_uuid = null }) {
         const body = { student, school_class, promotion, requested_at, created_offline };
+        if (academic_year) body.academic_year = academic_year;
         if (local_uuid) body.local_uuid = local_uuid;
         return apiClientRequest('/enrollments/inscriptions/', { method: 'POST', body });
     },

@@ -2529,6 +2529,32 @@ async function generatePreviewPDF(docName) {
                 showToast('❌ Enregistrement impossible. Vérifiez la connexion et vos droits.', 'error');
             }
         }
+        let academicYearsRH = [];
+        let currentAcademicYearRH = null;
+
+        async function updateRHAcademicYearSelect() {
+            try {
+                if (typeof AcademicYearsAPI !== 'undefined') {
+                    academicYearsRH = await AcademicYearsAPI.list();
+                } else if (typeof apiClientRequest !== 'undefined') {
+                    const res = await apiClientRequest('/students/academic-years/');
+                    academicYearsRH = res?.results || res || [];
+                }
+                const select = document.getElementById('rhAcademicYearSelect');
+                if (select && academicYearsRH.length > 0) {
+                    select.innerHTML = '<option value="">Toutes les années</option>' +
+                        academicYearsRH.map(y => `<option value="${y.label}" ${currentAcademicYearRH === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('');
+                }
+            } catch (e) {
+                console.warn('[RH] Impossible de charger les années académiques:', e);
+            }
+        }
+
+        window.changeRHAcademicYear = async function(val) {
+            currentAcademicYearRH = val || null;
+            await refreshAll();
+        };
+
         async function initRH() {
             console.log('[RH] Démarrage du module RH CEJEC...');
             
@@ -2540,6 +2566,7 @@ async function generatePreviewPDF(docName) {
                 console.warn('[RH] Types de congés non disponibles:', e.message);
             }
             
+            await updateRHAcademicYearSelect();
             await syncAllEmployees();
 
             _apiReady = Boolean(teachersFromAPI.length || employees.some(e => e._hrEmployeeId) || leaveTypesFromAPI.length);

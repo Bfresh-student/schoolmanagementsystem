@@ -86,6 +86,13 @@ class Inscription(models.Model):
     # Cohorte / promotion suivie. Une même classe peut accueillir des
     # promotions différentes au fil des années sans écraser l'historique.
     promotion = models.CharField(max_length=100, blank=True, db_index=True)
+    academic_year = models.ForeignKey(
+        "students.AcademicYear",
+        on_delete=models.PROTECT,
+        null=True, blank=True,
+        related_name="inscriptions",
+        help_text="Année académique d'inscription. Si vide, héritée de l'année active.",
+    )
 
     # --- État ---
     status = models.CharField(

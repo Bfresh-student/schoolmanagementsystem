@@ -6,6 +6,8 @@ let classesData=[];        // Liste des SchoolClass (une carte = une classe/nive
 let specializationsData=[]; // Liste des filières (pour le select + aperçu du nom)
 let coursesRaw=[];         // Liste brute des cours (rattachés à une filière) — page chargée
 let teachersRaw=[];        // Liste brute des professeurs, source de vérité pour les selects
+let academicYearsList=[];  // Liste des années académiques
+let currentAcademicYear=null; // Année académique sélectionnée
 
 // Vrai nombre total de cours en base (depuis le champ "count" de la pagination
 // DRF), distinct de coursesRaw.length qui ne reflète que la page chargée.
@@ -47,12 +49,22 @@ async function loadDataFromApi() {
     try {
         // page_size élevé : on veut la liste COMPLÈTE (pas juste la 1ère page)
         // pour construire correctement les cartes de classes et les selects.
-        const [specsRes, classesRes, coursesRes, teachersRes] = await Promise.all([
+        const classesPath = currentAcademicYear
+            ? `/students/classes/?academic_year=${encodeURIComponent(currentAcademicYear)}&page_size=1000`
+            : '/students/classes/?page_size=1000';
+        const [specsRes, classesRes, coursesRes, teachersRes, yearsRes] = await Promise.all([
             apiFetch('/students/specializations/?page_size=1000'),
-            apiFetch('/students/classes/?page_size=1000'),
+            apiFetch(classesPath),
             apiFetch('/courses/courses/?page_size=1000'),
-            apiFetch('/teachers/?page_size=1000')
+            apiFetch('/teachers/?page_size=1000'),
+            apiFetch('/students/academic-years/').catch(() => [])
         ]);
+
+        academicYearsList = yearsRes?.results || yearsRes || [];
+        if (!currentAcademicYear && academicYearsList.length > 0) {
+            const activeY = academicYearsList.find(y => y.is_active);
+            if (activeY) currentAcademicYear = activeY.label;
+        }
 
         specializationsData = specsRes?.results || specsRes || [];
         const classes = classesRes?.results || classesRes || [];
@@ -197,7 +209,13 @@ function renderDashboard(){
     section.innerHTML=`
         <div class="classes-section-header">
             <h2><i class="fas fa-layer-group"></i> Toutes les Classes</h2>
-            <span class="classes-count-badge">${allClasses.length} classe(s)</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <select id="classAcademicYearSelect" class="filter-select" style="padding:6px 12px;border-radius:6px;border:1px solid #cbd5e1;background:white;font-size:0.9rem;" onchange="changeClassAcademicYear(this.value)">
+                    <option value="">Toutes les années</option>
+                    ${academicYearsList.map(y => `<option value="${y.label}" ${currentAcademicYear === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('')}
+                </select>
+                <span class="classes-count-badge">${allClasses.length} classe(s)</span>
+            </div>
         </div>
     `;
 
@@ -517,6 +535,11 @@ async function saveClass(){
         showToast(err.message, 'error');
         if (btnSave) btnSave.disabled = false;
     }
+}
+
+async function changeClassAcademicYear(val) {
+    currentAcademicYear = val || null;
+    await loadDataFromApi();
 }
 
 document.addEventListener('DOMContentLoaded',()=>{

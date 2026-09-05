@@ -366,6 +366,11 @@ class SalaryViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelVie
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.SALARY
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        academic_year = self.request.query_params.get("academic_year")
+        return filter_by_academic_year(qs, academic_year, "pay_period_start")
+
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def mark_paid(self, request, pk=None):
         salary = self.get_object()
@@ -396,6 +401,11 @@ class LeaveViewSet(AuditLogMixin, TeacherScopedQuerysetMixin, viewsets.ModelView
     serializer_class = LeaveSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.LEAVE
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        academic_year = self.request.query_params.get("academic_year")
+        return filter_by_academic_year(qs, academic_year, "start_date")
 
     @action(detail=True, methods=["post"], permission_classes=[IsHRStaff])
     def approve(self, request, pk=None):
@@ -453,6 +463,11 @@ class PerformanceEvaluationViewSet(
     serializer_class = PerformanceEvaluationSerializer
     permission_classes = [IsHRStaffOrOwnerReadOnly]
     audit_entity_type = AuditEntityType.EVALUATION
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        academic_year = self.request.query_params.get("academic_year")
+        return filter_by_academic_year(qs, academic_year, "evaluation_date")
 
     def perform_create(self, serializer):
         serializer.save(evaluator=self.request.user)

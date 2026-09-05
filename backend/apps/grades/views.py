@@ -23,7 +23,7 @@ class AssessmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         if school_class := self.request.query_params.get("school_class"): qs = qs.filter(school_class_id=school_class)
-        if academic_year := self.request.query_params.get("academic_year"): qs = qs.filter(academic_year=academic_year)
+        if academic_year := self.request.query_params.get("academic_year"): qs = qs.filter(academic_year__label=academic_year)
         return qs.filter(course__teacher__user=self.request.user) if self.request.user.role == "TEACHER" else qs
 class GradeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """

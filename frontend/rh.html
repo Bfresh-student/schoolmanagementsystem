@@ -237,7 +237,7 @@
             <div class="breadcrumb"><i class="fas fa-home"></i> Accueil <i class="fas fa-chevron-right"></i> <span class="current">Module RH</span></div>
             <div class="header-rh">
                 <div><h1><span class="icon-circle"><i class="fas fa-users"></i></span>Ressources Humaines</h1><span class="header-badge"><i class="fas fa-graduation-cap"></i> CEJEC · Promotion 2026</span></div>
-                <div class="header-actions24"><button class="btn btn-primary" onclick="openModal('addEmpModal')"><i class="fas fa-user-plus"></i> Nouvel Employé</button><button class="btn btn-outline" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Actualiser</button></div>
+                <div class="header-actions24"><select id="rhAcademicYearSelect" class="filter-select" style="padding:8px 12px;border-radius:6px;border:1px solid #cbd5e1;background:white;font-size:0.9rem;font-weight:500;" onchange="changeRHAcademicYear(this.value)"><option value="">Toutes les années</option></select><button class="btn btn-primary" onclick="openModal('addEmpModal')"><i class="fas fa-user-plus"></i> Nouvel Employé</button><button class="btn btn-outline" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Actualiser</button></div>
             </div>
             <nav class="nav-rh" id="navRH">
                 <button class="active" data-page="employes"><i class="fas fa-users"></i> Employés <span class="nav-badge" id="empCountBadge">12</span></button>

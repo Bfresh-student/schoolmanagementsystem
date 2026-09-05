@@ -6,6 +6,12 @@ from .models import Assessment, Grade, GradeConflict, GradeSyncEntry
 class AssessmentSerializer(serializers.ModelSerializer):
     course_name = serializers.CharField(source="course.name", read_only=True)
     school_class_name = serializers.CharField(source="school_class.name", read_only=True)
+    from apps.students.models import AcademicYear
+    academic_year = serializers.SlugRelatedField(
+        slug_field="label",
+        queryset=AcademicYear.objects.all(),
+        allow_null=True, required=False
+    )
 
     class Meta:
         model = Assessment

@@ -62,6 +62,8 @@ class InscriptionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if academic_year := self.request.query_params.get("academic_year"):
+            qs = qs.filter(academic_year__label=academic_year)
         user = self.request.user
         role_name = getattr(user, "role", None)
 

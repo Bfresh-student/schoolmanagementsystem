@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import SchoolClass
 from .serializers import SchoolClassSerializer
-from .models import Specialization, Student
+from .models import Specialization, Student, AcademicYear
 from .permissions import HasResourcePermission, IsOwnerStudentOrStaff
 from .serializers import (
     SchoolClassSerializer,
@@ -14,7 +14,23 @@ from .serializers import (
     StudentCreateSerializer,
     StudentPublicSerializer,
     StudentSerializer,
+    AcademicYearSerializer,
 )
+
+
+class AcademicYearViewSet(viewsets.ModelViewSet):
+    queryset = AcademicYear.objects.all()
+    serializer_class = AcademicYearSerializer
+    permission_classes = [IsAuthenticated, HasResourcePermission]
+    resource_name = "academic_years"
+
+    @action(detail=False, methods=["get"])
+    def current(self, request):
+        """Retourne l'année académique active."""
+        year = AcademicYear.objects.filter(is_active=True).first()
+        if not year:
+            return Response({"detail": "Aucune année académique active."}, status=404)
+        return Response(AcademicYearSerializer(year).data)
 
 
 class SchoolClassViewSet(viewsets.ModelViewSet):
@@ -22,6 +38,12 @@ class SchoolClassViewSet(viewsets.ModelViewSet):
     serializer_class = SchoolClassSerializer
     resource_name = 'classes'
     permission_classes = [HasResourcePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if academic_year := self.request.query_params.get("academic_year"):
+            qs = qs.filter(inscriptions__academic_year__label=academic_year).distinct()
+        return qs
 
 
 class SpecializationViewSet(viewsets.ModelViewSet):
@@ -71,6 +93,8 @@ class StudentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(specialization_id=spec_id)
         if class_id := params.get("school_class"):
             qs = qs.filter(school_class_id=class_id)
+        if academic_year := params.get("academic_year"):
+            qs = qs.filter(inscriptions__academic_year__label=academic_year).distinct()
         if search := params.get("search"):
             qs = qs.filter(
                 Q(user__first_name__icontains=search)

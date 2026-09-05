@@ -5,6 +5,30 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+class AcademicYear(models.Model):
+    """Année académique de référence (ex: 2025-2026)."""
+    label = models.CharField(max_length=9, unique=True, help_text="Format: AAAA-AAAA")
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+        verbose_name = "Année académique"
+        verbose_name_plural = "Années académiques"
+
+    def __str__(self):
+        return self.label
+
+    def save(self, *args, **kwargs):
+        # Une seule année active à la fois
+        if self.is_active:
+            AcademicYear.objects.exclude(pk=self.pk).filter(is_active=True).update(is_active=False)
+        super().save(*args, **kwargs)
+
+
 class Specialization(models.Model):
     """
     Filière de formation (ex: Informatique, Commerce).

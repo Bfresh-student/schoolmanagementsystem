@@ -95,6 +95,9 @@ let API_DISPONIBLE = false;
 let paymentMethodsCache = [];
 let currentInvoiceForEncaissement = null;
 
+let academicYearsDisponibles = [];
+let currentAcademicYearSelected = null;
+
 const STATUT_API_VERS_UI = {
   pending: "Pré-inscrit",
   approved: "Inscrit",
@@ -113,11 +116,22 @@ const STATUT_UI_VERS_TRANSITION = {
 // CHARGEMENT DES DONNÉES (API réelle ; aucun dossier fictif en production)
 // ==========================================
 async function chargerDonnees() {
-  const [inscriptionsR, classesR, preInscripR] = await Promise.allSettled([
-    InscriptionsAPI.list(),
-    ClassesAPI.list(),
+  const [inscriptionsR, classesR, preInscripR, academicYearsR] = await Promise.allSettled([
+    currentAcademicYearSelected ? InscriptionsAPI.list({ academic_year: currentAcademicYearSelected }) : InscriptionsAPI.list(),
+    currentAcademicYearSelected ? ClassesAPI.list({ academic_year: currentAcademicYearSelected }) : ClassesAPI.list(),
     typeof PreInscriptionsAPI !== "undefined" ? PreInscriptionsAPI.list() : Promise.resolve([]),
+    typeof AcademicYearsAPI !== "undefined" ? AcademicYearsAPI.list() : Promise.resolve([]),
   ]);
+
+  if (academicYearsR.status === "fulfilled" && Array.isArray(academicYearsR.value)) {
+    academicYearsDisponibles = academicYearsR.value;
+    if (!currentAcademicYearSelected && academicYearsDisponibles.length > 0) {
+      const activeYear = academicYearsDisponibles.find(y => y.is_active);
+      if (activeYear) {
+        currentAcademicYearSelected = activeYear.label;
+      }
+    }
+  }
 
   if (inscriptionsR.status === "rejected") {
     console.error("GET /enrollments/inscriptions/ a échoué :", inscriptionsR.reason);
@@ -244,6 +258,8 @@ function mapInscriptionToEtudiant(insc) {
     classe: insc.class_name || insc.course_name || "",
     filiere: insc.specialization_name || "",
     promo: insc.promotion || "",
+    academic_year: insc.academic_year_label || insc.promotion || "",
+    academic_year_id: insc.academic_year || null,
     statut: STATUT_API_VERS_UI[insc.status] || "Pré-inscrit",
     statutApi: insc.status,
     dateInscription: (insc.requested_at || insc.created_at || "").slice(0, 10),
@@ -1501,6 +1517,10 @@ function renderEtudiants() {
     ${getSectionKpis("etudiants")}
     <div class="filters-row">
         <div class="search-box"><i class="fas fa-search"></i><input placeholder="Rechercher..." oninput="filterEtudiants(this.value)"></div>
+        <select class="filter-select" id="academicYearFilterSelect" onchange="filterByAcademicYear(this.value)">
+            <option value="tous">Toutes les années</option>
+            ${academicYearsDisponibles.map(y => `<option value="${y.label}" ${currentAcademicYearSelected === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('')}
+        </select>
         <select class="filter-select" onchange="filterByStatut(this.value)">
             <option value="tous">Tous les statuts</option>
             <option value="Inscrit">Actifs</option>
@@ -1584,6 +1604,12 @@ function filterByPromo(val) {
   tbody.querySelectorAll("tr").forEach((tr) => {
     tr.style.display = val === "tous" || tr.innerText.includes(val) ? "" : "none";
   });
+}
+
+async function filterByAcademicYear(val) {
+  currentAcademicYearSelected = val === "tous" ? null : val;
+  await chargerDonnees();
+  renderPage(currentPage);
 }
 
 function renderPaiements() {

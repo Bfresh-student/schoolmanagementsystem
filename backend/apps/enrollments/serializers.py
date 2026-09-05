@@ -66,11 +66,12 @@ class InscriptionSerializer(serializers.ModelSerializer):
     balance_due = serializers.SerializerMethodField()
     invoice_id = serializers.SerializerMethodField()
     invoice_status = serializers.SerializerMethodField()
+    academic_year_label = serializers.CharField(source="academic_year.label", read_only=True)
 
     class Meta:
         model = Inscription
         fields = [
-            "id", "local_uuid", "student", "course", "school_class", "promotion",
+            "id", "local_uuid", "student", "course", "school_class", "promotion", "academic_year", "academic_year_label",
             "student_name", "student_first_name", "student_last_name",
             "student_phone", "student_email", "student_user_id",
             "class_name", "specialization_name", "specialization_id", "tuition_fee",
@@ -196,12 +197,19 @@ class InscriptionCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Inscription
-        fields = ["local_uuid", "student", "school_class", "promotion", "requested_at", "created_offline"]
+        fields = ["local_uuid", "student", "school_class", "promotion", "academic_year", "requested_at", "created_offline"]
 
     def validate(self, attrs):
         local_uuid = attrs.get("local_uuid")
         if local_uuid and Inscription.objects.filter(local_uuid=local_uuid).exists():
             return attrs
+
+        # Default academic year
+        if "academic_year" not in attrs or not attrs["academic_year"]:
+            from apps.students.models import AcademicYear
+            active_year = AcademicYear.objects.filter(is_active=True).first()
+            if active_year:
+                attrs["academic_year"] = active_year
 
         student = attrs.get("student")
         school_class = attrs.get("school_class")
@@ -233,6 +241,7 @@ class InscriptionCreateSerializer(serializers.ModelSerializer):
             existing = Inscription.objects.filter(
                 student=student,
                 school_class=school_class,
+                academic_year=attrs.get("academic_year"),
                 status__in=active_statuses,
             )
             #

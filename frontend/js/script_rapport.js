@@ -44,6 +44,8 @@
       let invoices = [];
       let payments = [];
       let hrReport = [];
+      let academicYearsList = [];
+      let selectedAcademicYear = null;
 
       const reportList = data => Array.isArray(data) ? data : (data.results || []);
       async function reportApi(path) {
@@ -67,6 +69,12 @@
         return { labels: revenue.map(([month]) => month), revenus: revenue.map(([, amount]) => amount), depenses: revenue.map(() => 0) };
       }
       function selectedRange() {
+        if (selectedAcademicYear) {
+          const ay = academicYearsList.find(y => y.label === selectedAcademicYear);
+          if (ay) {
+            return { start: ay.start_date, end: ay.end_date };
+          }
+        }
         const end = new Date();
         const start = new Date(end);
         if (currentFilter === 'semaine') start.setDate(end.getDate() - 6);
@@ -94,9 +102,19 @@
       async function loadReportData() {
         try {
           const range = selectedRange();
-          const [studentsData, coursesData, invoicesData, paymentsData, companiesData, eventsData, internshipsData, hrData] = await Promise.all([
-            reportApi('/students/students/?page_size=1000'), reportApi('/courses/courses/?page_size=1000'), reportApi('/finance/invoices/?page_size=1000'), reportApi('/finance/payments/?page_size=1000'), reportApi('/projects/companies/?page_size=1000'), reportApi('/events/events/?page_size=1000'), reportApi('/projects/internships/?page_size=1000'), reportApi(`/hr/attendances/report-summary/?start=${range.start}&end=${range.end}`)
+          const [studentsData, coursesData, invoicesData, paymentsData, companiesData, eventsData, internshipsData, hrData, yearsData] = await Promise.all([
+            reportApi(selectedAcademicYear ? `/students/students/?academic_year=${encodeURIComponent(selectedAcademicYear)}&page_size=1000` : '/students/students/?page_size=1000'),
+            reportApi('/courses/courses/?page_size=1000'),
+            reportApi('/finance/invoices/?page_size=1000'),
+            reportApi('/finance/payments/?page_size=1000'),
+            reportApi('/projects/companies/?page_size=1000'),
+            reportApi('/events/events/?page_size=1000'),
+            reportApi('/projects/internships/?page_size=1000'),
+            reportApi(`/hr/attendances/report-summary/?start=${range.start}&end=${range.end}`),
+            reportApi('/students/academic-years/').catch(() => [])
           ]);
+          academicYearsList = reportList(yearsData);
+          updateAcademicYearSelect();
           const students = reportList(studentsData);
           const courses = reportList(coursesData);
           invoices = reportList(invoicesData); payments = reportList(paymentsData).filter(payment => inRange(payment.paid_at || payment.created_at, range));
@@ -117,6 +135,18 @@
           showToast('Chargement des rapports impossible : ' + error.message, 'error');
         }
       }
+
+      function updateAcademicYearSelect() {
+        const select = document.getElementById('rapportAcademicYearSelect');
+        if (!select || !academicYearsList.length) return;
+        select.innerHTML = '<option value="">Toutes les années</option>' +
+          academicYearsList.map(y => `<option value="${y.label}" ${selectedAcademicYear === y.label ? 'selected' : ''}>${y.label}${y.is_active ? ' (Active)' : ''}</option>`).join('');
+      }
+
+      window.changeRapportAcademicYear = function(val) {
+        selectedAcademicYear = val || null;
+        loadReportData();
+      };
 
       // ----- TOAST SYSTEM -----
       function showToast(msg, type = 'success') {

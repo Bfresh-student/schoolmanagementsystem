@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Specialization, Student
+from .models import Specialization, Student, AcademicYear
+
+
+@admin.register(AcademicYear)
+class AcademicYearAdmin(admin.ModelAdmin):
+    list_display = ("label", "start_date", "end_date", "is_active", "created_at")
+    search_fields = ("label",)
+    list_filter = ("is_active",)
 
 
 @admin.register(Specialization)

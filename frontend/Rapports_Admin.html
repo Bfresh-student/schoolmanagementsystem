@@ -258,6 +258,9 @@
                     <div class="option-item" data-value="annee">Cette année</div>
                 </div>
                 </div>
+                <select id="rapportAcademicYearSelect" class="filter-select" style="padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;background:white;font-size:0.9rem;font-weight:500;" onchange="changeRapportAcademicYear(this.value)">
+                    <option value="">Toutes les années</option>
+                </select>
                 <button class="btn-icon" onclick="refreshAll()" title="Actualiser"><i class="fas fa-sync-alt"></i></button>
                 <div class="export-container" id="exportContainer">
                 <button class="btn-export" id="exportBtn"><i class="fas fa-file-export"></i> Exporter <i class="fas fa-chevron-down"></i></button>

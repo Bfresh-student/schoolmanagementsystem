@@ -1,13 +1,18 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Specialization, Student
+from .models import Specialization, Student, AcademicYear
 from .models import SchoolClass
 
 User = get_user_model()
 
- 
- 
+
+class AcademicYearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicYear
+        fields = ['id', 'label', 'start_date', 'end_date', 'is_active', 'created_at', 'updated_at']
+
+
 class SchoolClassSerializer(serializers.ModelSerializer):
     specialization_name = serializers.CharField(source='specialization.name', read_only=True)
     student_count = serializers.IntegerField(source='students.count', read_only=True)
