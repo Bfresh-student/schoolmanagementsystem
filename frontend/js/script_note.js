@@ -63,14 +63,14 @@
                         .padStart(2, '0'), coef: 2, comment: '', annee: '2025-2026',
                     classe: 'ENTREPRENEURIAT' });
                 etudiants.filter(e => e.classe === 'ENTREPRENEURIAT' && e.annee === '2025-2026').forEach(et => {
-                    notes[`${et.id}_${evalId1}`] = Math.round((11 + Math.random() * 9) * 2) / 2;
+                    notes[`${et.id}_${evalId1}`] = Math.round((55 + Math.random() * 45) * 2) / 2;
                 });
                 const evalId2 = nextEvalId++;
                 evaluations.push({ id: evalId2, matiere: mat, type: 'Examen', date: '2026-05-' + String(15 + idx)
                         .padStart(2, '0'), coef: 3, comment: 'Examen Final', annee: '2025-2026',
                     classe: 'ENTREPRENEURIAT' });
                 etudiants.filter(e => e.classe === 'ENTREPRENEURIAT' && e.annee === '2025-2026').forEach(et => {
-                    notes[`${et.id}_${evalId2}`] = Math.round((9 + Math.random() * 11) * 2) / 2;
+                    notes[`${et.id}_${evalId2}`] = Math.round((45 + Math.random() * 55) * 2) / 2;
                 });
             });
         }
@@ -141,11 +141,11 @@
         }
 
         function getMention(avg) {
-            if (avg >= 18) return { text: 'Excellent', class: 'mention-excellent' };
-            if (avg >= 16) return { text: 'Très Bien', class: 'mention-tresbien' };
-            if (avg >= 14) return { text: 'Bien', class: 'mention-bien' };
-            if (avg >= 12) return { text: 'Assez Bien', class: 'mention-assezbien' };
-            if (avg >= 10) return { text: 'Passable', class: 'mention-passable' };
+            if (avg >= 90) return { text: 'Excellent', class: 'mention-excellent' };
+            if (avg >= 80) return { text: 'Très Bien', class: 'mention-tresbien' };
+            if (avg >= 70) return { text: 'Bien', class: 'mention-bien' };
+            if (avg >= 60) return { text: 'Assez Bien', class: 'mention-assezbien' };
+            if (avg >= 50) return { text: 'Passable', class: 'mention-passable' };
             return { text: 'Insuffisant', class: 'mention-insuffisant' };
         }
 
@@ -158,8 +158,8 @@
 
         function getNoteClass(note) {
             if (note === null || note === undefined || note === '') return '';
-            if (note >= 16) return 'note-high';
-            if (note >= 12) return 'note-mid';
+            if (note >= 80) return 'note-high';
+            if (note >= 60) return 'note-mid';
             return 'note-low';
         }
 
@@ -202,7 +202,7 @@
                         bodyHTML +=
                             `<td class="note-cell" onclick="event.stopPropagation();startCellEdit(this, ${et.id}, '${mat.replace(/'/g, "\\'")}')" title="Cliquer pour ajouter/modifier la note de ${et.nom} en ${mat}">
                     <span class="note-display ${noteClass}">${avg !== null ? avg.toFixed(1) : '<span style="color:#cbd5e1">-</span>'}</span>
-                    <input type="number" class="note-input-inline" min="0" max="20" step="0.5" inputmode="decimal" onblur="finishCellEdit(this, ${et.id}, '${mat.replace(/'/g, "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}">
+                    <input type="number" class="note-input-inline" min="0" max="100" step="0.5" inputmode="decimal" onblur="finishCellEdit(this, ${et.id}, '${mat.replace(/'/g, "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}">
                   </td>`;
                     });
 
@@ -245,7 +245,7 @@
             input.dataset.matiere = matiere;
         }
 
-        async function finishCellEdit(input, etudiantId, matiere) { const cell = input.closest('.note-cell'); if (!cell) return; const value = Number(input.value); cell.classList.remove('editing'); if (input.value === '' || Number.isNaN(value)) { showToast('La suppression d’une note n’est pas encore disponible.', 'info'); renderTable(); return; } if (value < 0 || value > 20) { showToast('La note doit être comprise entre 0 et 20.', 'error'); renderTable(); return; } try { await persistNote(etudiantId, matiere, value, new Date().toISOString().slice(0, 10)); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Enregistrement impossible.', 'error'); } renderTable(); }
+        async function finishCellEdit(input, etudiantId, matiere) { const cell = input.closest('.note-cell'); if (!cell) return; const value = Number(input.value); cell.classList.remove('editing'); if (input.value === '' || Number.isNaN(value)) { showToast('La suppression d’une note n’est pas encore disponible.', 'info'); renderTable(); return; } if (value < 0 || value > 100) { showToast('La note doit être comprise entre 0 et 100.', 'error'); renderTable(); return; } try { await persistNote(etudiantId, matiere, value, new Date().toISOString().slice(0, 10)); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Enregistrement impossible.', 'error'); } renderTable(); }
 
         function openAssessmentModal(id = null) { editingAssessmentId = id; const existing = id ? assessments.find(item => String(item.id) === String(id)) : null; const schoolClass = getCurrentClassData(); document.getElementById('assessmentModalTitle').textContent = existing ? 'Modifier l’évaluation' : 'Nouvelle évaluation'; document.getElementById('assessmentCourse').innerHTML = courses.map(course => `<option value="${course.id}">${course.code} — ${course.name}</option>`).join(''); document.getElementById('assessmentCourse').value = existing?.course || ''; document.getElementById('assessmentTitle').value = existing?.title || ''; document.getElementById('assessmentType').value = existing?.evaluation_type || 'assignment'; document.getElementById('assessmentCoefficient').value = existing?.coefficient || 1; document.getElementById('assessmentTerm').value = existing?.term || ''; document.getElementById('assessmentYear').value = existing?.academic_year || currentYear; document.getElementById('assessmentDate').value = existing?.evaluation_date || new Date().toISOString().slice(0, 10); if (!schoolClass) { showToast('Sélectionnez une classe active.', 'error'); return; } document.getElementById('assessmentModal').classList.add('open'); }
         function closeAssessmentModal() { document.getElementById('assessmentModal').classList.remove('open'); editingAssessmentId = null; }
@@ -263,7 +263,7 @@
             matiereSelect.onchange = () => { const e = getEvaluationForMatiere(matiereSelect.value); const labels = { quiz: 'Quiz', assignment: 'Devoir', exam: 'Examen', project: 'Projet', oral: 'Oral' }; document.getElementById('addNoteCoef').value = e?.coef || ''; document.getElementById('addNoteType').value = labels[e?.evaluationType] || ''; };
 
             document.getElementById('addNoteDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('addNoteValue').value = 15;
+            document.getElementById('addNoteValue').value = 75;
             document.getElementById('addNoteCoef').value = 1;
             document.getElementById('addNoteType').value = 'Examen';
             document.getElementById('addNoteModal').classList.add('open');
@@ -272,7 +272,7 @@
 
         function closeAddNoteModal() { document.getElementById('addNoteModal').classList.remove('open'); }
 
-        async function saveNewNote() { const etudiantId = Number(document.getElementById('addNoteStudent').value); const matiere = document.getElementById('addNoteMatiere').value; const noteVal = Number(document.getElementById('addNoteValue').value); const date = document.getElementById('addNoteDate').value; if (!etudiantId || !matiere || Number.isNaN(noteVal) || noteVal < 0 || noteVal > 20) { showToast('Sélectionnez un élève, un cours et une note entre 0 et 20.', 'error'); return; } try { await persistNote(etudiantId, matiere, noteVal, date); closeAddNoteModal(); renderTable(); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : la note doit être arbitrée par un administrateur.' : 'Enregistrement impossible.', 'error'); } }
+        async function saveNewNote() { const etudiantId = Number(document.getElementById('addNoteStudent').value); const matiere = document.getElementById('addNoteMatiere').value; const noteVal = Number(document.getElementById('addNoteValue').value); const date = document.getElementById('addNoteDate').value; if (!etudiantId || !matiere || Number.isNaN(noteVal) || noteVal < 0 || noteVal > 100) { showToast('Sélectionnez un élève, un cours et une note entre 0 et 100.', 'error'); return; } try { await persistNote(etudiantId, matiere, noteVal, date); closeAddNoteModal(); renderTable(); showToast('Note enregistrée.', 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : la note doit être arbitrée par un administrateur.' : 'Enregistrement impossible.', 'error'); } }
 
         function updateStats() {
             const filtered = getFilteredEtudiants();
@@ -307,9 +307,9 @@
                 const shortLabels = matieres.map(m => m.length > 18 ? m.substring(0, 16) + '...' : m);
                 chartInstances['bar'] = new Chart(ctx1, {
                     type: 'bar',
-                    data: { labels: shortLabels, datasets: [{ label: 'Moy. /20', data: matAvgs,
+                    data: { labels: shortLabels, datasets: [{ label: 'Moy. /100', data: matAvgs,
                             backgroundColor: 'rgba(10,77,140,0.7)', borderRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 20,
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100,
                                 ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 9 },
                                 maxRotation: 45 } } },
                         plugins: { legend: { display: false } } }
@@ -352,7 +352,7 @@
                 const mAvg = getMatiereAverage(etudiantId, mat);
                 const m = mAvg !== null ? getMention(mAvg) : { text: '-', class: '' };
                 const shortMat = mat.length > 30 ? mat.substring(0, 28) + '...' : mat;
-                return `<div class="info-row"><span class="label">${shortMat}</span><span class="value">${mAvg !== null ? mAvg.toFixed(1)+'/20' : 'N/A'} <small style="font-size:0.6rem">(${m.text})</small></span></div>`;
+                return `<div class="info-row"><span class="label">${shortMat}</span><span class="value">${mAvg !== null ? mAvg.toFixed(1)+'/100' : 'N/A'} <small style="font-size:0.6rem">(${m.text})</small></span></div>`;
             }).join('');
             document.getElementById('panelBody').innerHTML = `
             <div class="info-row"><span class="label">Matricule</span><span class="value">${currentPanelStudent.matricule}</span></div>
@@ -361,7 +361,7 @@
             <div class="info-row"><span class="label">Année</span><span class="value">${currentPanelStudent.annee}</span></div>
             <div class="info-row"><span class="label">Notes saisies</span><span class="value">${getRecordedNoteCount(etudiantId)}</span></div>
             <hr style="margin:10px 0;border-color:var(--border-light)">
-            <div class="info-row"><span class="label" style="font-weight:700;color:var(--blue);font-size:0.85rem">Moyenne</span><span class="value" style="font-size:1.3rem;font-weight:800;color:var(--blue)">${avg > 0 ? avg.toFixed(2)+'/20' : 'N/A'}</span></div>
+            <div class="info-row"><span class="label" style="font-weight:700;color:var(--blue);font-size:0.85rem">Moyenne</span><span class="value" style="font-size:1.3rem;font-weight:800;color:var(--blue)">${avg > 0 ? avg.toFixed(2)+'/100' : 'N/A'}</span></div>
             <div class="info-row"><span class="label">Rang</span><span class="value" style="font-weight:700">${rank} / ${filtered.length}</span></div>
             <div class="info-row"><span class="label">Mention</span><span class="value"><span class="mention-badge ${mention.class}">${mention.text}</span></span></div>
             <hr style="margin:10px 0;border-color:var(--border-light)">
@@ -392,7 +392,7 @@
         function panelSendWhatsApp() {
             if (currentPanelStudent) {
                 const msg =
-                    `📚 *Bulletin CEJEC*\n👤 *${currentPanelStudent.nom}*\n📊 Moy: ${getStudentAverage(currentPanelStudent.id).toFixed(2)}/20\n🏅 Mention: ${getMention(getStudentAverage(currentPanelStudent.id)).text}\n📅 ${currentYear}`;
+                    `📚 *Bulletin CEJEC*\n👤 *${currentPanelStudent.nom}*\n📊 Moy: ${getStudentAverage(currentPanelStudent.id).toFixed(2)}/100\n🏅 Mention: ${getMention(getStudentAverage(currentPanelStudent.id)).text}\n📅 ${currentYear}`;
                 window.open(
                     `https://wa.me/${currentPanelStudent.telephone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(msg)}`,
                     '_blank');
@@ -427,8 +427,8 @@
                 <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border-light);flex-wrap:wrap">
                   <span style="flex:1;font-size:0.75rem;min-width:110px">${ev.type} (coef ${ev.coef})</span>
                   <span style="font-size:0.7rem;color:var(--muted);min-width:80px">${ev.date}</span>
-                  <input type="number" class="note-edit-input" data-eval="${ev.id}" value="${val}" min="0" max="20" step="0.5" style="width:60px;padding:7px;border:2px solid var(--input-border);border-radius:var(--radius-xs);text-align:center;font-family:Inter,sans-serif;font-size:0.8rem" inputmode="decimal">
-                  <span style="font-size:0.7rem;color:var(--muted)">/20</span>
+                  <input type="number" class="note-edit-input" data-eval="${ev.id}" value="${val}" min="0" max="100" step="0.5" style="width:60px;padding:7px;border:2px solid var(--input-border);border-radius:var(--radius-xs);text-align:center;font-family:Inter,sans-serif;font-size:0.8rem" inputmode="decimal">
+                  <span style="font-size:0.7rem;color:var(--muted)">/100</span>
                 </div>`;
                     });
                 }
@@ -441,7 +441,7 @@
         function closeEditNotesModal() { document.getElementById('editNotesModal').classList.remove('open');
             currentEditStudent = null; }
 
-        async function saveEditedNotes() { if (!currentEditStudent) return; const student = currentEditStudent; try { for (const input of document.querySelectorAll('.note-edit-input')) { if (input.value === '') continue; const value = Number(input.value); const evaluation = evaluations.find(item => String(item.id) === input.dataset.eval); if (!evaluation || Number.isNaN(value) || value < 0 || value > 20) throw new Error('NOTE_INVALIDE'); await persistNote(student.id, evaluation.matiere, value, new Date().toISOString().slice(0, 10)); } closeEditNotesModal(); renderTable(); showToast(`Notes de ${student.nom} enregistrées.`, 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Une note est invalide ou n’a pas pu être enregistrée.', 'error'); } }
+        async function saveEditedNotes() { if (!currentEditStudent) return; const student = currentEditStudent; try { for (const input of document.querySelectorAll('.note-edit-input')) { if (input.value === '') continue; const value = Number(input.value); const evaluation = evaluations.find(item => String(item.id) === input.dataset.eval); if (!evaluation || Number.isNaN(value) || value < 0 || value > 100) throw new Error('NOTE_INVALIDE'); await persistNote(student.id, evaluation.matiere, value, new Date().toISOString().slice(0, 10)); } closeEditNotesModal(); renderTable(); showToast(`Notes de ${student.nom} enregistrées.`, 'success'); } catch (error) { showToast(error.message === 'CONFLIT_NOTE' ? 'Conflit détecté : arbitrage administrateur requis.' : 'Une note est invalide ou n’a pas pu être enregistrée.', 'error'); } }
 
         function archiveStudent(etudiantId) {
             const et = etudiants.find(e => e.id === etudiantId);
@@ -471,9 +471,9 @@
             <div class="header"><div class="logo">🏫 CEJEC</div><h1>BULLETIN DE NOTES</h1><p>Année : ${currentYear} | Classe : ${currentClass}</p><p>Émis le ${new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</p></div>
             <div class="info"><div><strong>Élève :</strong> ${et.nom}</div><div><strong>Matricule :</strong> ${et.matricule}</div><div><strong>Tél :</strong> ${et.telephone}</div></div>
             <table><thead><tr><th>Matière</th><th>Coef</th><th>Moy.</th><th>Appréciation</th></tr></thead><tbody>
-            ${matieres.map(mat=>{const mAvg=getMatiereAverage(etudiantId,mat);const m=mAvg!==null?getMention(mAvg):{text:'-',class:''};const totalCoef=classEvals.filter(ev=>ev.matiere===mat).reduce((s,ev)=>s+ev.coef,0);return `<tr><td>${mat}</td><td style="text-align:center">${totalCoef}</td><td style="text-align:center;font-weight:700">${mAvg!==null?mAvg.toFixed(1):'-'}/20</td><td>${m.text}</td></tr>`;}).join('')}
+            ${matieres.map(mat=>{const mAvg=getMatiereAverage(etudiantId,mat);const m=mAvg!==null?getMention(mAvg):{text:'-',class:''};const totalCoef=classEvals.filter(ev=>ev.matiere===mat).reduce((s,ev)=>s+ev.coef,0);return `<tr><td>${mat}</td><td style="text-align:center">${totalCoef}</td><td style="text-align:center;font-weight:700">${mAvg!==null?mAvg.toFixed(1):'-'}/100</td><td>${m.text}</td></tr>`;}).join('')}
             </tbody></table>
-            <div class="summary"><div class="summary-item"><div class="label">Moyenne</div><div class="value">${avg.toFixed(2)}/20</div></div><div class="summary-item"><div class="label">Rang</div><div class="value">${rank}/${filtered.length}</div></div><div class="summary-item"><div class="label">Mention</div><div class="value" style="color:#065f46">${mention.text}</div></div></div>
+            <div class="summary"><div class="summary-item"><div class="label">Moyenne</div><div class="value">${avg.toFixed(2)}/100</div></div><div class="summary-item"><div class="label">Rang</div><div class="value">${rank}/${filtered.length}</div></div><div class="summary-item"><div class="label">Mention</div><div class="value" style="color:#065f46">${mention.text}</div></div></div>
             <div class="footer"><div class="signature"><div class="signature-line"></div>Professeur</div><div class="signature"><div class="signature-line"></div>Direction</div><div class="signature"><div class="signature-line"></div>Parent/Tuteur</div></div>
             <p style="text-align:center;margin-top:18px;font-size:.6rem;color:#8b95a5">CEJEC ERP · Document officiel</p></body></html>`);
             win.document.close();
@@ -507,14 +507,14 @@
                     row.push(avg !== null ? avg.toFixed(1) : 'N/A'); });
                 const avg = getStudentAverage(et.id);
                 row.push(avg > 0 ? avg.toFixed(2) : 'N/A', rankMap[et.id] || filtered.length, getMention(avg).text,
-                    avg >= 10 ? 'Admis' : 'Échec');
+                    avg >= 50 ? 'Admis' : 'Échec');
                 csv += row.join(';') + '\n';
             });
             csv += '\n═══ STATISTIQUES ═══\n';
             const allAvgs = filtered.map(e => getStudentAverage(e.id)).filter(a => a > 0);
             if (allAvgs.length > 0) {
-                csv += `Moyenne de classe: ${(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length).toFixed(2)}/20\n`;
-                csv += `Taux de réussite: ${Math.round((allAvgs.filter(a=>a>=10).length/allAvgs.length)*100)}%\n`;
+                csv += `Moyenne de classe: ${(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length).toFixed(2)}/100\n`;
+                csv += `Taux de réussite: ${Math.round((allAvgs.filter(a=>a>=50).length/allAvgs.length)*100)}%\n`;
                 csv += `Meilleure note: ${Math.max(...allAvgs)} | Note basse: ${Math.min(...allAvgs)}\n`;
             }
             csv += '\n═══ MOYENNES PAR MATIÈRE ═══\nMatière;Moyenne;Nb Notes\n';

@@ -10,6 +10,7 @@ from apps.users.models import User
 
 from apps.grades import services
 from apps.grades.models import Grade, GradeConflict, GradeSyncEntry, SyncEntryStatus
+from apps.grades.serializers import GradeConflictResolveSerializer, GradeSubmitSerializer
 
 
 def _dt(hour, minute):
@@ -135,3 +136,23 @@ class GradeConflictScenarioTests(TestCase):
         self.assertEqual(entry.id, entry2.id)
         self.assertEqual(result2["outcome"], "discarded")
         self.assertEqual(GradeSyncEntry.objects.filter(local_uuid=entry.local_uuid).count(), 1)
+
+    def test_grade_submission_accepts_100_and_rejects_values_above_100(self):
+        payload = {
+            "student": self.student.id,
+            "course": self.course.id,
+            "local_timestamp": _dt(14, 30).isoformat(),
+        }
+
+        self.assertTrue(GradeSubmitSerializer(data={**payload, "value": "100"}).is_valid())
+
+        invalid = GradeSubmitSerializer(data={**payload, "value": "100.01"})
+        self.assertFalse(invalid.is_valid())
+        self.assertIn("value", invalid.errors)
+
+    def test_manual_conflict_resolution_rejects_values_above_100(self):
+        serializer = GradeConflictResolveSerializer(
+            data={"choice": GradeConflict.Resolution.MANUAL, "manual_value": "100.01"}
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("manual_value", serializer.errors)

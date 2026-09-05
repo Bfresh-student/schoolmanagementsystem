@@ -15,5 +15,5 @@ grade_recorded = django.dispatch.Signal()
 grade_conflict_detected = django.dispatch.Signal()
 
 # Émis quand l'admin a tranché -> notifie le prof ("Sync complétée") et
-# l'étudiant ("Votre note : 16/20").
+# l'étudiant ("Votre note : 80/100").
 grade_conflict_resolved = django.dispatch.Signal()

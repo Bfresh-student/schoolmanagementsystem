@@ -41,7 +41,7 @@ class GradeSubmitSerializer(serializers.Serializer):
     student = serializers.PrimaryKeyRelatedField(queryset=Grade._meta.get_field("student").related_model.objects.all())
     course = serializers.PrimaryKeyRelatedField(queryset=Grade._meta.get_field("course").related_model.objects.all(), required=False)
     assessment = serializers.PrimaryKeyRelatedField(queryset=Assessment.objects.all(), required=False)
-    value = serializers.DecimalField(max_digits=4, decimal_places=2, min_value=0, max_value=20)
+    value = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=0, max_value=100)
     def validate(self, attrs):
         assessment = attrs.get("assessment")
         course = attrs.get("course")
@@ -85,7 +85,7 @@ class GradeConflictSerializer(serializers.ModelSerializer):
 class GradeConflictResolveSerializer(serializers.Serializer):
     choice = serializers.ChoiceField(choices=GradeConflict.Resolution.choices)
     manual_value = serializers.DecimalField(
-        max_digits=4, decimal_places=2, min_value=0, max_value=20, required=False
+        max_digits=5, decimal_places=2, min_value=0, max_value=100, required=False
     )
 
     def validate(self, attrs):

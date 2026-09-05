@@ -59,7 +59,7 @@ class DashboardStatsView(APIView):
         for start in month_starts:
             end = _next_month(start)
             monthly_grade = Grade.objects.filter(date_graded__gte=start, date_graded__lt=end).aggregate(avg=Avg("value"))["avg"]
-            success_rate_history.append(round(float(monthly_grade or 0) * 5, 2))
+            success_rate_history.append(round(float(monthly_grade or 0), 2))
             paid = Payment.objects.filter(status=Payment.Status.COMPLETED).filter(
                 Q(paid_at__date__gte=start, paid_at__date__lt=end)
                 | Q(paid_at__isnull=True, created_at__date__gte=start, created_at__date__lt=end)
@@ -102,7 +102,7 @@ class DashboardStatsView(APIView):
             "articles_count": Article.objects.filter(status=Article.Status.PUBLISHED).count(),
             "revenue": float(Invoice.objects.filter(status=Invoice.Status.PAID).aggregate(total=Sum("amount_paid"))["total"] or 0),
             "revenue_month": float(current_revenue),
-            "success_rate": round(float(average_grade or 0) * 5, 2),
+            "success_rate": round(float(average_grade or 0), 2),
             "diplomas_delivered": Student.objects.filter(status=Student.Status.GRADUATED).count(),
             "month_labels": month_labels,
             "student_history": student_history,

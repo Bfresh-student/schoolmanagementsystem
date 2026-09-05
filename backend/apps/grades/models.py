@@ -69,8 +69,8 @@ class Grade(models.Model):
     )
 
     value = models.DecimalField(
-        max_digits=4, decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(20)],
+        max_digits=5, decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
     date_graded = models.DateField(default=timezone.now)
 
@@ -85,7 +85,11 @@ class Grade(models.Model):
         app_label = "grades"
         db_table = "grades"
         constraints = [
-            models.UniqueConstraint(fields=["student", "assessment"], name="uniq_grade_per_student_assessment")
+            models.UniqueConstraint(fields=["student", "assessment"], name="uniq_grade_per_student_assessment"),
+            models.CheckConstraint(
+                condition=models.Q(value__gte=0) & models.Q(value__lte=100),
+                name="grade_value_between_0_and_100",
+            ),
         ]
         indexes = [
             models.Index(fields=["synced"]),
@@ -130,8 +134,8 @@ class GradeSyncEntry(models.Model):
     teacher = models.ForeignKey("teachers.Teacher", on_delete=models.SET_NULL, null=True)
 
     value = models.DecimalField(
-        max_digits=4, decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(20)],
+        max_digits=5, decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
     source = models.CharField(max_length=10, choices=Source.choices)
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
@@ -149,6 +153,12 @@ class GradeSyncEntry(models.Model):
     class Meta:
         app_label = "grades"
         db_table = "grade_sync_entries"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(value__gte=0) & models.Q(value__lte=100),
+                name="grade_sync_value_between_0_and_100",
+            ),
+        ]
         indexes = [models.Index(fields=["status"])]
 
     def __str__(self):
@@ -175,7 +185,13 @@ class GradeConflict(models.Model):
     remote_version = models.JSONField(help_text="Snapshot de la valeur actuellement en base.")
 
     resolution_choice = models.CharField(max_length=15, choices=Resolution.choices, null=True, blank=True)
-    resolved_value = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    resolved_value = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
     resolved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
 
@@ -184,6 +200,12 @@ class GradeConflict(models.Model):
     class Meta:
         app_label = "grades"
         db_table = "grade_conflicts"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(resolved_value__gte=0) & models.Q(resolved_value__lte=100),
+                name="resolved_grade_value_between_0_and_100",
+            ),
+        ]
         indexes = [models.Index(fields=["resolution_choice"])]
 
     @property
