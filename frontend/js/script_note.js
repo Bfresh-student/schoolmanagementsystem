@@ -40,7 +40,6 @@
         let evaluations = [];
         let notes = {};
         let nextEvalId = 1;
-        let nextStudentId = 13;
         let currentPanelStudent = null;
         let currentEditStudent = null;
         let chartInstances = {};
@@ -584,23 +583,6 @@
         function updateClassFilter() { document.getElementById('filterClass').innerHTML = classes.map(c =>
                 `<option value="${c}" ${c===currentClass?'selected':''}>${c}</option>`).join(''); }
 
-        function openStudentModal() { document.getElementById('studentModal').classList.add('open'); }
-
-        function closeStudentModal() { document.getElementById('studentModal').classList.remove('open'); }
-
-        function addStudent() { const nom = document.getElementById('newStudentName').value.trim(); if (!nom) { showToast(
-                    'Nom requis', 'error'); return; }
-            const id = nextStudentId++;
-            etudiants.push({ id, nom, matricule: document.getElementById('newStudentMat').value.trim() || 'CEJ-' + String(
-                    id).padStart(3, '0'), telephone: document.getElementById('newStudentTel').value.trim(),
-                classe: currentClass, annee: currentYear });
-            closeStudentModal();
-            renderTable();
-            showToast('✅ ' + nom + ' ajouté', 'success');
-            document.getElementById('newStudentName').value = '';
-            document.getElementById('newStudentMat').value = '';
-            document.getElementById('newStudentTel').value = ''; }
-
         function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); }
 
         function applyFilters() { const yearVal = document.getElementById('filterYear').value; const classVal = document
@@ -610,7 +592,6 @@
 
         addYear = () => showToast('Les années académiques ne sont pas encore gérées par le backend.', 'info');
         addClass = () => showToast('Créez une classe depuis la gestion des classes.', 'info');
-        addStudent = () => showToast('Créez un élève depuis la gestion des utilisateurs ou inscriptions.', 'info');
         archiveStudent = () => showToast('L’archivage doit être effectué depuis la fiche de l’élève.', 'info');
         async function init() { try { await loadRealData(); } catch (error) { console.error('Chargement des notes impossible', error); etudiants = []; evaluations = []; matieres = []; showToast('Impossible de charger les données réelles.', 'error'); }
             updateYearFilter();

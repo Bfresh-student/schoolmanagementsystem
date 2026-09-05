@@ -243,12 +243,12 @@
                         <span class="badge badge-blue"><i class="fas fa-building"></i> CEJEC</span>
                         <span class="badge badge-green"><i class="fas fa-calendar-alt"></i> <span id="currentYear">2025-2026</span></span>
                         <span class="badge badge-purple"><i class="fas fa-users"></i> <span id="currentClass">ENTREPRENEURIAT</span></span>
+                        <span class="badge badge-orange"><i class="fas fa-percent"></i> Notes sur 100</span>
                     </div>
                 </div>
                 <div class="header-right22">
                     <button class="btn btn-outline btn-sm" onclick="openYearModal()"><i class="fas fa-calendar-plus"></i> Année</button>
                     <button class="btn btn-outline btn-sm" onclick="openClassModal()"><i class="fas fa-layer-group"></i> Classe</button>
-                    <button class="btn btn-outline btn-sm" onclick="openStudentModal()"><i class="fas fa-user-plus"></i> Élève</button>
                     <button class="btn btn-add-note" onclick="openAddNoteModal()"><i class="fas fa-plus-circle"></i> Ajouter Note</button>
                     <button class="btn btn-outline btn-sm" onclick="openAssessmentModal()"><i class="fas fa-clipboard-list"></i> Évaluation</button>
                     <button class="btn btn-primary btn-sm" onclick="generateAllBulletins()"><i class="fas fa-file-alt"></i> Bulletins</button>
@@ -419,21 +419,6 @@
                     <div id="existingClasses" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"></div>
                 </div>
                 <div class="modal-footer"><button class="btn btn-outline" onclick="closeClassModal()">Fermer</button><button class="btn btn-primary" onclick="addClass()"><i class="fas fa-plus"></i> Ajouter</button></div>
-            </div>
-        </div>
-
-        <!-- MODAL ÉLÈVE -->
-        <div class="modal-overlay" id="studentModal">
-            <div class="modal" style="max-width:450px">
-                <div class="modal-header"><h3><i class="fas fa-user-plus"></i> Ajouter Élève</h3><button class="modal-close" onclick="closeStudentModal()"><i class="fas fa-times"></i></button></div>
-                <div class="modal-body">
-                    <div class="form-grid">
-                        <div class="form-group full"><label>Nom complet</label><input type="text" id="newStudentName" placeholder="Ex: Jean Dupont"></div>
-                        <div class="form-group"><label>Matricule</label><input type="text" id="newStudentMat" placeholder="CEJ-0XX"></div>
-                        <div class="form-group"><label>Téléphone</label><input type="text" id="newStudentTel" placeholder="+509 XX XX XXXX"></div>
-                    </div>
-                </div>
-                <div class="modal-footer"><button class="btn btn-outline" onclick="closeStudentModal()">Annuler</button><button class="btn btn-primary" onclick="addStudent()"><i class="fas fa-user-plus"></i> Ajouter</button></div>
             </div>
         </div>
 
