@@ -25,7 +25,7 @@ def progress_event_lifecycle():
                     enqueue_notification(
                         recipient_id=event.creator_id,
                         trigger_type=trigger_type,
-                        context={"event_name": event.name, "start_datetime": event.start_datetime.isoformat()},
+                        context={"event_name": event.name, "event_id": str(event.id), "start_datetime": event.start_datetime.isoformat()},
                         priority=priority,
                     )
                 except Exception:
@@ -85,6 +85,7 @@ def send_upcoming_event_reminders():
                 trigger_type="event_reminder",
                 context={
                     "event_name": event.name,
+                    "event_id": str(event.id),
                     "start_datetime": event.start_datetime.isoformat(),
                     "location": event.location,
                 },

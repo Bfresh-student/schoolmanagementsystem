@@ -50,7 +50,7 @@ def publish_scheduled_articles():
                 enqueue_notification(
                     recipient_id=article.author_id,
                     trigger_type="article_published",
-                    context={"article_title": article.title, "publication_date": article.publication_date.isoformat()},
+                    context={"article_title": article.title, "article_id": str(article.id), "publication_date": article.publication_date.isoformat()},
                     priority="normal",
                 )
             except Exception:

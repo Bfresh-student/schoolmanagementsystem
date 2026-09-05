@@ -36,7 +36,7 @@ def on_course_saved(sender, instance: Course, created, **kwargs):
         enqueue_notification(
             recipient_id=instance.teacher.user_id,
             trigger_type="course_assigned",
-            context={"course_code": instance.code, "course_name": instance.name},
+            context={"course_code": instance.code, "course_name": instance.name, "course_id": str(instance.id)},
         )
 
     previous_status = getattr(instance, "_previous_status", None)
@@ -47,6 +47,7 @@ def on_course_saved(sender, instance: Course, created, **kwargs):
             context={
                 "course_code": instance.code,
                 "specialization": instance.specialization.name,
+                "course_id": str(instance.id),
             },
             broadcast_specialization_id=str(instance.specialization_id),
         )

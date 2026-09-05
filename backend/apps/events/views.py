@@ -178,5 +178,5 @@ class EventViewSet(viewsets.ModelViewSet):
         enqueue_notification(
             recipient_id=participant.user_id,
             trigger_type=trigger_type,
-            context={"event_name": participant.event.name},
+            context={"event_name": participant.event.name, "event_id": str(participant.event_id)},
         )

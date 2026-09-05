@@ -78,10 +78,12 @@ class EmployeeAndAttendanceAPITests(TestCase):
         }, format="json")
 
         self.assertEqual(response.status_code, 201, response.data)
-        employee = Employee.objects.get(employee_number="EMP-TEST-TEACHER")
+        employee = Employee.objects.get(email="marie.joseph@ecole.ht")
         self.assertEqual(employee.gender, "Femme")
         self.assertIsNotNone(employee.user)
         self.assertEqual(employee.user.profile.gender, "F")
+        self.assertTrue(employee.employee_number.startswith("pf"))
+        self.assertEqual(employee.employee_number, employee.user.teacher_profile.teacher_id)
         self.assertTrue(Teacher.objects.filter(user=employee.user).exists())
 
     def test_attendance_is_saved_for_the_employee(self):

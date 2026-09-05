@@ -50,6 +50,22 @@ from apps.hr.serializers import (
 )
 
 
+def filter_by_academic_year(queryset, label, date_field):
+    """Filtre les données RH sur une année académique ``AAAA-AAAA``."""
+    if not label:
+        return queryset
+    try:
+        start_year, end_year = (int(part) for part in label.split("-", 1))
+    except (TypeError, ValueError):
+        return queryset
+    start_date = date(start_year, 9, 1)
+    end_date = date(end_year, 8, 31)
+    return queryset.filter(**{
+        f"{date_field}__gte": start_date,
+        f"{date_field}__lte": end_date,
+    })
+
+
 def _is_teacher_position(job_title: str) -> bool:
     return any(word in (job_title or "").lower() for word in ("prof", "enseign"))
 

@@ -15,11 +15,20 @@ def on_deliverable_created(sender, instance: ProjectDeliverable, created, **kwar
         return
 
     for member in instance.project.members.all():
+        try:
+            from apps.students.models import Student
+        except ImportError:
+            continue
+        try:
+            recipient_id = Student.objects.values_list("user_id", flat=True).get(pk=member.student_id)
+        except Student.DoesNotExist:
+            continue
         enqueue_notification(
-            recipient_id=None,
+            recipient_id=recipient_id,
             trigger_type="deliverable_created",
             context={
                 "project_name": instance.project.name,
+                "project_id": str(instance.project_id),
                 "deliverable_name": instance.name,
                 "due_date": instance.due_date.isoformat(),
                 "student_id": str(member.student_id),

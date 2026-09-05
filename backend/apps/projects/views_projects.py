@@ -19,6 +19,17 @@ def _notify(recipient_id, trigger_type, context):
         from notifications.services import enqueue_notification
     except ImportError:
         return
+    if recipient_id is None and context.get("student_id"):
+        try:
+            from apps.students.models import Student
+        except ImportError:
+            return
+        try:
+            recipient_id = Student.objects.values_list("user_id", flat=True).get(
+                pk=context["student_id"]
+            )
+        except Student.DoesNotExist:
+            return
     enqueue_notification(recipient_id=recipient_id, trigger_type=trigger_type, context=context)
 
 
@@ -70,7 +81,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         _notify(
             recipient_id=None,
             trigger_type="project_member_added",
-            context={"project_name": project.name, "student_id": str(member.student_id)},
+            context={"project_name": project.name, "project_id": str(project.id), "student_id": str(member.student_id)},
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -120,6 +131,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 trigger_type="deliverable_graded",
                 context={
                     "deliverable_name": deliverable.name,
+                    "project_id": str(deliverable.project_id),
                     "grade": str(deliverable.grade),
                     "student_id": str(deliverable.submitted_by_student_id),
                 },
@@ -139,6 +151,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 trigger_type="project_evaluated",
                 context={
                     "project_name": project.name,
+                    "project_id": str(project.id),
                     "final_grade": str(project.final_grade),
                     "student_id": str(member.student_id),
                 },

@@ -158,6 +158,7 @@ let employees = [...localEmployees];
 // ==================== ÉTAT API (rempli au chargement) ====================
 let teachersFromAPI = []; // Teachers chargés depuis /api/v1/teachers/
 let congesData = []; // Congés depuis /api/v1/hr/leaves/
+let currentLeaveEmployeeIds = new Set();
 let salaireFromAPI = []; // Salaires depuis /api/v1/hr/salaries/
 let evaluationsData = []; // Évaluations depuis /api/v1/hr/evaluations/
 let documentsFromAPI = []; // Documents depuis /api/v1/hr/documents/
@@ -922,7 +923,27 @@ async function loadAndRenderPresences() {
   showTabSpinner();
   try {
     await ensureAuth();
-    const raw = await HRAPI.attendances(true);
+    const [attendanceRaw, leaveRaw] = await Promise.all([
+      HRAPI.attendances(true),
+      HRAPI.leaves(),
+    ]);
+    const today = getTodayDateString();
+    const activeLeaves = leaveRaw.filter(
+      (leave) =>
+        leave.status === "approved" &&
+        leave.start_date <= today &&
+        leave.end_date >= today,
+    );
+    currentLeaveEmployeeIds = new Set(
+      activeLeaves.map((leave) => String(leave.employee)),
+    );
+    const leaveAttendances = activeLeaves.map((leave) => ({
+      employee: leave.employee,
+      date: today,
+      status: "excused",
+      notes: leave.reason || leave.leave_type_name || "Congé approuvé",
+    }));
+    const raw = [...attendanceRaw, ...leaveAttendances];
     presencesData = raw.map(mapAttendanceFromAPI);
   } catch (e) {
     console.warn("[RH] Impossible de charger les présences:", e);
@@ -937,13 +958,14 @@ function renderEmployes() {
   const total = employees.length;
   const actifs = employees.filter((e) => e.statut === "Actif").length;
   const suspendus = employees.filter((e) => e.statut === "Suspendu").length;
+  const enConges = employees.filter((e) => e.statut === "Congé").length;
   let rows = employees
     .map(
       (e, i) => `
                 <tr>
                     <td><div class="emp-cell"><div class="avatar-sm" style="background:${getAvatarColor(i)}">${getInitials(e)}</div><div><div class="emp-name">${e.prenom} ${e.nom}</div><div class="emp-detail">${e.id}</div></div></div></td>
                     <td>${e.sexe}</td><td>${e.tel}</td><td>${e.email}</td><td>${e.fonction}</td><td>${e.dept}</td><td>${e.embauche}</td>
-                    <td><span class="pill ${e.statut === "Actif" ? "pill-success" : e.statut === "Suspendu" ? "pill-danger" : "pill-warning"}">${e.statut}</span></td>
+                    <td><span class="pill ${e.statut === "Actif" ? "pill-success" : e.statut === "Suspendu" ? "pill-danger" : e.statut === "Congé" ? "pill-info" : "pill-warning"}">${e.statut}</span></td>
                     <td><div class="btn-group">
                         <button class="btn btn-sm btn-outline btn-icon" title="Voir" onclick="viewProfil(${i})"><i class="fas fa-eye"></i></button>
                         <button class="btn btn-sm btn-outline btn-icon" title="Modifier" onclick="editEmp(${i})"><i class="fas fa-edit"></i></button>
@@ -956,6 +978,7 @@ function renderEmployes() {
                 <div class="stat-card"><div class="stat-info"><span>Total</span><h2>${total}</h2></div><div class="stat-icon" style="color:var(--blue)"><i class="fas fa-users"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Actifs</span><h2>${actifs}</h2></div><div class="stat-icon" style="color:var(--success)"><i class="fas fa-check-circle"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Suspendus</span><h2>${suspendus}</h2></div><div class="stat-icon" style="color:var(--red)"><i class="fas fa-times-circle"></i></div></div>
+                                <div class="stat-card"><div class="stat-info"><span>En congé</span><h2>${enConges}</h2></div><div class="stat-icon" style="color:var(--info)"><i class="fas fa-umbrella-beach"></i></div></div>
                 <div class="stat-card"><div class="stat-info"><span>Masse Salariale</span><h2>${(employees.reduce((s, e) => (e.salaire || 0) + (e.prime || 0), 0) / 1000).toFixed(0)}K</h2></div><div class="stat-icon" style="color:#059669"><i class="fas fa-money-bill-wave"></i></div></div>
             </div>
             <div class="card"><div class="card-header"><h2><i class="fas fa-users"></i> Liste des Employés</h2><div class="btn-group">
@@ -1329,8 +1352,9 @@ function renderPresences() {
         ((e._hrEmployeeId && att._employeeId === e._hrEmployeeId) ||
           (att.employe && att.employe.trim().toLowerCase() === nomComplet)),
     );
-    const isPointed = Boolean(p && p.statut && p.statut !== "À pointer");
-    return { employee: e, empIndex, pres: p, isPointed };
+    const presence = p || (currentLeaveEmployeeIds.has(String(e._hrEmployeeId)) ? { statut: "Congé" } : null);
+    const isPointed = Boolean(presence && presence.statut && presence.statut !== "À pointer");
+    return { employee: e, empIndex, pres: presence, isPointed };
   });
 
   // Statistiques du jour
@@ -3186,6 +3210,7 @@ async function refreshAll() {
 async function syncAllEmployees() {
   let apiProfs = [];
   let apiStaff = [];
+  let activeLeaveEmployeeIds = new Set();
 
   try {
     teachersFromAPI = await HRAPI.teachers();
@@ -3199,6 +3224,24 @@ async function syncAllEmployees() {
     apiStaff = staff.map(mapEmployeeFromAPI);
   } catch (e) {
     console.warn("[RH] Personnel administratif non disponible:", e.message);
+  }
+
+  try {
+    const leaves = await HRAPI.leaves();
+    const today = getTodayDateString();
+    activeLeaveEmployeeIds = new Set(
+      leaves
+        .filter(
+          (leave) =>
+            leave.status === "approved" &&
+            leave.start_date <= today &&
+            leave.end_date >= today,
+        )
+        .map((leave) => String(leave.employee)),
+    );
+    currentLeaveEmployeeIds = activeLeaveEmployeeIds;
+  } catch (e) {
+    console.warn("[RH] Impossible de charger les congés actifs:", e.message);
   }
 
   try {
@@ -3315,6 +3358,11 @@ async function syncAllEmployees() {
   } else {
     employees = [...staffOnly, ...apiProfs, ...recruitedEmployees];
   }
+  employees = employees.map((employee) =>
+    activeLeaveEmployeeIds.has(String(employee._hrEmployeeId))
+      ? { ...employee, statut: "Congé" }
+      : employee,
+  );
   localStorage.setItem("cejec_employees_rh", JSON.stringify(employees));
 }
 

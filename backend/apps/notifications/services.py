@@ -121,6 +121,8 @@ def enqueue_notification(
         "grade_added": ("gestion_notes.html", "openPanel", context.get("student_id")),
         "article_published": ("gestion_medias.html", "openArticleModal", context.get("article_id")),
         "event_reminder": ("incubateur_calendrier.html", "openEventModal", context.get("event_id")),
+        "event_started": ("incubateur_calendrier.html", "openEventModal", context.get("event_id")),
+        "event_completed": ("incubateur_calendrier.html", "openEventModal", context.get("event_id")),
         "event_published_confirmation": ("incubateur_calendrier.html", "", ""),
         "course_assigned": ("gestion_classes.html", "openModal", context.get("course_id")),
         "course_published": ("gestion_classes.html", "openModal", context.get("course_id")),

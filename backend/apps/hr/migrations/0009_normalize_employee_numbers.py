@@ -4,19 +4,39 @@ from django.db import migrations
 def normalize_employee_numbers(apps, schema_editor):
     Employee = apps.get_model("hr", "Employee")
     Teacher = apps.get_model("teachers", "Teacher")
-    for number, employee in enumerate(
-        Employee.objects.exclude(job_title__icontains="prof").exclude(job_title__icontains="enseign").order_by("id"),
-        start=1,
-    ):
-        employee.employee_number = f"em{number:06d}"
-        employee.save(update_fields=["employee_number"])
+    employees = list(Employee.objects.order_by("id"))
 
+    # The unique constraint is immediate in PostgreSQL. Move every row out
+    # of the final namespace before assigning the normalized values.
+    for employee in employees:
+        Employee.objects.filter(pk=employee.pk).update(
+            employee_number=f"__migrate_employee_{employee.pk}"
+        )
+
+    teacher_ids = {
+        teacher.user_id: teacher.teacher_id
+        for teacher in Teacher.objects.all()
+        if teacher.user_id
+    }
+    used_numbers = set()
+    employee_number = 1
     teacher_number = 1
-    for employee in Employee.objects.filter(job_title__icontains="prof").order_by("id"):
-        teacher = Teacher.objects.filter(user_id=employee.user_id).first() if employee.user_id else None
-        employee.employee_number = teacher.teacher_id if teacher else f"pf{teacher_number:04d}"
-        teacher_number += 1
-        employee.save(update_fields=["employee_number"])
+
+    for employee in employees:
+        is_teacher = any(
+            word in (employee.job_title or "").lower()
+            for word in ("prof", "enseign")
+        )
+        if is_teacher:
+            number = teacher_ids.get(employee.user_id)
+            while not number or number in used_numbers:
+                number = f"pf{teacher_number:04d}"
+                teacher_number += 1
+        else:
+            number = f"em{employee_number:06d}"
+            employee_number += 1
+        used_numbers.add(number)
+        Employee.objects.filter(pk=employee.pk).update(employee_number=number)
 
 
 class Migration(migrations.Migration):
