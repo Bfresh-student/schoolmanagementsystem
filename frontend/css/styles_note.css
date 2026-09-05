@@ -406,6 +406,8 @@
 
         .table-wrapper {
             overflow-x: auto;
+        .table-wrapper {
+            overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             max-height: 60vh;
             overflow-y: auto;
@@ -415,7 +417,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.78rem;
-            min-width: 1800px;
+            min-width: auto;
         }
         thead {
             position: sticky;
