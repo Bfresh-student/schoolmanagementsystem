@@ -34,5 +34,11 @@ def test_dashboard_stats_endpoint(admin_user, api_client):
     response = api_client.get(url)
     assert response.status_code == 200
     data = response.json()
-    expected_keys = {'students_count', 'teachers_count', 'courses_count', 'attendance_records'}
+    expected_keys = {
+        'students_count', 'teachers_count', 'courses_count', 'attendance_records',
+        'month_labels', 'student_history', 'success_rate_history',
+        'promotion_distribution', 'attendance_history', 'revenue_month',
+    }
     assert expected_keys.issubset(data.keys())
+    assert len(data['month_labels']) == len(data['student_history']) == 7
+    assert set(data['attendance_history']) == {'labels', 'data'}

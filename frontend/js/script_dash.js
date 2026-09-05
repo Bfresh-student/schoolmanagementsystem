@@ -69,16 +69,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
             };
 
-            // Création des sparklines
-            createSparkline('spark-1', [30, 45, 38, 55, 48, 62, 70], '#0a4d8c');
-            createSparkline('spark-2', [5, 6, 6, 6, 6, 6, 6], '#073864');
-            createSparkline('spark-3', [28, 29, 30, 30, 32, 34, 34], '#0a4d8c');
-            createSparkline('spark-4', [40, 42, 45, 44, 48, 50, 52], '#0a4d8c');
-            createSparkline('spark-5', [8000, 10000, 9000, 11000, 13000, 12000, 14250], '#10b981');
-            createSparkline('spark-6', [91, 92, 92, 93, 93, 94, 94.2], '#10b981');
-            createSparkline('spark-7', [90, 95, 100, 105, 110, 120, 120], '#0a4d8c');
-            createSparkline('spark-8', [8, 10, 11, 13, 14, 16, 18], '#10b981');
-            createSparkline('spark-9', [45, 44, 46, 43, 44, 41, 42], '#d62828');
+            // Aucun chiffre de démonstration : les séries sont remplies après
+            // le chargement de /dashboard/stats/.
+            document.querySelectorAll('.kpi-value').forEach(el => { el.textContent = '—'; });
+            createSparkline('spark-1', [], '#0a4d8c');
+            createSparkline('spark-3', [], '#0a4d8c');
+            createSparkline('spark-4', [], '#0a4d8c');
+            createSparkline('spark-5', [], '#10b981');
+            createSparkline('spark-6', [], '#10b981');
+            createSparkline('spark-8', [], '#10b981');
+            createSparkline('spark-9', [], '#d62828');
 
             // 2. Graphique Mixte - Responsive
             const mixedCanvas = document.getElementById('mixedChart');
@@ -89,11 +89,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 mixedChart = new Chart(mixedCtx, {
                     type: 'bar',
                     data: {
-                        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil'],
+                        labels: [],
                         datasets: [
                             {
                                 label: 'Nouvelles Inscriptions',
-                                data: [65, 82, 74, 91, 85, 110, 125],
+                                data: [],
                                 backgroundColor: 'rgba(10, 77, 140, 0.85)',
                                 borderRadius: 6,
                                 yAxisID: 'y',
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             },
                             {
                                 label: 'Taux de Performance (%)',
-                                data: [88, 89, 91, 90, 93, 92, 94],
+                                data: [],
                                 type: 'line',
                                 borderColor: '#d62828',
                                 borderWidth: 3,
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             },
                             y1: { 
                                 position: 'right', 
-                                min: 70, 
+                                min: 0,
                                 max: 100, 
                                 title: { 
                                     display: true, 
@@ -192,9 +192,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 donutChart = new Chart(donutCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Sciences Comptables', 'Entrepreneuriat', 'Gestion des Affaires', 'Informatique Pro'],
+                        labels: [],
                         datasets: [{
-                            data: [40, 30, 20, 10],
+                            data: [],
                             backgroundColor: ['#0a4d8c', '#073864', '#e8f1fa', '#d62828'],
                             borderWidth: 2,
                             borderColor: '#ffffff'
@@ -230,10 +230,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 attendanceChart = new Chart(attendanceCtx, {
                     type: 'line',
                     data: {
-                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                        labels: [],
                         datasets: [{
                             label: 'Présence effective (%)',
-                            data: [94, 96, 95, 93, 91, 88],
+                            data: [],
                             borderColor: '#0a4d8c',
                             backgroundColor: 'rgba(10, 77, 140, 0.06)',
                             fill: true,
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 }
                             },
                             y: { 
-                                min: 80, 
+                                min: 0,
                                 max: 100,
                                 ticks: {
                                     font: {
@@ -548,13 +548,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Charger les KPIs depuis le backend
             async function loadDashboardStats() {
                 try {
-                    const token = localStorage.getItem('authToken');
-                    if (!token) return;
-                    const res = await fetch('https://schoolmanagementsystem-production-6624.up.railway.app/api/v1/dashboard/stats/', {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    if (!res.ok) return;
-                    const data = await res.json();
+                    const data = await apiClientRequest('/dashboard/stats/');
                     
                     const updateKpiByTitle = (titleKey, value) => {
                         const normalizedKey = titleKey.toLowerCase().trim();
@@ -571,17 +565,38 @@ document.addEventListener("DOMContentLoaded", async () => {
                     updateKpiByTitle('promotions', data.students_count);
                     updateKpiByTitle('professeurs', data.teachers_count);
                     updateKpiByTitle('cours', data.courses_count);
-                    updateKpiByTitle('revenus', Number(data.revenue).toLocaleString('fr-FR') + ' $');
+                    updateKpiByTitle('revenus', Number(data.revenue_month || 0).toLocaleString('fr-FR') + ' HTG');
                     updateKpiByTitle('ussite', data.success_rate + '%'); // Taux de réussite
                     updateKpiByTitle('dipl', data.diplomas_delivered); // Diplômes
                     updateKpiByTitle('projets', data.projects_count);
                     updateKpiByTitle('actualit', data.articles_count); // Publications & Actualités
                     
-                    if (data.success_rate_history) createSparkline('spark-6', data.success_rate_history, '#10b981');
-                    if (data.projects_history) createSparkline('spark-8', data.projects_history, '#10b981');
-                    if (data.articles_history) createSparkline('spark-9', data.articles_history, '#d62828'); // Publications & Actualités
+                    createSparkline('spark-1', data.student_history || [], '#0a4d8c');
+                    createSparkline('spark-3', data.teacher_history || [], '#0a4d8c');
+                    createSparkline('spark-4', data.course_history || [], '#0a4d8c');
+                    createSparkline('spark-5', data.revenue_history || [], '#10b981');
+                    createSparkline('spark-6', data.success_rate_history || [], '#10b981');
+                    createSparkline('spark-8', data.projects_history || [], '#10b981');
+                    createSparkline('spark-9', data.articles_history || [], '#d62828');
+
+                    if (mixedChart) {
+                        mixedChart.data.labels = data.month_labels || [];
+                        mixedChart.data.datasets[0].data = data.student_history || [];
+                        mixedChart.data.datasets[1].data = data.success_rate_history || [];
+                        mixedChart.update();
+                    }
+                    if (donutChart) {
+                        donutChart.data.labels = data.promotion_distribution?.labels || [];
+                        donutChart.data.datasets[0].data = data.promotion_distribution?.data || [];
+                        donutChart.update();
+                    }
+                    if (attendanceChart) {
+                        attendanceChart.data.labels = data.attendance_history?.labels || [];
+                        attendanceChart.data.datasets[0].data = data.attendance_history?.data || [];
+                        attendanceChart.update();
+                    }
                 } catch (e) {
-                    console.warn('Impossible de charger les stats:', e);
+                    console.warn('Impossible de charger les statistiques du tableau de bord:', e);
                 }
             }
             loadDashboardStats();

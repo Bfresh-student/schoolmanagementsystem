@@ -409,6 +409,7 @@
         <span class="dev-name">Qytralab</span>
     </div>
 
+    <script src="js/session-bootstrap.js"></script>
     <!-- Script redireksyon -->
     <script>
         // Redireksyon apre animasyon fini
@@ -417,12 +418,9 @@
             document.body.style.opacity = '0';
             document.body.style.transition = 'opacity 0.6s ease';
             
-            setTimeout(() => {
-                if (localStorage.getItem("authToken")) {
-                    window.location.href = "Dashbord-Admin.html";
-                } else {
-                    window.location.href = "Se connecter - Admin.html";
-                }
+            setTimeout(async () => {
+                const authenticated = await window.cejecSessionReady;
+                window.location.replace(authenticated ? "Dashbord-Admin.html" : "Se connecter - Admin.html");
             }, 600);
         }, 3200);
     </script>

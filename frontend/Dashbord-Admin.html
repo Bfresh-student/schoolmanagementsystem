@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="css/AI_Styles.css" />
     <link rel="stylesheet" href="css/styles_dash.css" />
       <link rel="manifest" href="manifest.json" />
+    <script src="js/session-bootstrap.js"></script>
     <script src="sw-register.js" defer></script>
   </head>
   <body>
@@ -653,10 +654,12 @@
       document.addEventListener("DOMContentLoaded", updateSyncStatus);
     </script>
     <script>
-      // Guard d'authentification — redirige vers le login si pas de token
-      if (!localStorage.getItem('authToken')) {
-        window.location.replace('Se connecter - Admin.html');
-      }
+      // Attend la restauration avec le refresh token avant d'écarter une session.
+      // Ainsi l'ouverture directe du PWA fonctionne aussi après l'expiration
+      // normale du jeton d'accès.
+      window.cejecSessionReady.then(function (authenticated) {
+        if (!authenticated) window.location.replace('Se connecter - Admin.html');
+      });
     </script>
     <script src="js/api-client.js"></script>
     <script src="js/Script_Ad.js"></script>

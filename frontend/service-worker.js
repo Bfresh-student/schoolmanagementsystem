@@ -1,13 +1,14 @@
 // service-worker.js
 // PWA Service Worker with Cache-First strategy for static assets & Background Sync
 
-const CACHE_NAME = 'cejec-erp-cache-v3';
+const CACHE_NAME = 'cejec-erp-cache-v4';
 
 const STATIC_ASSETS = [
   './',
   './Se%20connecter%20-%20Admin.html',
   './Home%20-%20Admin_Panel.html',
   './Dashbord-Admin.html',
+  './js/session-bootstrap.js',
   './auth.js',
   './db.js',
   './apiManager.js',
