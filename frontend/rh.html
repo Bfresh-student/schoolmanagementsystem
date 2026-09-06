@@ -98,7 +98,7 @@
                         tabindex="0"
                         aria-label="Ouvrir les notifications">
                         <i class="fa-regular fa-bell"></i>
-                        <span class="badge44" id="notifBadge">6</span>
+                        <span class="badge44" id="notifBadge">0</span>
                     </div>
 
                     <!-- MENU NOTIFICATIONS -->
@@ -316,16 +316,15 @@
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-
             <!-- BRAND -->
             <div class="brand">
-                <div class="logo">
-                <img src="assets/favicon.png" alt="CEJEC Logo">
-                </div>
-                <div>
+            <div class="logo">
+                <img src="assets/favicon.png" alt="CEJEC Logo" />
+            </div>
+            <div class="brand-text">
                 <h1>CEJEC</h1>
                 <div class="muted">Admin Panel</div>
-                </div>
+            </div>
             </div>
 
             <button
@@ -333,124 +332,147 @@
             id="sidebarToggle"
             title="Réduire/Agrandir">
             <i data-lucide="panel-left"></i>
-            </button>            
+            </button>
 
             <!-- NAVIGATION -->
             <nav>
-
-                <!-- DASHBOARD -->
-                <p>Vue d'ensemble</p>                
-                <a href="Dashbord-Admin.html">
+            <!-- DASHBOARD -->
+            <p>Vue d'ensemble</p>
+            <a href="Dashbord-Admin.html">
                 <div class="nav-item">
                 <i class="fa-solid fa-chart-line"></i>
-                Tableau de bord
+                <span class="nav-label">Tableau de bord</span>
                 </div>
+            </a>
+
+            <!-- MANAGEMENT -->
+            <p>Opérations</p>
+            <!-- DROPDOWN -->
+            <div class="dropdown22">
+                <div class="dropdown22-toggle" id="chevrToggle">
+                <span class="fa-stack" style="width: 1.5em">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-school fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i
+                    class="fa-solid fa-gear fa-stack-1x"
+                    style="
+                        font-size: 0.55em;
+                        transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                <span class="nav-label">Académique</span>
+                <!-- CHEVRON DEROULE -->
+                <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
+                </div>
+                <!-- MENI DEROULE -->
+                <div class="dropdown22-menu" id="itemMenu">
+                <a class="dropdown22-item" href="gestion_classes.html"
+                    ><i class="fa-solid fa-chalkboard"></i> Classes</a
+                >
+                <a class="dropdown22-item" href="gestion_notes.html"
+                    ><i class="fa-solid fa-sticky-note"></i> Notes</a
+                >
+                <a class="dropdown22-item" href="gestion_medias.html">
+                    <span class="fa-stack" style="width: 1.5em">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-image fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i
+                        class="fa-solid fa-newspaper fa-stack-1x"
+                        style="
+                        font-size: 0.55em;
+                        transform: translate(8px, -8px);
+                        "></i>
+                    </span>
+                    Médias & Communication
                 </a>
-                
-                <!-- MANAGEMENT -->
-                <p>Opérations</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-school fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Académique
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item" href="gestion_classes.html"><i class="fa-solid fa-chalkboard"></i> Classes</a>
-                        <a class="dropdown22-item" href="gestion_notes.html"><i class="fa-solid fa-sticky-note"></i> Notes</a>
-                        <a class="dropdown22-item" href="gestion_medias.html">
-                            <span class="fa-stack" style="width: 1.5em;">
-                                    <!-- ICON PRINCIPAL -->
-                                    <i class="fa-solid fa-image fa-stack-1x"></i>
-                                    <!-- PETIT GEAR (TOP RIGHT) -->
-                                    <i class="fa-solid fa-newspaper fa-stack-1x"
-                                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                            </span>  
-                        Médias & Communication
-                    </a>
-                    </div>
                 </div>
-                
-                <!-- INCUBATEUR PROJETS & CALDRIER -->
-                <a href="incubateur_calendrier.html">
+            </div>
+
+            <!-- INCUBATEUR PROJETS & CALDRIER -->
+            <a href="incubateur_calendrier.html">
                 <div class="nav-item">
-                <span class="fa-stack" style="width: 1.5em;">
+                <span class="fa-stack" style="width: 1.5em">
                     <!-- ICON PRINCIPAL -->
                     <i class="fa-solid fa-lightbulb fa-stack-1x"></i>
                     <!-- PETIT GEAR (TOP RIGHT) -->
-                    <i class="fa-solid fa-calendar-days fa-stack-1x"
-                    style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                </span>                    
-                Incubateur Projets & Calendrier
+                    <i
+                    class="fa-solid fa-calendar-days fa-stack-1x"
+                    style="
+                        font-size: 0.55em;
+                        transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                <span class="nav-label">Incubateur Projets & Calendrier</span>
                 </div>
-                </a>
-             
-                <!-- OPERATIONS -->
-                <p>Système</p> 
-                <!-- DROPDOWN -->
-                <div class="dropdown22">
-                    <div class="dropdown22-toggle" id="chevrToggle">
-                        <span class="fa-stack" style="width: 1.5em;">
-                            <!-- ICON PRINCIPAL -->
-                            <i class="fa-solid fa-cogs fa-stack-1x"></i>
-                            <!-- PETIT GEAR (TOP RIGHT) -->
-                            <i class="fa-solid fa-gear fa-stack-1x"
-                            style="font-size: 0.55em; transform: translate(8px, -8px);"></i>
-                        </span>
-                        Opérations
-                        <!-- CHEVRON DEROULE -->
-                        <i class="fa-solid fa-chevron-down" style="margin-left: 5px;"></i>
-                    </div>
-                    <!-- MENI DEROULE -->
-                    <div class="dropdown22-menu" id="itemMenu">
-                        <a class="dropdown22-item" href="gestion_inscriptions.html"><i class="fa-solid fa-user-plus"></i> Inscriptions</a>                     
-                        <a class="dropdown22-item" href="gestion_utilisateurs.html"><i class="fa-solid fa-users"></i> Eleves & Professeurs</a>
-                        <a class="dropdown22-item" href="Rapports_Admin.html"><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a>
-                        <a class="dropdown22-item active" href="rh.html"><i class="fa-solid fa-user-tie"></i> RH</a>
-                    </div>
-                </div>   
-  
-                <!-- PARAMÈT -->
-                <a href="Parametre_Admin.html">
-                <div class="nav-item">
-                <i class="fa-solid fa-gear"></i>
-                Paramètre
-                </div>
-                </a>
+            </a>
 
-            </nav>
-                
-            <!-- FOOTER TOOLS -->
-            <div class="sidebar-footer">
-
-                <div class="user-profile2">
-                    <div class="avatar-wrapper2">
-                        <div class="avatar2">BJ</div>
-                        <span class="status-indicator2"></span>
-                    </div>
-                    
-                    <div class="user-info2">
-                        <div class="user-name2">Bruno Jean</div>
-                        <div class="user-role2">Super Admin</div>
-                    </div>
-                    <a href="Se connecter - Admin.html">
-                        <button class="logout-btn2" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </a>
+            <!-- OPERATIONS -->
+            <p>Système</p>
+            <!-- DROPDOWN -->
+            <div class="dropdown22">
+                <div class="dropdown22-toggle" id="chevrToggle">
+                <span class="fa-stack" style="width: 1.5em">
+                    <!-- ICON PRINCIPAL -->
+                    <i class="fa-solid fa-cogs fa-stack-1x"></i>
+                    <!-- PETIT GEAR (TOP RIGHT) -->
+                    <i
+                    class="fa-solid fa-gear fa-stack-1x"
+                    style="
+                        font-size: 0.55em;
+                        transform: translate(8px, -8px);
+                    "></i>
+                </span>
+                <span class="nav-label">Opérations</span>
+                <!-- CHEVRON DEROULE -->
+                <i class="fa-solid fa-chevron-down" style="margin-left: 5px"></i>
                 </div>
-                
+                <!-- MENI DEROULE -->
+                <div class="dropdown22-menu" id="itemMenu">
+                <a class="dropdown22-item" href="gestion_inscriptions.html"
+                    ><i class="fa-solid fa-user-plus"></i> Inscriptions</a
+                >
+                <a class="dropdown22-item" href="gestion_utilisateurs.html"
+                    ><i class="fa-solid fa-users"></i> Eleves & Professeurs</a
+                >
+                <a class="dropdown22-item" href="Rapports_Admin.html"
+                    ><i class="fa-solid fa-arrow-trend-up"></i> Rapports</a
+                >
+                <a class="dropdown22-item active" href="rh.html"
+                    ><i class="fa-solid fa-user-tie"></i> RH</a
+                >
+                </div>
             </div>
 
+            <!-- PARAMÈT -->
+            <a href="Parametre_Admin.html">
+                <div class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span class="nav-label">Paramètre</span>
+                </div>
+            </a>
+            </nav>
+
+            <!-- FOOTER TOOLS -->
+            <div class="sidebar-footer">
+            <div class="user-profile2">
+                <div class="avatar-wrapper2">
+                <div class="avatar2">BJ</div>
+                <span class="status-indicator2"></span>
+                </div>
+
+                <div class="user-info2">
+                <div class="user-name2">Bruno Jean</div>
+                <div class="user-role2">Super Admin</div>
+                </div>
+                <a href="Se connecter - Admin.html">
+                <button class="logout-btn2" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+                </a>
+            </div>
+            </div>
         </aside>
 
         <!-- OVERLAY -->

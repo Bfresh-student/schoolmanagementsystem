@@ -507,6 +507,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function refreshNotificationMenus() {
     if (typeof apiClientRequest !== "function") return;
+    if (notifBadge) {
+      unreadCount = 0;
+      updateBadge();
+    }
+    if (notifList) notifList.innerHTML = '<p class="notif-empty">Chargement...</p>';
+    if (sidebarNoctiList)
+      sidebarNoctiList.innerHTML = '<p class="notif-empty">Chargement...</p>';
     try {
       const response = await apiClientRequest(
         "/notifications/notifications/?page_size=100",
@@ -531,6 +538,12 @@ document.addEventListener("DOMContentLoaded", function () {
       updateSidebarNoctiSelectionUI();
     } catch (error) {
       console.warn("Chargement des notifications impossible", error);
+      if (notifList)
+        notifList.innerHTML =
+          '<p class="notif-empty">Notifications indisponibles.</p>';
+      if (sidebarNoctiList)
+        sidebarNoctiList.innerHTML =
+          '<p class="notif-empty">Notifications indisponibles.</p>';
     }
   }
 

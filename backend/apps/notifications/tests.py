@@ -25,10 +25,12 @@ class EnqueueNotificationTests(TestCase):
         )
         self.email_channel, _ = NotificationChannel.objects.get_or_create(name="email")
         self.in_app_channel, _ = NotificationChannel.objects.get_or_create(name="in_app")
-        self.trigger = NotificationTrigger.objects.create(
+        self.trigger, _ = NotificationTrigger.objects.get_or_create(
             trigger_name="grade_added",
-            template_key="grade_added",
-            default_priority="normal",
+            defaults={
+                "template_key": "grade_added",
+                "default_priority": "normal",
+            },
         )
         NotificationTemplate.objects.create(
             template_key="grade_added",
