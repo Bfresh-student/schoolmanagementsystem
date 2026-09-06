@@ -511,7 +511,8 @@ document.addEventListener("DOMContentLoaded", function () {
       unreadCount = 0;
       updateBadge();
     }
-    if (notifList) notifList.innerHTML = '<p class="notif-empty">Chargement...</p>';
+    if (notifList)
+      notifList.innerHTML = '<p class="notif-empty">Chargement...</p>';
     if (sidebarNoctiList)
       sidebarNoctiList.innerHTML = '<p class="notif-empty">Chargement...</p>';
     try {
