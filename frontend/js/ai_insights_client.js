@@ -19,7 +19,7 @@ window.askAIInsight = async function askAIInsight(
 ) {
   // Resolved relative to the page, since this file runs as a classic script
   // (auth.js lives at frontend/auth.js, same folder as the HTML pages).
-  const { authFetch } = await import("./auth.js");
+  const { authFetch } = await import("../auth.js");
 
   const created = await authFetch("ai-insights/requests/", {
     method: "POST",
