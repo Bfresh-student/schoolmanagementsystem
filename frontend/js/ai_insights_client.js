@@ -15,11 +15,11 @@
 window.askAIInsight = async function askAIInsight(
   prompt,
   insightType = "chat_assistant",
-  { timeoutMs = 20000, pollIntervalMs = 1200 } = {}
+  { timeoutMs = 20000, pollIntervalMs = 1200 } = {},
 ) {
   // Resolved relative to the page, since this file runs as a classic script
   // (auth.js lives at frontend/auth.js, same folder as the HTML pages).
-  const { authFetch } = await import("../auth.js");
+  const { authFetch } = await import("./auth.js");
 
   const created = await authFetch("ai-insights/requests/", {
     method: "POST",
