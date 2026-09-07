@@ -19,16 +19,25 @@ def generate_insight_task(self, insight_request_id):
         api_key = os.environ.get("GEMINI_API_KEY")
         if api_key:
             try:
-                import google.generativeai as genai
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                from google import genai
+
+                # gemini-1.5-flash and the old google-generativeai SDK are fully
+                # retired (404). Use the current unified SDK. "gemini-flash-latest"
+                # is an alias Google hot-swaps to the newest stable Flash model,
+                # with a 2-week notice before breaking changes - override with
+                # GEMINI_MODEL to pin an exact version in production if preferred.
+                model_name = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+                client = genai.Client(api_key=api_key)
                 prompt_text = (
                     f"Tu es un assistant IA spécialisé dans l'analyse de données scolaires.\n"
                     f"Type d'analyse: {insight.insight_type}\n"
                     f"Demande: {insight.prompt}\n"
                     f"Fournis une synthèse pertinente et exploitable pour l'établissement."
                 )
-                response = model.generate_content(prompt_text)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt_text,
+                )
                 insight.response = response.text
             except Exception as api_err:
                 logger.warning("Gemini API call failed (%s), falling back to offline analysis generator", api_err)

@@ -832,9 +832,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typingDiv) typingDiv.remove();
     }
 
-    function getBotResponse(question) {
+     // Returns null when no local keyword matches, instead of the generic
+    // fallback text, so handleSendMessage can try the real AI backend first.
+    function getLocalKnowledgeBaseResponse(question) {
         const q = question.toLowerCase().trim();
-        
+
         for (const [topic, data] of Object.entries(knowledgeBase)) {
             for (const keyword of data.keywords) {
                 if (q.includes(keyword)) {
@@ -842,7 +844,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         }
-        
+
+        return null;
+    }
+
+    function getFallbackResponse() {
         return `<i class="fa-solid fa-circle-info"></i> <strong>Excellente question !</strong><br><br>
             Pour mieux vous répondre, voici les sujets que je maîtrise :
             <br>• <strong>Étudiants</strong> - Effectifs, inscriptions, suivi
@@ -859,7 +865,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <br><br>Pouvez-vous préciser votre demande ?`;
     }
 
-    function handleSendMessage() {
+    async function handleSendMessage() {
         const message = chatInputFloat.value.trim();
         if (!message) {
             showToast("Veuillez saisir votre question", "warning");
@@ -879,15 +885,38 @@ document.addEventListener("DOMContentLoaded", () => {
         inputClearBtn.style.display = 'none';
         
         showTypingIndicator();
-        
-        setTimeout(() => {
+
+        // Fast path: answer instantly (and offline) from the local keyword
+        // base used for FAQ-style questions about the school.
+        const localMatch = getLocalKnowledgeBaseResponse(message);
+        if (localMatch) {
+            setTimeout(() => {
+                removeTypingIndicator();
+                saveMessageToCurrentSession(localMatch, 'bot');
+                addMessageToChat(localMatch, 'bot');
+            }, 600 + Math.random() * 600);
+            return;
+        }
+
+        // No local match: ask the real Gemini-backed backend
+        // (apps/ai_insights). Requires the user to be logged in; falls back
+        // to the generic topic list if the user is offline, unauthenticated,
+        // or the request times out.
+        try {
+            if (typeof window.askAIInsight !== "function") {
+                throw new Error("ai_insights_client.js n'est pas chargé sur cette page");
+            }
+            const aiResponse = await window.askAIInsight(message);
             removeTypingIndicator();
-            const response = getBotResponse(message);
-            
-            saveMessageToCurrentSession(response, 'bot');
-            
-            addMessageToChat(response, 'bot');
-        }, 1200 + Math.random() * 1800);
+            saveMessageToCurrentSession(aiResponse, 'bot');
+            addMessageToChat(aiResponse, 'bot');
+        } catch (err) {
+            console.warn("AI insight request failed, using fallback response", err);
+            removeTypingIndicator();
+            const fallback = getFallbackResponse();
+            saveMessageToCurrentSession(fallback, 'bot');
+            addMessageToChat(fallback, 'bot');
+        }
     }
 
     function clearChat() {
