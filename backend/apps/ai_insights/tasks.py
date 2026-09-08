@@ -21,12 +21,15 @@ def generate_insight_task(self, insight_request_id):
             try:
                 from google import genai
 
-                # gemini-1.5-flash and the old google-generativeai SDK are fully
-                # retired (404). Use the current unified SDK. "gemini-flash-latest"
-                # is an alias Google hot-swaps to the newest stable Flash model,
-                # with a 2-week notice before breaking changes - override with
-                # GEMINI_MODEL to pin an exact version in production if preferred.
-                model_name = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+                model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+                model_aliases = {
+                    "Gemini 3.5 Flash Lite": "gemini-2.5-flash-lite",
+                    "Gemini 2.5 Flash": "gemini-2.5-flash",
+                    "Gemini 2.5 Flash Lite": "gemini-2.5-flash-lite",
+                }
+                model_name = model_aliases.get(model_name, model_name)
+                if model_name.startswith("models/"):
+                    model_name = model_name.removeprefix("models/")
                 client = genai.Client(api_key=api_key)
                 prompt_text = (
                     f"Tu es un assistant IA spécialisé dans l'analyse de données scolaires.\n"

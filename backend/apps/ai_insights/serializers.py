@@ -3,8 +3,14 @@ from .models import InsightRequest
 
 
 class InsightRequestSerializer(serializers.ModelSerializer):
-    student_name = serializers.ReadOnlyField(source="student.__str__")
-    requested_by_name = serializers.ReadOnlyField(source="requested_by.get_full_name")
+    student_name = serializers.SerializerMethodField()
+    requested_by_name = serializers.SerializerMethodField()
+
+    def get_student_name(self, obj):
+        return str(obj.student) if obj.student else None
+
+    def get_requested_by_name(self, obj):
+        return obj.requested_by.get_full_name() if obj.requested_by else None
 
     class Meta:
         model = InsightRequest

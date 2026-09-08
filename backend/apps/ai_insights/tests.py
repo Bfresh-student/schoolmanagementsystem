@@ -25,3 +25,17 @@ class TestAIInsightsAPI:
         self.client.force_authenticate(user=self.user)
         response = self.client.get("/api/v1/ai-insights/requests/")
         assert response.status_code == 200
+
+    def test_create_insight_endpoint_returns_json(self, settings):
+        settings.CELERY_TASK_ALWAYS_EAGER = True
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            "/api/v1/ai-insights/requests/",
+            {"prompt": "Analyser la progression en mathematiques"},
+            format="json",
+        )
+
+        assert response.status_code == 201
+        assert response.data["requested_by_name"] == self.user.get_full_name()
+        assert response.data["student_name"] is None
