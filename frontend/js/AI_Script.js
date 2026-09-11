@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // ========== AI CHAT CEJEC - CONCIERGE IA PRO ==========
-  const LOCAL_AI_ENABLED = false;
-  if (!LOCAL_AI_ENABLED) return;
+  const ASSISTANT_ENABLED = true;
+  if (!ASSISTANT_ENABLED) return;
 
   const targetContainer = document.getElementById("orion-concierge-sistem");
   if (!targetContainer) return;
@@ -1016,25 +1016,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showTypingIndicator();
 
-    // Fast path: answer instantly (and offline) from the local keyword
-    // base used for FAQ-style questions about the school.
-    const localMatch = getLocalKnowledgeBaseResponse(message);
-    if (localMatch) {
-      setTimeout(
-        () => {
-          removeTypingIndicator();
-          saveMessageToCurrentSession(localMatch, "bot");
-          addMessageToChat(localMatch, "bot");
-        },
-        600 + Math.random() * 600,
-      );
-      return;
-    }
-
-    // No local match: ask the real Gemini-backed backend
-    // (apps/ai_insights). Requires the user to be logged in; falls back
-    // to the generic topic list if the user is offline, unauthenticated,
-    // or the request times out.
+    // Toutes les réponses passent par l'API backend ai_insights.
     try {
       if (typeof window.askAIInsight !== "function") {
         throw new Error(
@@ -1046,11 +1028,12 @@ document.addEventListener("DOMContentLoaded", () => {
       saveMessageToCurrentSession(aiResponse, "bot");
       addMessageToChat(aiResponse, "bot");
     } catch (err) {
-      console.warn("AI insight request failed, using fallback response", err);
+      console.warn("AI insight request failed", err);
       removeTypingIndicator();
-      const fallback = getFallbackResponse();
-      saveMessageToCurrentSession(fallback, "bot");
-      addMessageToChat(fallback, "bot");
+      const errorMessage =
+        "L'assistant est momentanément indisponible. Vérifiez votre connexion et réessayez.";
+      saveMessageToCurrentSession(errorMessage, "bot");
+      addMessageToChat(errorMessage, "bot");
     }
   }
 
