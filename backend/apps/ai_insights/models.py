@@ -33,6 +33,11 @@ class InsightRequest(models.Model):
         related_name="requested_ai_insights",
     )
     synced = models.BooleanField(default=False)
+    tool_calls = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Audit trail: read-only tools invoked (and their args) while generating this insight.",
+    )
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
