@@ -1,9 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ========== AI CHAT CEJEC - CONCIERGE IA PRO ==========
-    const targetContainer = document.getElementById("orion-concierge-sistem");
-    if (!targetContainer) return;
+  // ========== AI CHAT CEJEC - CONCIERGE IA PRO ==========
+  const LOCAL_AI_ENABLED = false;
+  if (!LOCAL_AI_ENABLED) return;
 
-    targetContainer.innerHTML = `
+  const targetContainer = document.getElementById("orion-concierge-sistem");
+  if (!targetContainer) return;
+
+  targetContainer.innerHTML = `
         <div class="chat-wrapper-float" id="chatWrapperFloat">
             <div class="chat-header-bot">
                 <div class="bot-profile">
@@ -141,152 +144,159 @@ document.addEventListener("DOMContentLoaded", () => {
         </button>
     `;
 
-    // ========== ÉLÉMENTS DOM ==========
-    const fabToggleFloat = document.getElementById("fabToggleFloat");
-    const chatWrapperFloat = document.getElementById("chatWrapperFloat");
-    const fabIconFloat = document.getElementById("fabIconFloat");
-    const closeChatBtn = document.getElementById("closeChatBtn");
-    const chatInputFloat = document.getElementById("chatInputFloat");
-    const btnSendFloat = document.getElementById("btnSendFloat");
-    const inputClearBtn = document.getElementById("inputClearBtn");
-    const chatBodyFloat = document.getElementById("chatBodyFloat");
-    const btnNewChat = document.getElementById("btnNewChat");
-    const btnHistory = document.getElementById("btnHistory");
-    const btnExpand = document.getElementById('btnExpand');
+  // ========== ÉLÉMENTS DOM ==========
+  const fabToggleFloat = document.getElementById("fabToggleFloat");
+  const chatWrapperFloat = document.getElementById("chatWrapperFloat");
+  const fabIconFloat = document.getElementById("fabIconFloat");
+  const closeChatBtn = document.getElementById("closeChatBtn");
+  const chatInputFloat = document.getElementById("chatInputFloat");
+  const btnSendFloat = document.getElementById("btnSendFloat");
+  const inputClearBtn = document.getElementById("inputClearBtn");
+  const chatBodyFloat = document.getElementById("chatBodyFloat");
+  const btnNewChat = document.getElementById("btnNewChat");
+  const btnHistory = document.getElementById("btnHistory");
+  const btnExpand = document.getElementById("btnExpand");
 
-    // ========== SISTÈM ISTORIK ==========
-    const STORAGE_KEY = 'cejec_chat_history';
-    const MAX_HISTORY = 50;
+  // ========== SISTÈM ISTORIK ==========
+  const STORAGE_KEY = "cejec_chat_history";
+  const MAX_HISTORY = 50;
 
-    let chatHistory = [];
-    let currentSessionId = null;
-    let currentSessionMessages = [];
-    let isHistoryViewOpen = false;
+  let chatHistory = [];
+  let currentSessionId = null;
+  let currentSessionMessages = [];
+  let isHistoryViewOpen = false;
 
-    function loadHistory() {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                chatHistory = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.warn('Error loading chat history:', e);
-            chatHistory = [];
-        }
+  function loadHistory() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        chatHistory = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn("Error loading chat history:", e);
+      chatHistory = [];
+    }
+  }
+
+  function saveHistory() {
+    try {
+      if (!chatHistory || chatHistory.length === 0) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+      }
+    } catch (e) {
+      console.warn("Error saving chat history:", e);
+    }
+  }
+
+  function createNewSession() {
+    currentSessionId =
+      Date.now().toString(36) + Math.random().toString(36).substr(2);
+    currentSessionMessages = [];
+
+    chatHistory.unshift({
+      id: currentSessionId,
+      date: new Date().toISOString(),
+      title: "Nouveau conversation",
+      preview: "Comment puis-je vous aider ?",
+      messages: [],
+    });
+
+    if (chatHistory.length > MAX_HISTORY) {
+      chatHistory = chatHistory.slice(0, MAX_HISTORY);
     }
 
-    function saveHistory() {
-        try {
-            if (!chatHistory || chatHistory.length === 0) {
-                localStorage.removeItem(STORAGE_KEY);
-            } else {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
-            }
-        } catch (e) {
-            console.warn('Error saving chat history:', e);
-        }
+    saveHistory();
+    return currentSessionId;
+  }
+
+  function saveMessageToCurrentSession(text, sender) {
+    if (!currentSessionId) {
+      createNewSession();
     }
 
-    function createNewSession() {
-        currentSessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-        currentSessionMessages = [];
-        
-        chatHistory.unshift({
-            id: currentSessionId,
-            date: new Date().toISOString(),
-            title: 'Nouveau conversation',
-            preview: 'Comment puis-je vous aider ?',
-            messages: []
-        });
-        
-        if (chatHistory.length > MAX_HISTORY) {
-            chatHistory = chatHistory.slice(0, MAX_HISTORY);
-        }
-        
-        saveHistory();
-        return currentSessionId;
+    const message = {
+      text: text,
+      sender: sender,
+      timestamp: new Date().toISOString(),
+    };
+
+    currentSessionMessages.push(message);
+
+    const sessionIndex = chatHistory.findIndex(
+      (h) => h.id === currentSessionId,
+    );
+    if (sessionIndex !== -1) {
+      chatHistory[sessionIndex].messages = [...currentSessionMessages];
+
+      if (
+        sender === "user" &&
+        currentSessionMessages.filter((m) => m.sender === "user").length === 1
+      ) {
+        chatHistory[sessionIndex].title =
+          text.substring(0, 40) + (text.length > 40 ? "..." : "");
+      }
+      chatHistory[sessionIndex].preview = text;
+      chatHistory[sessionIndex].date = new Date().toISOString();
     }
 
-    function saveMessageToCurrentSession(text, sender) {
-        if (!currentSessionId) {
-            createNewSession();
-        }
-        
-        const message = {
-            text: text,
-            sender: sender,
-            timestamp: new Date().toISOString()
-        };
-        
-        currentSessionMessages.push(message);
-        
-        const sessionIndex = chatHistory.findIndex(h => h.id === currentSessionId);
-        if (sessionIndex !== -1) {
-            chatHistory[sessionIndex].messages = [...currentSessionMessages];
-            
-            if (sender === 'user' && currentSessionMessages.filter(m => m.sender === 'user').length === 1) {
-                chatHistory[sessionIndex].title = text.substring(0, 40) + (text.length > 40 ? '...' : '');
-            }
-            chatHistory[sessionIndex].preview = text;
-            chatHistory[sessionIndex].date = new Date().toISOString();
-        }
-        
-        saveHistory();
+    saveHistory();
+  }
+
+  function loadSession(sessionId) {
+    const session = chatHistory.find((h) => h.id === sessionId);
+    if (!session) return false;
+
+    currentSessionId = session.id;
+    currentSessionMessages = [...session.messages];
+
+    clearChatDisplay();
+
+    session.messages.forEach((msg) => {
+      restoreMessage(msg.text, msg.sender);
+    });
+
+    return true;
+  }
+
+  function deleteSession(sessionId) {
+    const index = chatHistory.findIndex((h) => h.id === sessionId);
+    if (index === -1) return false;
+
+    chatHistory.splice(index, 1);
+
+    if (currentSessionId === sessionId) {
+      clearChatDisplay();
+      ensureWelcomeCard();
+
+      currentSessionId = null;
+      currentSessionMessages = [];
+
+      if (chatHistory.length > 0) {
+        createNewSession();
+      }
     }
 
-    function loadSession(sessionId) {
-        const session = chatHistory.find(h => h.id === sessionId);
-        if (!session) return false;
-        
-        currentSessionId = session.id;
-        currentSessionMessages = [...session.messages];
-        
-        clearChatDisplay();
-        
-        session.messages.forEach(msg => {
-            restoreMessage(msg.text, msg.sender);
-        });
-        
-        return true;
-    }
+    saveHistory();
 
-    function deleteSession(sessionId) {
-        const index = chatHistory.findIndex(h => h.id === sessionId);
-        if (index === -1) return false;
-        
-        chatHistory.splice(index, 1);
-        
-        if (currentSessionId === sessionId) {
-            clearChatDisplay();
-            ensureWelcomeCard();
-            
-            currentSessionId = null;
-            currentSessionMessages = [];
-            
-            if (chatHistory.length > 0) {
-                createNewSession();
-            }
-        }
-        
-        saveHistory();
-        
-        return true;
-    }
+    return true;
+  }
 
-    function clearChatDisplay() {
-        const allCards = chatBodyFloat.querySelectorAll('.msg-card');
-        allCards.forEach(card => {
-            if (!card.classList.contains('welcome-card')) {
-                card.remove();
-            }
-        });
-    }
+  function clearChatDisplay() {
+    const allCards = chatBodyFloat.querySelectorAll(".msg-card");
+    allCards.forEach((card) => {
+      if (!card.classList.contains("welcome-card")) {
+        card.remove();
+      }
+    });
+  }
 
-    function ensureWelcomeCard() {
-        if (!chatBodyFloat.querySelector('.welcome-card')) {
-            const welcomeCard = document.createElement('div');
-            welcomeCard.className = 'msg-card welcome-card';
-            welcomeCard.innerHTML = `
+  function ensureWelcomeCard() {
+    if (!chatBodyFloat.querySelector(".welcome-card")) {
+      const welcomeCard = document.createElement("div");
+      welcomeCard.className = "msg-card welcome-card";
+      welcomeCard.innerHTML = `
                 <div class="sparkle-badge">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </div>
@@ -295,16 +305,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p>Comment puis-je vous aider aujourd'hui ?</p>
                 </div>
             `;
-            chatBodyFloat.insertBefore(welcomeCard, chatBodyFloat.firstChild);
-        }
+      chatBodyFloat.insertBefore(welcomeCard, chatBodyFloat.firstChild);
     }
+  }
 
-    function restoreMessage(text, sender) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg-card ${sender}-message`;
-        
-        if (sender === 'user') {
-            msgDiv.innerHTML = `
+  function restoreMessage(text, sender) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `msg-card ${sender}-message`;
+
+    if (sender === "user") {
+      msgDiv.innerHTML = `
                 <div class="msg-content user-content">
                     <p>${text}</p>
                     <span class="msg-time">--:--</span>
@@ -313,8 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="fa-solid fa-user"></i>
                 </div>
             `;
-        } else {
-            msgDiv.innerHTML = `
+    } else {
+      msgDiv.innerHTML = `
                 <div class="bot-avatar-mini">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
@@ -323,55 +333,58 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="msg-time">--:--</span>
                 </div>
             `;
-        }
-        
-        chatBodyFloat.appendChild(msgDiv);
     }
 
-    // ========== FONKSYON NETWAYAJ TÈKS POU APERÇU ==========
-    
-    function cleanPreviewText(htmlText) {
-        if (!htmlText) return '';
-        
-        let cleanText = htmlText.replace(/<[^>]*>/g, ' ');
-        cleanText = cleanText.replace(/\s+/g, ' ').trim();
-        
-        if (cleanText.length > 60) {
-            cleanText = cleanText.substring(0, 60) + '...';
-        }
-        
-        return cleanText;
-    }
-    
-    function cleanTitleText(htmlText) {
-        if (!htmlText) return 'Nouveau conversation';
-        
-        let cleanText = htmlText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-        
-        if (cleanText.length > 40) {
-            cleanText = cleanText.substring(0, 40) + '...';
-        }
-        
-        return cleanText || 'Nouveau conversation';
+    chatBodyFloat.appendChild(msgDiv);
+  }
+
+  // ========== FONKSYON NETWAYAJ TÈKS POU APERÇU ==========
+
+  function cleanPreviewText(htmlText) {
+    if (!htmlText) return "";
+
+    let cleanText = htmlText.replace(/<[^>]*>/g, " ");
+    cleanText = cleanText.replace(/\s+/g, " ").trim();
+
+    if (cleanText.length > 60) {
+      cleanText = cleanText.substring(0, 60) + "...";
     }
 
-    // ========== VUE ISTORIK ANDEDAN CHAT LA ==========
-    
-    function openHistoryView() {
-        if (isHistoryViewOpen) return;
-        
-        isHistoryViewOpen = true;
-        
-        const chatMessages = chatBodyFloat.querySelectorAll('.msg-card');
-        chatMessages.forEach(msg => msg.style.display = 'none');
-        
-        chatWrapperFloat.classList.add('showing-history');
-        
-        const historyView = document.createElement('div');
-        historyView.className = 'history-view';
-        historyView.id = 'historyView';
-        
-        historyView.innerHTML = `
+    return cleanText;
+  }
+
+  function cleanTitleText(htmlText) {
+    if (!htmlText) return "Nouveau conversation";
+
+    let cleanText = htmlText
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (cleanText.length > 40) {
+      cleanText = cleanText.substring(0, 40) + "...";
+    }
+
+    return cleanText || "Nouveau conversation";
+  }
+
+  // ========== VUE ISTORIK ANDEDAN CHAT LA ==========
+
+  function openHistoryView() {
+    if (isHistoryViewOpen) return;
+
+    isHistoryViewOpen = true;
+
+    const chatMessages = chatBodyFloat.querySelectorAll(".msg-card");
+    chatMessages.forEach((msg) => (msg.style.display = "none"));
+
+    chatWrapperFloat.classList.add("showing-history");
+
+    const historyView = document.createElement("div");
+    historyView.className = "history-view";
+    historyView.id = "historyView";
+
+    historyView.innerHTML = `
             <div class="history-view-header">
                 <h3>
                     <i class="fa-solid fa-clock-rotate-left" style="color: #0a4d8c;"></i>
@@ -391,110 +404,120 @@ document.addEventListener("DOMContentLoaded", () => {
                 </button>
             </div>
         `;
-        
-        chatBodyFloat.appendChild(historyView);
-        
-        renderHistoryViewList();
-        setupHistoryViewEvents();
-        
-        chatBodyFloat.scrollTop = 0;
+
+    chatBodyFloat.appendChild(historyView);
+
+    renderHistoryViewList();
+    setupHistoryViewEvents();
+
+    chatBodyFloat.scrollTop = 0;
+  }
+
+  function closeHistoryView() {
+    if (!isHistoryViewOpen) return;
+
+    const historyView = document.getElementById("historyView");
+    if (!historyView) return;
+
+    historyView.classList.add("closing");
+
+    setTimeout(() => {
+      chatWrapperFloat.classList.remove("showing-history");
+      historyView.remove();
+
+      const chatMessages = chatBodyFloat.querySelectorAll(".msg-card");
+      chatMessages.forEach((msg) => (msg.style.display = ""));
+
+      isHistoryViewOpen = false;
+    }, 280);
+  }
+
+  function setupHistoryViewEvents() {
+    const backBtn = document.getElementById("historyViewBackBtn");
+    const btnNewConv = document.getElementById("btnNewConversationView");
+    const btnClearAll = document.getElementById("btnClearAllHistoryView");
+
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        closeHistoryView();
+      });
     }
-    
-    function closeHistoryView() {
-        if (!isHistoryViewOpen) return;
-        
-        const historyView = document.getElementById('historyView');
-        if (!historyView) return;
-        
-        historyView.classList.add('closing');
-        
-        setTimeout(() => {
-            chatWrapperFloat.classList.remove('showing-history');
-            historyView.remove();
-            
-            const chatMessages = chatBodyFloat.querySelectorAll('.msg-card');
-            chatMessages.forEach(msg => msg.style.display = '');
-            
-            isHistoryViewOpen = false;
-        }, 280);
+
+    if (btnNewConv) {
+      btnNewConv.addEventListener("click", () => {
+        closeHistoryView();
+
+        const messages = chatBodyFloat.querySelectorAll(
+          ".msg-card:not(.welcome-card)",
+        );
+        messages.forEach((msg) => msg.remove());
+
+        ensureWelcomeCard();
+        createNewSession();
+
+        chatInputFloat.value = "";
+        inputClearBtn.style.display = "none";
+
+        setTimeout(() => chatInputFloat.focus(), 350);
+
+        showToast("Nouvelle conversation créée", "success");
+      });
     }
-    
-    function setupHistoryViewEvents() {
-        const backBtn = document.getElementById('historyViewBackBtn');
-        const btnNewConv = document.getElementById('btnNewConversationView');
-        const btnClearAll = document.getElementById('btnClearAllHistoryView');
-        
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                closeHistoryView();
-            });
+
+    if (btnClearAll) {
+      btnClearAll.addEventListener("click", () => {
+        if (
+          confirm(
+            "Êtes-vous sûr de vouloir supprimer tout l'historique ? Cette action est irréversible.",
+          )
+        ) {
+          chatHistory = [];
+          localStorage.removeItem(STORAGE_KEY);
+          currentSessionId = null;
+          currentSessionMessages = [];
+
+          clearChatDisplay();
+          ensureWelcomeCard();
+
+          renderHistoryViewList();
+
+          showToast("Historique supprimé avec succès", "success");
         }
-        
-        if (btnNewConv) {
-            btnNewConv.addEventListener('click', () => {
-                closeHistoryView();
-                
-                const messages = chatBodyFloat.querySelectorAll('.msg-card:not(.welcome-card)');
-                messages.forEach(msg => msg.remove());
-                
-                ensureWelcomeCard();
-                createNewSession();
-                
-                chatInputFloat.value = '';
-                inputClearBtn.style.display = 'none';
-                
-                setTimeout(() => chatInputFloat.focus(), 350);
-                
-                showToast('Nouvelle conversation créée', 'success');
-            });
-        }
-        
-        if (btnClearAll) {
-            btnClearAll.addEventListener('click', () => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer tout l\'historique ? Cette action est irréversible.')) {
-                    chatHistory = [];
-                    localStorage.removeItem(STORAGE_KEY);
-                    currentSessionId = null;
-                    currentSessionMessages = [];
-                    
-                    clearChatDisplay();
-                    ensureWelcomeCard();
-                    
-                    renderHistoryViewList();
-                    
-                    showToast('Historique supprimé avec succès', 'success');
-                }
-            });
-        }
+      });
     }
-    
-    function renderHistoryViewList() {
-        const container = document.getElementById('historyViewList');
-        if (!container) return;
-        
-        if (!chatHistory || chatHistory.length === 0) {
-            container.innerHTML = `
+  }
+
+  function renderHistoryViewList() {
+    const container = document.getElementById("historyViewList");
+    if (!container) return;
+
+    if (!chatHistory || chatHistory.length === 0) {
+      container.innerHTML = `
                 <div class="history-view-empty">
                     <i class="fa-solid fa-inbox"></i>
                     <p>Aucune conversation dans l'historique</p>
                 </div>
             `;
-            return;
-        }
-        
-        container.innerHTML = chatHistory.map(session => {
-            const date = new Date(session.date);
-            const timeStr = formatTimeAgo(date);
-            const isActive = session.id === currentSessionId;
-            
-            const cleanTitle = cleanTitleText(session.title);
-            const cleanPreview = cleanPreviewText(session.preview);
-            
-            const lastMessage = session.messages.length > 0 ? session.messages[session.messages.length - 1] : null;
-            const isUserMessage = lastMessage && lastMessage.sender === 'user';
-            
-            return `
-                <div class="history-view-item ${isActive ? 'active' : ''}" data-session-id="${session.id}">
+      return;
+    }
+
+    container.innerHTML = chatHistory
+      .map((session) => {
+        const date = new Date(session.date);
+        const timeStr = formatTimeAgo(date);
+        const isActive = session.id === currentSessionId;
+
+        const cleanTitle = cleanTitleText(session.title);
+        const cleanPreview = cleanPreviewText(session.preview);
+
+        const lastMessage =
+          session.messages.length > 0
+            ? session.messages[session.messages.length - 1]
+            : null;
+        const isUserMessage = lastMessage && lastMessage.sender === "user";
+
+        return `
+                <div class="history-view-item ${isActive ? "active" : ""}" data-session-id="${session.id}">
                     <div class="history-view-item-icon">
                         <i class="fa-solid fa-message"></i>
                     </div>
@@ -511,79 +534,96 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 </div>
             `;
-        }).join('');
-        
-        container.querySelectorAll('.history-view-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('.history-view-item-delete')) return;
-                
-                const sessionId = item.dataset.sessionId;
-                if (loadSession(sessionId)) {
-                    closeHistoryView();
-                    showToast('Conversation chargée', 'success');
-                }
-            });
-        });
-        
-        container.querySelectorAll('.history-view-item-delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const sessionId = btn.dataset.deleteId;
-                
-                const deleted = deleteSession(sessionId);
-                
-                if (deleted) {
-                    renderHistoryViewList();
-                    showToast('Conversation supprimée', 'success');
-                }
-            });
-        });
-    }
+      })
+      .join("");
 
-    function formatTimeAgo(date) {
-        const now = new Date();
-        const diff = now - date;
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days = Math.floor(diff / 86400000);
-        
-        if (minutes < 1) return 'Maintenant';
-        if (minutes < 60) return `Il y a ${minutes} min`;
-        if (hours < 24) return `Il y a ${hours}h`;
-        if (days < 7) return `Il y a ${days}j`;
-        
-        return date.toLocaleDateString('fr-FR', { 
-            day: 'numeric', 
-            month: 'short' 
-        });
-    }
+    container.querySelectorAll(".history-view-item").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        if (e.target.closest(".history-view-item-delete")) return;
 
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
-    }
+        const sessionId = item.dataset.sessionId;
+        if (loadSession(sessionId)) {
+          closeHistoryView();
+          showToast("Conversation chargée", "success");
+        }
+      });
+    });
 
-    // ========== BASE DE CONNAISSANCES CEJEC ==========
-    const knowledgeBase = {
-        etudiants: {
-            keywords: ['étudiant', 'inscrit', 'inscription', 'élève', 'effectif', 'classe', 'groupe'],
-            response: `<i class="fa-solid fa-user-graduate"></i> <strong>Étudiants du CEJEC</strong><br><br>
+    container.querySelectorAll(".history-view-item-delete").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const sessionId = btn.dataset.deleteId;
+
+        const deleted = deleteSession(sessionId);
+
+        if (deleted) {
+          renderHistoryViewList();
+          showToast("Conversation supprimée", "success");
+        }
+      });
+    });
+  }
+
+  function formatTimeAgo(date) {
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "Maintenant";
+    if (minutes < 60) return `Il y a ${minutes} min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days < 7) return `Il y a ${days}j`;
+
+    return date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+    });
+  }
+
+  function escapeHtml(text) {
+    const map = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    };
+    return text.replace(/[&<>"']/g, (m) => map[m]);
+  }
+
+  // ========== BASE DE CONNAISSANCES CEJEC ==========
+  const knowledgeBase = {
+    etudiants: {
+      keywords: [
+        "étudiant",
+        "inscrit",
+        "inscription",
+        "élève",
+        "effectif",
+        "classe",
+        "groupe",
+      ],
+      response: `<i class="fa-solid fa-user-graduate"></i> <strong>Étudiants du CEJEC</strong><br><br>
                 Le CEJEC compte actuellement <strong>482 étudiants</strong> répartis dans nos différentes promotions. Chaque étudiant bénéficie d'un suivi personnalisé avec :
                 <br>• <strong>Carnet de bord numérique</strong> pour suivre sa progression
                 <br>• <strong>Accès à la plateforme e-learning</strong> 24/7
                 <br>• <strong>Mentorat individuel</strong> avec des professionnels
                 <br>• <strong>Évaluation continue</strong> des compétences
-                <br><br>Souhaitez-vous des informations sur une promotion spécifique ?`
-        },
-        admissions: {
-            keywords: ['admission', 'inscrire', 'inscription', 'dossier', 'candidature', 'postuler', 'admis'],
-            response: `<i class="fa-solid fa-file-signature"></i> <strong>Admissions au CEJEC</strong><br><br>
+                <br><br>Souhaitez-vous des informations sur une promotion spécifique ?`,
+    },
+    admissions: {
+      keywords: [
+        "admission",
+        "inscrire",
+        "inscription",
+        "dossier",
+        "candidature",
+        "postuler",
+        "admis",
+      ],
+      response: `<i class="fa-solid fa-file-signature"></i> <strong>Admissions au CEJEC</strong><br><br>
                 <strong>Conditions d'admission :</strong>
                 <br>• Diplôme de fin d'études secondaires (Baccalauréat)
                 <br>• Dossier de candidature complet
@@ -593,11 +633,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br><br><strong>Prochaines sessions :</strong>
                 <br>• Septembre 2026
                 <br>• Janvier 2027
-                <br><br>Le processus d'admission est ouvert toute l'année. Voulez-vous télécharger le formulaire ?`
-        },
-        promotions: {
-            keywords: ['promotion', 'niveau', 'année', 'licence', 'master', 'doctorat', 'cycle'],
-            response: `<i class="fa-solid fa-layer-group"></i> <strong>Promotions Actives</strong><br><br>
+                <br><br>Le processus d'admission est ouvert toute l'année. Voulez-vous télécharger le formulaire ?`,
+    },
+    promotions: {
+      keywords: [
+        "promotion",
+        "niveau",
+        "année",
+        "licence",
+        "master",
+        "doctorat",
+        "cycle",
+      ],
+      response: `<i class="fa-solid fa-layer-group"></i> <strong>Promotions Actives</strong><br><br>
                 Le CEJEC propose <strong>6 promotions</strong> :
                 <br>• <strong>Licence 1</strong> - Fondamentaux du commerce
                 <br>• <strong>Licence 2</strong> - Techniques entrepreneuriales
@@ -605,11 +653,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>• <strong>Master 1</strong> - Management avancé
                 <br>• <strong>Master 2</strong> - Leadership & Innovation
                 <br>• <strong>Formation Continue</strong> - Professionnels en activité
-                <br><br>Effectif total : <strong>482 étudiants</strong>. Quelle promotion vous intéresse ?`
-        },
-        cours: {
-            keywords: ['cours', 'module', 'matière', 'programme', 'formation', 'enseigner', 'apprendre'],
-            response: `<i class="fa-solid fa-book-open"></i> <strong>Cours & Programme</strong><br><br>
+                <br><br>Effectif total : <strong>482 étudiants</strong>. Quelle promotion vous intéresse ?`,
+    },
+    cours: {
+      keywords: [
+        "cours",
+        "module",
+        "matière",
+        "programme",
+        "formation",
+        "enseigner",
+        "apprendre",
+      ],
+      response: `<i class="fa-solid fa-book-open"></i> <strong>Cours & Programme</strong><br><br>
                 Notre catalogue compte <strong>52 cours</strong> répartis en <strong>12 modules</strong> :
                 <br>1. Comptabilité & Finance
                 <br>2. Marketing Digital
@@ -623,30 +679,56 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>10. Informatique de Gestion
                 <br>11. Éthique Professionnelle
                 <br>12. Stage Pratique
-                <br><br>Quel module souhaitez-vous explorer ?`
-        },
-        professeurs: {
-            keywords: ['professeur', 'enseignant', 'formateur', 'prof', 'instructeur', 'équipe pédagogique'],
-            response: `<i class="fa-solid fa-chalkboard-user"></i> <strong>Corps Professoral</strong><br><br>
+                <br><br>Quel module souhaitez-vous explorer ?`,
+    },
+    professeurs: {
+      keywords: [
+        "professeur",
+        "enseignant",
+        "formateur",
+        "prof",
+        "instructeur",
+        "équipe pédagogique",
+      ],
+      response: `<i class="fa-solid fa-chalkboard-user"></i> <strong>Corps Professoral</strong><br><br>
                 Le CEJEC dispose de <strong>34 professeurs</strong> qualifiés :
                 <br>• <strong>12 Professeurs permanents</strong> (docteurs et experts)
                 <br>• <strong>18 Chargés de cours</strong> (professionnels en activité)
                 <br>• <strong>4 Conférenciers invités</strong> (experts internationaux)
-                <br><br>Tous nos formateurs sont certifiés et possèdent une expérience significative en entreprise. Souhaitez-vous consulter un CV spécifique ?`
-        },
-        diplomes: {
-            keywords: ['diplôme', 'certificat', 'graduation', 'diplômé', 'certifier', 'reconnaissance', 'accréditation'],
-            response: `<i class="fa-solid fa-certificate"></i> <strong>Diplômes & Certifications</strong><br><br>
+                <br><br>Tous nos formateurs sont certifiés et possèdent une expérience significative en entreprise. Souhaitez-vous consulter un CV spécifique ?`,
+    },
+    diplomes: {
+      keywords: [
+        "diplôme",
+        "certificat",
+        "graduation",
+        "diplômé",
+        "certifier",
+        "reconnaissance",
+        "accréditation",
+      ],
+      response: `<i class="fa-solid fa-certificate"></i> <strong>Diplômes & Certifications</strong><br><br>
                 Le CEJEC a délivré <strong>120 diplômes</strong> cette année :
                 <br>• <strong>Licence en Entrepreneuriat</strong> (Bac+3) - Reconnu MENFP
                 <br>• <strong>Master en Commerce</strong> (Bac+5) - Reconnu MCI
                 <br>• <strong>Certificat Professionnel</strong> - Spécialisations
                 <br>• <strong>Attestation de Formation</strong> - Modules courts
-                <br><br>Taux de réussite : <strong>94.2%</strong>. Voulez-vous vérifier l'éligibilité d'un diplôme ?`
-        },
-        finances: {
-            keywords: ['financ', 'paiement', 'frais', 'scolarité', 'bourse', 'échéance', 'facture', 'coût', 'prix', 'argent'],
-            response: `<i class="fa-solid fa-sack-dollar"></i> <strong>Finances & Paiements</strong><br><br>
+                <br><br>Taux de réussite : <strong>94.2%</strong>. Voulez-vous vérifier l'éligibilité d'un diplôme ?`,
+    },
+    finances: {
+      keywords: [
+        "financ",
+        "paiement",
+        "frais",
+        "scolarité",
+        "bourse",
+        "échéance",
+        "facture",
+        "coût",
+        "prix",
+        "argent",
+      ],
+      response: `<i class="fa-solid fa-sack-dollar"></i> <strong>Finances & Paiements</strong><br><br>
                 <strong>Frais de scolarité 2026 :</strong>
                 <br>• Licence : <strong>2,500 USD/an</strong>
                 <br>• Master : <strong>3,500 USD/an</strong>
@@ -655,32 +737,57 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>• Paiement comptant (-10% de remise)
                 <br>• Paiement en 3 versements
                 <br>• Paiement mensuel (sur 10 mois)
-                <br><br>Revenus du mois : <strong>14,250 USD</strong>. Bourses disponibles sur demande.`
-        },
-        rapports: {
-            keywords: ['rapport', 'statistique', 'analyse', 'performance', 'évaluation', 'bulletin', 'résultat', 'note'],
-            response: `<i class="fa-solid fa-chart-bar"></i> <strong>Rapports & Analyses</strong><br><br>
+                <br><br>Revenus du mois : <strong>14,250 USD</strong>. Bourses disponibles sur demande.`,
+    },
+    rapports: {
+      keywords: [
+        "rapport",
+        "statistique",
+        "analyse",
+        "performance",
+        "évaluation",
+        "bulletin",
+        "résultat",
+        "note",
+      ],
+      response: `<i class="fa-solid fa-chart-bar"></i> <strong>Rapports & Analyses</strong><br><br>
                 Générez vos rapports en un clic :
                 <br>• <strong>Rapport Académique</strong> - Performances par promotion
                 <br>• <strong>Rapport de Présence</strong> - Taux quotidien/mensuel
                 <br>• <strong>Rapport Financier</strong> - Revenus & dépenses
                 <br>• <strong>Rapport d'Inscriptions</strong> - Évolution des effectifs
                 <br>• <strong>Bulletins individuels</strong> - Par étudiant
-                <br><br>Quel type de rapport souhaitez-vous consulter ?`
-        },
-        projets: {
-            keywords: ['projet', 'incubateur', 'startup', 'création', 'entreprise', 'business', 'entrepreneur'],
-            response: `<i class="fa-solid fa-lightbulb"></i> <strong>Projets Entrepreneuriaux</strong><br><br>
+                <br><br>Quel type de rapport souhaitez-vous consulter ?`,
+    },
+    projets: {
+      keywords: [
+        "projet",
+        "incubateur",
+        "startup",
+        "création",
+        "entreprise",
+        "business",
+        "entrepreneur",
+      ],
+      response: `<i class="fa-solid fa-lightbulb"></i> <strong>Projets Entrepreneuriaux</strong><br><br>
                 <strong>18 projets incubés</strong> cette année :
                 <br>• <strong>Incubateur CEJEC</strong> - Accompagnement complet
                 <br>• <strong>Financement</strong> - Jusqu'à 5,000 USD par projet
                 <br>• <strong>Mentorat</strong> - Entrepreneurs expérimentés
                 <br>• <strong>Réseautage</strong> - Accès au réseau d'affaires
-                <br><br>Taux de croissance : <strong>+35%</strong>. Vous avez un projet à soumettre ?`
-        },
-        evenements: {
-            keywords: ['événement', 'conférence', 'séminaire', 'atelier', 'soutenance', 'calendrier', 'agenda'],
-            response: `<i class="fa-solid fa-calendar-star"></i> <strong>Événements à Venir</strong><br><br>
+                <br><br>Taux de croissance : <strong>+35%</strong>. Vous avez un projet à soumettre ?`,
+    },
+    evenements: {
+      keywords: [
+        "événement",
+        "conférence",
+        "séminaire",
+        "atelier",
+        "soutenance",
+        "calendrier",
+        "agenda",
+      ],
+      response: `<i class="fa-solid fa-calendar-star"></i> <strong>Événements à Venir</strong><br><br>
                 <strong>Juin 2026 :</strong>
                 <br>• 15 Juin - Soutenance de Projet
                 <br>• 18-20 Juin - Séminaire Stratégique
@@ -690,21 +797,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>• Conférence Innovation & Tech
                 <br>• Atelier Création d'Entreprise
                 <br>• Forum des Partenaires
-                <br><br>Voulez-vous vous inscrire à un événement ?`
-        },
-        actualites: {
-            keywords: ['actualité', 'news', 'nouvelle', 'publication', 'article', 'blog', 'information'],
-            response: `<i class="fa-solid fa-newspaper"></i> <strong>Actualités du CEJEC</strong><br><br>
+                <br><br>Voulez-vous vous inscrire à un événement ?`,
+    },
+    actualites: {
+      keywords: [
+        "actualité",
+        "news",
+        "nouvelle",
+        "publication",
+        "article",
+        "blog",
+        "information",
+      ],
+      response: `<i class="fa-solid fa-newspaper"></i> <strong>Actualités du CEJEC</strong><br><br>
                 <strong>42 publications</strong> cette année. Dernières actualités :
                 <br>• Lancement officiel de la Médiathèque Numérique
                 <br>• Nouveau partenariat avec la Chambre de Commerce
                 <br>• Résultats exceptionnels aux examens nationaux
                 <br>• Visite des investisseurs internationaux
-                <br><br>Restez informé en vous abonnant à notre newsletter !`
-        },
-        entreprise: {
-            keywords: ['cejec', 'centre', 'histoire', 'mission', 'valeur', 'fondateur', 'équipe', 'siège', 'contact'],
-            response: `<i class="fa-solid fa-building-columns"></i> <strong>Le CEJEC</strong><br><br>
+                <br><br>Restez informé en vous abonnant à notre newsletter !`,
+    },
+    entreprise: {
+      keywords: [
+        "cejec",
+        "centre",
+        "histoire",
+        "mission",
+        "valeur",
+        "fondateur",
+        "équipe",
+        "siège",
+        "contact",
+      ],
+      response: `<i class="fa-solid fa-building-columns"></i> <strong>Le CEJEC</strong><br><br>
                 <strong>Centre d'Études des Jeunes en Entrepreneuriat et Commerce</strong>
                 <br><br><strong>Mission :</strong> Former la nouvelle génération d'entrepreneurs haïtiens en combinant excellence académique et pratique professionnelle.
                 <br><br><strong>Valeurs :</strong>
@@ -713,37 +838,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br><br><strong>Contact :</strong>
                 <br>• Téléphone : +509 4808 8452 / 3354 0425                                
                 <br>• Email : contact@cejec.edu.ht
-                <br>• Site web : www.cejec.edu.ht`
-        }
+                <br>• Site web : www.cejec.edu.ht`,
+    },
+  };
+
+  // ========== FONCTIONS UTILITAIRES ==========
+
+  function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    const vw = Math.max(
+      document.documentElement.clientWidth || 0,
+      window.innerWidth || 0,
+    );
+    const toastWidth = vw < 480 ? "85vw" : "auto";
+
+    const iconMap = {
+      success: "fa-circle-check",
+      error: "fa-circle-xmark",
+      warning: "fa-triangle-exclamation",
+      info: "fa-circle-info",
     };
 
-    // ========== FONCTIONS UTILITAIRES ==========
-    
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-        const toastWidth = vw < 480 ? '85vw' : 'auto';
-        
-        const iconMap = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-xmark',
-            warning: 'fa-triangle-exclamation',
-            info: 'fa-circle-info'
-        };
-        
-        const colorMap = {
-            success: '#059669',
-            error: '#d62828',
-            warning: '#d97706',
-            info: '#0a4d8c'
-        };
-        
-        toast.style.cssText = `
+    const colorMap = {
+      success: "#059669",
+      error: "#d62828",
+      warning: "#d97706",
+      info: "#0a4d8c",
+    };
+
+    toast.style.cssText = `
             position: fixed;
             bottom: clamp(20px, 3vw, 30px);
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: ${colorMap[type] || '#1e293b'};
+            background: ${colorMap[type] || "#1e293b"};
             color: white;
             padding: clamp(10px, 1.2vw, 14px) clamp(16px, 2vw, 24px);
             border-radius: 14px;
@@ -761,30 +889,32 @@ document.addEventListener("DOMContentLoaded", () => {
             justify-content: center;
             gap: 8px;
         `;
-        
-        toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i> ${message}`;
-        document.body.appendChild(toast);
-        
-        requestAnimationFrame(() => {
-            toast.style.transform = "translateX(-50%) translateY(0)";
-        });
-        
-        setTimeout(() => {
-            toast.style.transform = "translateX(-50%) translateY(100px)";
-            setTimeout(() => toast.remove(), 400);
-        }, 3000);
-    }
 
-    function addMessageToChat(text, sender = 'user') {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg-card ${sender}-message`;
-        
-        const now = new Date();
-        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                       now.getMinutes().toString().padStart(2, '0');
-        
-        if (sender === 'user') {
-            msgDiv.innerHTML = `
+    toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i> ${message}`;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.style.transform = "translateX(-50%) translateY(0)";
+    });
+
+    setTimeout(() => {
+      toast.style.transform = "translateX(-50%) translateY(100px)";
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  function addMessageToChat(text, sender = "user") {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `msg-card ${sender}-message`;
+
+    const now = new Date();
+    const timeStr =
+      now.getHours().toString().padStart(2, "0") +
+      ":" +
+      now.getMinutes().toString().padStart(2, "0");
+
+    if (sender === "user") {
+      msgDiv.innerHTML = `
                 <div class="msg-content user-content">
                     <p>${text}</p>
                     <span class="msg-time">${timeStr} <i class="fa-solid fa-check-double"></i></span>
@@ -793,8 +923,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="fa-solid fa-user"></i>
                 </div>
             `;
-        } else {
-            msgDiv.innerHTML = `
+    } else {
+      msgDiv.innerHTML = `
                 <div class="bot-avatar-mini">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
@@ -803,17 +933,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="msg-time">${timeStr}</span>
                 </div>
             `;
-        }
-        
-        chatBodyFloat.appendChild(msgDiv);
-        chatBodyFloat.scrollTop = chatBodyFloat.scrollHeight;
     }
 
-    function showTypingIndicator() {
-        const typingDiv = document.createElement('div');
-        typingDiv.className = 'msg-card bot-message typing-indicator';
-        typingDiv.id = 'typingIndicator';
-        typingDiv.innerHTML = `
+    chatBodyFloat.appendChild(msgDiv);
+    chatBodyFloat.scrollTop = chatBodyFloat.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "msg-card bot-message typing-indicator";
+    typingDiv.id = "typingIndicator";
+    typingDiv.innerHTML = `
             <div class="bot-avatar-mini">
                 <i class="fa-solid fa-graduation-cap"></i>
             </div>
@@ -823,33 +953,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         `;
-        chatBodyFloat.appendChild(typingDiv);
-        chatBodyFloat.scrollTop = chatBodyFloat.scrollHeight;
-    }
+    chatBodyFloat.appendChild(typingDiv);
+    chatBodyFloat.scrollTop = chatBodyFloat.scrollHeight;
+  }
 
-    function removeTypingIndicator() {
-        const typingDiv = document.getElementById('typingIndicator');
-        if (typingDiv) typingDiv.remove();
-    }
+  function removeTypingIndicator() {
+    const typingDiv = document.getElementById("typingIndicator");
+    if (typingDiv) typingDiv.remove();
+  }
 
-     // Returns null when no local keyword matches, instead of the generic
-    // fallback text, so handleSendMessage can try the real AI backend first.
-    function getLocalKnowledgeBaseResponse(question) {
-        const q = question.toLowerCase().trim();
+  // Returns null when no local keyword matches, instead of the generic
+  // fallback text, so handleSendMessage can try the real AI backend first.
+  function getLocalKnowledgeBaseResponse(question) {
+    const q = question.toLowerCase().trim();
 
-        for (const [topic, data] of Object.entries(knowledgeBase)) {
-            for (const keyword of data.keywords) {
-                if (q.includes(keyword)) {
-                    return data.response;
-                }
-            }
+    for (const [topic, data] of Object.entries(knowledgeBase)) {
+      for (const keyword of data.keywords) {
+        if (q.includes(keyword)) {
+          return data.response;
         }
-
-        return null;
+      }
     }
 
-    function getFallbackResponse() {
-        return `<i class="fa-solid fa-circle-info"></i> <strong>Excellente question !</strong><br><br>
+    return null;
+  }
+
+  function getFallbackResponse() {
+    return `<i class="fa-solid fa-circle-info"></i> <strong>Excellente question !</strong><br><br>
             Pour mieux vous répondre, voici les sujets que je maîtrise :
             <br>• <strong>Étudiants</strong> - Effectifs, inscriptions, suivi
             <br>• <strong>Admissions</strong> - Procédures, conditions, frais
@@ -863,267 +993,276 @@ document.addEventListener("DOMContentLoaded", () => {
             <br>• <strong>Événements</strong> - Calendrier, conférences
             <br>• <strong>Actualités</strong> - News, publications
             <br><br>Pouvez-vous préciser votre demande ?`;
+  }
+
+  async function handleSendMessage() {
+    const message = chatInputFloat.value.trim();
+    if (!message) {
+      showToast("Veuillez saisir votre question", "warning");
+      return;
     }
 
-    async function handleSendMessage() {
-        const message = chatInputFloat.value.trim();
-        if (!message) {
-            showToast("Veuillez saisir votre question", "warning");
-            return;
-        }
-        
-        if (!currentSessionId) {
-            createNewSession();
-        }
-        
-        saveMessageToCurrentSession(message, 'user');
-        
-        addMessageToChat(message, 'user');
-        
-        // Netwaye input apre envoyé
-        chatInputFloat.value = '';
-        inputClearBtn.style.display = 'none';
-        
-        showTypingIndicator();
-
-        // Fast path: answer instantly (and offline) from the local keyword
-        // base used for FAQ-style questions about the school.
-        const localMatch = getLocalKnowledgeBaseResponse(message);
-        if (localMatch) {
-            setTimeout(() => {
-                removeTypingIndicator();
-                saveMessageToCurrentSession(localMatch, 'bot');
-                addMessageToChat(localMatch, 'bot');
-            }, 600 + Math.random() * 600);
-            return;
-        }
-
-        // No local match: ask the real Gemini-backed backend
-        // (apps/ai_insights). Requires the user to be logged in; falls back
-        // to the generic topic list if the user is offline, unauthenticated,
-        // or the request times out.
-        try {
-            if (typeof window.askAIInsight !== "function") {
-                throw new Error("ai_insights_client.js n'est pas chargé sur cette page");
-            }
-            const aiResponse = await window.askAIInsight(message);
-            removeTypingIndicator();
-            saveMessageToCurrentSession(aiResponse, 'bot');
-            addMessageToChat(aiResponse, 'bot');
-        } catch (err) {
-            console.warn("AI insight request failed, using fallback response", err);
-            removeTypingIndicator();
-            const fallback = getFallbackResponse();
-            saveMessageToCurrentSession(fallback, 'bot');
-            addMessageToChat(fallback, 'bot');
-        }
+    if (!currentSessionId) {
+      createNewSession();
     }
 
-    function clearChat() {
-        const messages = chatBodyFloat.querySelectorAll('.msg-card:not(.welcome-card)');
-        messages.forEach(msg => msg.remove());
-        
-        ensureWelcomeCard();
-        createNewSession();
-        
-        showToast("Nouvelle conversation démarrée", "success");
+    saveMessageToCurrentSession(message, "user");
+
+    addMessageToChat(message, "user");
+
+    // Netwaye input apre envoyé
+    chatInputFloat.value = "";
+    inputClearBtn.style.display = "none";
+
+    showTypingIndicator();
+
+    // Fast path: answer instantly (and offline) from the local keyword
+    // base used for FAQ-style questions about the school.
+    const localMatch = getLocalKnowledgeBaseResponse(message);
+    if (localMatch) {
+      setTimeout(
+        () => {
+          removeTypingIndicator();
+          saveMessageToCurrentSession(localMatch, "bot");
+          addMessageToChat(localMatch, "bot");
+        },
+        600 + Math.random() * 600,
+      );
+      return;
     }
 
-    // ========== GESTIONNAIRES INPUT ==========
-    
-    /**
-     * Mete ajou vizibilite bouton efase input la
-     * Bouton an parèt sèlman si gen tèks nan input la
-     */
-    function updateClearButtonVisibility() {
-        if (chatInputFloat.value.length > 0) {
-            inputClearBtn.style.display = 'flex';
-        } else {
-            inputClearBtn.style.display = 'none';
-        }
+    // No local match: ask the real Gemini-backed backend
+    // (apps/ai_insights). Requires the user to be logged in; falls back
+    // to the generic topic list if the user is offline, unauthenticated,
+    // or the request times out.
+    try {
+      if (typeof window.askAIInsight !== "function") {
+        throw new Error(
+          "ai_insights_client.js n'est pas chargé sur cette page",
+        );
+      }
+      const aiResponse = await window.askAIInsight(message);
+      removeTypingIndicator();
+      saveMessageToCurrentSession(aiResponse, "bot");
+      addMessageToChat(aiResponse, "bot");
+    } catch (err) {
+      console.warn("AI insight request failed, using fallback response", err);
+      removeTypingIndicator();
+      const fallback = getFallbackResponse();
+      saveMessageToCurrentSession(fallback, "bot");
+      addMessageToChat(fallback, "bot");
+    }
+  }
+
+  function clearChat() {
+    const messages = chatBodyFloat.querySelectorAll(
+      ".msg-card:not(.welcome-card)",
+    );
+    messages.forEach((msg) => msg.remove());
+
+    ensureWelcomeCard();
+    createNewSession();
+
+    showToast("Nouvelle conversation démarrée", "success");
+  }
+
+  // ========== GESTIONNAIRES INPUT ==========
+
+  /**
+   * Mete ajou vizibilite bouton efase input la
+   * Bouton an parèt sèlman si gen tèks nan input la
+   */
+  function updateClearButtonVisibility() {
+    if (chatInputFloat.value.length > 0) {
+      inputClearBtn.style.display = "flex";
+    } else {
+      inputClearBtn.style.display = "none";
+    }
+  }
+
+  // ========== GESTIONNAIRES D'ÉVÉNEMENTS ==========
+
+  function openChat() {
+    chatWrapperFloat.classList.add("active");
+    fabIconFloat.className = "fa-solid fa-xmark";
+    fabToggleFloat.style.transform = "rotate(90deg)";
+    setTimeout(() => chatInputFloat.focus(), 400);
+  }
+
+  function closeChat() {
+    // Si historique ouvert, fèmen li d'abord
+    if (isHistoryViewOpen) {
+      closeHistoryView();
     }
 
-    // ========== GESTIONNAIRES D'ÉVÉNEMENTS ==========
+    // Retire klas "active" pou kache chat la
+    chatWrapperFloat.classList.remove("active");
 
-    function openChat() {
-        chatWrapperFloat.classList.add("active");
-        fabIconFloat.className = "fa-solid fa-xmark";
-        fabToggleFloat.style.transform = "rotate(90deg)";
-        setTimeout(() => chatInputFloat.focus(), 400);
+    // 🔑 RETIRE MODE AGRANDI SI LI TE AGRANDI
+    // Sa ap fè FAB bouton an re-parèt
+    if (chatWrapperFloat.classList.contains("chat-expanded")) {
+      chatWrapperFloat.classList.remove("chat-expanded");
+
+      // Remet icon expand nan header la
+      const icon = btnExpand.querySelector("i");
+      if (icon) {
+        icon.classList.remove("fa-compress");
+        icon.classList.add("fa-expand");
+        btnExpand.title = "Agrandir";
+      }
     }
 
-    function closeChat() {
-        // Si historique ouvert, fèmen li d'abord
-        if (isHistoryViewOpen) {
-            closeHistoryView();
-        }
-        
-        // Retire klas "active" pou kache chat la
-        chatWrapperFloat.classList.remove("active");
-        
-        // 🔑 RETIRE MODE AGRANDI SI LI TE AGRANDI
-        // Sa ap fè FAB bouton an re-parèt
-        if (chatWrapperFloat.classList.contains("chat-expanded")) {
-            chatWrapperFloat.classList.remove("chat-expanded");
-            
-            // Remet icon expand nan header la
-            const icon = btnExpand.querySelector("i");
-            if (icon) {
-                icon.classList.remove("fa-compress");
-                icon.classList.add("fa-expand");
-                btnExpand.title = "Agrandir";
-            }
-        }
-        
-        // Remet icon FAB bouton an
-        fabIconFloat.className = "fa-solid fa-wand-magic-sparkles";
-        fabToggleFloat.style.transform = "rotate(0deg)";
-        
-        // 🔑 ASIRE FAB BOUTON AN VIZIB
-        fabToggleFloat.style.opacity = "1";
-        fabToggleFloat.style.visibility = "visible";
-        fabToggleFloat.style.pointerEvents = "auto";
-        fabToggleFloat.style.transform = "rotate(0deg) scale(1)";
+    // Remet icon FAB bouton an
+    fabIconFloat.className = "fa-solid fa-wand-magic-sparkles";
+    fabToggleFloat.style.transform = "rotate(0deg)";
+
+    // 🔑 ASIRE FAB BOUTON AN VIZIB
+    fabToggleFloat.style.opacity = "1";
+    fabToggleFloat.style.visibility = "visible";
+    fabToggleFloat.style.pointerEvents = "auto";
+    fabToggleFloat.style.transform = "rotate(0deg) scale(1)";
+  }
+
+  // ========== INITIALISATION HISTORIK ==========
+  function initHistorySystem() {
+    loadHistory();
+
+    if (!currentSessionId && chatHistory.length > 0) {
+      createNewSession();
+    } else if (!currentSessionId) {
+      createNewSession();
     }
+  }
 
-    // ========== INITIALISATION HISTORIK ==========
-    function initHistorySystem() {
-        loadHistory();
-        
-        if (!currentSessionId && chatHistory.length > 0) {
-            createNewSession();
-        } else if (!currentSessionId) {
-            createNewSession();
-        }
+  initHistorySystem();
+
+  // ========== ÉVÉNEMENTS ==========
+
+  fabToggleFloat.addEventListener("click", () => {
+    chatWrapperFloat.classList.contains("active") ? closeChat() : openChat();
+  });
+
+  closeChatBtn.addEventListener("click", closeChat);
+
+  btnNewChat.addEventListener("click", () => {
+    if (isHistoryViewOpen) {
+      closeHistoryView();
+      setTimeout(() => {
+        clearChat();
+      }, 300);
+    } else {
+      clearChat();
     }
-    
-    initHistorySystem();
+  });
 
-    // ========== ÉVÉNEMENTS ==========
+  btnHistory.addEventListener("click", () => {
+    if (isHistoryViewOpen) {
+      closeHistoryView();
+    } else {
+      openHistoryView();
+    }
+  });
 
-    fabToggleFloat.addEventListener("click", () => {
-        chatWrapperFloat.classList.contains("active") ? closeChat() : openChat();
-    });
+  btnExpand.addEventListener("click", () => {
+    chatWrapperFloat.classList.toggle("chat-expanded");
+    const icon = btnExpand.querySelector("i");
+    if (chatWrapperFloat.classList.contains("chat-expanded")) {
+      icon.classList.remove("fa-expand");
+      icon.classList.add("fa-compress");
+      btnExpand.title = "Réduire";
+    } else {
+      icon.classList.remove("fa-compress");
+      icon.classList.add("fa-expand");
+      btnExpand.title = "Agrandir";
+    }
+  });
 
-    closeChatBtn.addEventListener("click", closeChat);
-
-    btnNewChat.addEventListener("click", () => {
-        if (isHistoryViewOpen) {
-            closeHistoryView();
-            setTimeout(() => {
-                clearChat();
-            }, 300);
-        } else {
-            clearChat();
-        }
-    });
-
-    btnHistory.addEventListener('click', () => {
-        if (isHistoryViewOpen) {
-            closeHistoryView();
-        } else {
-            openHistoryView();
-        }
-    });
-
-    btnExpand.addEventListener("click", () => {
-        chatWrapperFloat.classList.toggle("chat-expanded");
-        const icon = btnExpand.querySelector("i");
-        if (chatWrapperFloat.classList.contains("chat-expanded")) {
-            icon.classList.remove("fa-expand");
-            icon.classList.add("fa-compress");
-            btnExpand.title = "Réduire";
-        } else {
-            icon.classList.remove("fa-compress");
-            icon.classList.add("fa-expand");
-            btnExpand.title = "Agrandir";
-        }
-    });    
-
-    document.querySelectorAll('.feature-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const topic = item.dataset.topic;
-            if (topic && knowledgeBase[topic]) {
-                const query = item.querySelector('strong').textContent;
-                chatInputFloat.value = `Parle-moi des ${query.toLowerCase()}`;
-                updateClearButtonVisibility();
-                handleSendMessage();
-            }
-        });
-    });
-
-    document.querySelectorAll(".chip-suggestion").forEach(chip => {
-        chip.addEventListener("click", () => {
-            const query = chip.dataset.query;
-            if (query) {
-                chatInputFloat.value = query;
-                updateClearButtonVisibility();
-                handleSendMessage();
-            }
-            
-            chip.style.transform = 'scale(0.95)';
-            setTimeout(() => chip.style.transform = 'scale(1)', 150);
-        });
-    });
-
-    // Bouton envoyé
-    btnSendFloat.addEventListener("click", handleSendMessage);
-
-    // Envoyer avec Entrée
-    chatInputFloat.addEventListener("keypress", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    });
-
-    // 🔧 BOUTON EFASE INPUT - Efase tout tèks la epi fokale
-    inputClearBtn.addEventListener("click", () => {
-        chatInputFloat.value = '';
-        chatInputFloat.focus();
+  document.querySelectorAll(".feature-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const topic = item.dataset.topic;
+      if (topic && knowledgeBase[topic]) {
+        const query = item.querySelector("strong").textContent;
+        chatInputFloat.value = `Parle-moi des ${query.toLowerCase()}`;
         updateClearButtonVisibility();
+        handleSendMessage();
+      }
     });
-    
-    // 🔧 INPUT EVENTS - Mete ajou bouton efase a chak fwa tèks chanje
-    chatInputFloat.addEventListener("input", () => {
-        updateClearButtonVisibility();
-    });
-    
-    // 🔧 Touche "Backspace" nan input - si vid, kache bouton
-    chatInputFloat.addEventListener("keyup", () => {
-        updateClearButtonVisibility();
-    });
-    
-    // 🔧 Lè input pèdi fokis, verifye si bouton dwe rete ou kache
-    chatInputFloat.addEventListener("blur", () => {
-        // Retade yon ti kras pou evite konfli ak klik sou bouton
-        setTimeout(() => {
-            updateClearButtonVisibility();
-        }, 150);
-    });
+  });
 
-    // Fermer avec la touche Échap
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            if (isHistoryViewOpen) {
-                closeHistoryView();
-            } else if (chatWrapperFloat.classList.contains("active")) {
-                closeChat();
-            }
-        }
-    });
+  document.querySelectorAll(".chip-suggestion").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const query = chip.dataset.query;
+      if (query) {
+        chatInputFloat.value = query;
+        updateClearButtonVisibility();
+        handleSendMessage();
+      }
 
-    // ========== INITIALISATION ==========
-    
-    // Verifikasyon inisyal bouton efase a
+      chip.style.transform = "scale(0.95)";
+      setTimeout(() => (chip.style.transform = "scale(1)"), 150);
+    });
+  });
+
+  // Bouton envoyé
+  btnSendFloat.addEventListener("click", handleSendMessage);
+
+  // Envoyer avec Entrée
+  chatInputFloat.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  });
+
+  // 🔧 BOUTON EFASE INPUT - Efase tout tèks la epi fokale
+  inputClearBtn.addEventListener("click", () => {
+    chatInputFloat.value = "";
+    chatInputFloat.focus();
     updateClearButtonVisibility();
-    
-    setTimeout(() => {
-        fabToggleFloat.classList.add('initial-pulse');
-        setTimeout(() => fabToggleFloat.classList.remove('initial-pulse'), 2000);
-    }, 2000);
+  });
 
-    console.log('%c✨ CEJEC Concierge IA %cinitialisé avec succès',
-        'color: #0a4d8c; font-weight: bold; font-size: 14px;',
-        'color: #5b6675;');
+  // 🔧 INPUT EVENTS - Mete ajou bouton efase a chak fwa tèks chanje
+  chatInputFloat.addEventListener("input", () => {
+    updateClearButtonVisibility();
+  });
+
+  // 🔧 Touche "Backspace" nan input - si vid, kache bouton
+  chatInputFloat.addEventListener("keyup", () => {
+    updateClearButtonVisibility();
+  });
+
+  // 🔧 Lè input pèdi fokis, verifye si bouton dwe rete ou kache
+  chatInputFloat.addEventListener("blur", () => {
+    // Retade yon ti kras pou evite konfli ak klik sou bouton
+    setTimeout(() => {
+      updateClearButtonVisibility();
+    }, 150);
+  });
+
+  // Fermer avec la touche Échap
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (isHistoryViewOpen) {
+        closeHistoryView();
+      } else if (chatWrapperFloat.classList.contains("active")) {
+        closeChat();
+      }
+    }
+  });
+
+  // ========== INITIALISATION ==========
+
+  // Verifikasyon inisyal bouton efase a
+  updateClearButtonVisibility();
+
+  setTimeout(() => {
+    fabToggleFloat.classList.add("initial-pulse");
+    setTimeout(() => fabToggleFloat.classList.remove("initial-pulse"), 2000);
+  }, 2000);
+
+  console.log(
+    "%c✨ CEJEC Concierge IA %cinitialisé avec succès",
+    "color: #0a4d8c; font-weight: bold; font-size: 14px;",
+    "color: #5b6675;",
+  );
 });
